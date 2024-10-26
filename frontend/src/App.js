@@ -13,6 +13,8 @@ import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt
 import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import './App.css';
+import titleImage from './images/title.png';
+import grandmaImage from './images/grandma.png';
 
 function GrandmaForm() {
   const [query, setQuery] = useState('');
@@ -58,19 +60,6 @@ function GrandmaForm() {
     }
   }, [handleSubmit]);
 
-  const getFaceIcon = (face) => {
-    switch (face) {
-      case 0:
-        return <SentimentNeutralIcon />;
-      case 1:
-        return <SentimentSatisfiedAltIcon />;
-      case 2:
-        return <SentimentVeryDissatisfiedIcon />;
-      default:
-        return <SentimentNeutralIcon />;
-    }
-  };
-
   return (
     <Container maxWidth="sm">
       <Box sx={{
@@ -82,9 +71,22 @@ function GrandmaForm() {
         transition: 'all 0.3s ease-in-out',
         pt: isSubmitted ? 4 : 0
       }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          今日の予定は?
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center',  }}>
+          <Box
+            component="img"
+            sx={{
+              height: 'auto',
+              width: '50px',  // タイトルの文字サイズに合わせて調整
+              maxWidth: '100%',
+              objectFit: 'contain'
+            }}
+            alt="タイトルおばあ"
+            src={titleImage}
+          />
+          <Typography className="zen-maru-gothic-regular" variant="h4" component="h1">
+            「今日の予定を教えておくれ」
+          </Typography>
+        </Box>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
           <TextField
             margin="normal"
@@ -106,6 +108,7 @@ function GrandmaForm() {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
             disabled={isLoading}
+            className="zen-maru-gothic-regular"
           >
             {isLoading ? 'おばあを呼んでいます...' : 'おばあを呼ぶ'}
           </Button>
@@ -119,8 +122,19 @@ function GrandmaForm() {
           {aiResponses.map((response, index) => (
             <Paper key={index} elevation={3} sx={{ p: 2, mt: 2, width: '100%', bgcolor: '#e9e9e9' }}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-                  {getFaceIcon(response.face)}
+                <Avatar
+                  sx={{
+                    bgcolor: response.face === 0 ? 'blue' :
+                      response.face === 1 ? 'green' :
+                        response.face === 2 ? 'red' : 'blue',
+                    mr: 2,
+                    width: 56,
+                    height: 56
+                  }}
+                  src={grandmaImage}
+                  alt="おばあちゃん"
+                >
+                  おばあ
                 </Avatar>
                 <Box>
                   <Typography className="yuji-mai-regular" variant="h6">{response.title}</Typography>
@@ -131,7 +145,7 @@ function GrandmaForm() {
           ))}
         </Box>
       </Box>
-    </Container>
+    </Container >
   );
 }
 
