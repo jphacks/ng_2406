@@ -12,6 +12,20 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
+@import url('https://fonts.googleapis.com/css2?family=Yuji+Mai&family=Zen+Maru+Gothic&display=swap');
+
+.zen-maru-gothic-regular {
+  font-family: "Zen Maru Gothic", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.yuji-mai-regular {
+  font-family: "Yuji Mai", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 
 .App-header {
   background-color: #282c34;
