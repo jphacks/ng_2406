@@ -4,10 +4,12 @@ from .models import Diary, Feedback, db
 from . import bcrypt
 from flask_jwt_extended import create_access_token, jwt_required
 from datetime import datetime
+from app.gemini_api import GeminiAPI
 
 api = Blueprint('api', __name__)
+gemini = GeminiAPI()
 
-# ユーザー情報登録API
+# アドバイス生成API
 @api.route('/feedback', methods=['POST'])
 def register():
     try:
@@ -15,20 +17,7 @@ def register():
         data_action = data.get('action')
         if data_action is None:
             return jsonify({'message': 'リクエストが不正です'}), 400
-        test = {
-            "data": [
-                {
-                    "face": 1,
-                    "title": "test",
-                    "description": "test"
-                },
-                {
-                    "face": 2,
-                    "title": "file",
-                    "description": "file"
-                }
-            ]
-        }
+        response = gemini.generate_content(data_action)
         # データベースへの登録
         ## Diaryテーブルへの登録
         time_now = datetime.utcnow()
@@ -36,13 +25,11 @@ def register():
             date=time_now,
             action=data_action
         )
-        print(diary)
         db.session.add(diary)
         db.session.commit()
         diary_id = diary.id
-        print(diary_id)
         ## Feedbackテーブルへの登録
-        for data in test['data']:
+        for data in response['data']:
             feedback = Feedback(
                 diary_id=diary_id,
                 face=data['face'],
@@ -51,7 +38,7 @@ def register():
             )
             db.session.add(feedback)
         db.session.commit()
-        return jsonify(test), 200
+        return jsonify(response), 200
     except Exception as e:
         print(e)
         return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
