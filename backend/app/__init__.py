@@ -1,5 +1,5 @@
 from flask import Flask
-from config import Config
+from ng_2406.backend.app.config import Config
 
 
 def create_app():
