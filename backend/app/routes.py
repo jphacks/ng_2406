@@ -12,7 +12,8 @@ def register():
         print(prompt)
         if prompt is None:
             return jsonify({'message': 'リクエストが不正です'}), 400
-        test = {"data":
+        test = {
+            "data":
                 [
                     {
                         "face": 1,
@@ -25,7 +26,7 @@ def register():
                         "description": "file"
                     }
                 ]
-        }
+            }
         return jsonify(test), 200
     except:
         return jsonify({'message': '処理が失敗しました'})
