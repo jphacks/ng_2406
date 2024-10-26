@@ -14,7 +14,6 @@ import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import './App.css';
 
-
 function GrandmaForm() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,27 +26,31 @@ function GrandmaForm() {
     setAiResponses([]);
     setIsSubmitted(true);
 
-    // APIレスポンスをシミュレート
-    setTimeout(() => {
-      setIsLoading(false);
-      setAiResponses([
-        { face: 1, title: "駅について", content: "駅には次のような危険があります..." },
-        { face: 0, title: "卵について", content: "卵には次のような危険があります..." },
-      ]);
-    }, 2000);
-  }, [query]);
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: query })
+      });
 
-  // 実際のAPI呼び出し
-  // try {
-  //   const response = await fetch('API_ENDPOINT', { method: 'POST', body: JSON.stringify({ query }) });
-  //   const data = await response.json();
-  //   setAiResponses(data);
-  // } catch (error) {
-  //   console.error('Error:', error);
-  // } finally {
-  //   setIsLoading(false);
-  // }
-  //}, [query]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.message) {
+        console.error('サーバーエラー:', data.message);
+      } else {
+        setAiResponses(data.data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [query]);
 
   const handleKeyDown = useCallback((event) => {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
@@ -69,7 +72,7 @@ function GrandmaForm() {
   };
 
   return (
-    <Container maxWidth="sm" >
+    <Container maxWidth="sm">
       <Box sx={{
         minHeight: '100vh',
         display: 'flex',
@@ -80,7 +83,7 @@ function GrandmaForm() {
         pt: isSubmitted ? 4 : 0
       }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          今日の予定は？
+          今日の予定は?
         </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
           <TextField
@@ -121,7 +124,7 @@ function GrandmaForm() {
                 </Avatar>
                 <Box>
                   <Typography className="yuji-mai-regular" variant="h6">{response.title}</Typography>
-                  <Typography className="yuji-mai-regular" variant="body1">{response.content}</Typography>
+                  <Typography className="yuji-mai-regular" variant="body1">{response.description}</Typography>
                 </Box>
               </Box>
             </Paper>
