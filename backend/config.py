@@ -1,6 +1,6 @@
 import os
-
+from dotenv import load_dotenv
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard-to-guess-string'
-    # その他の設定
+    load_dotenv()
+    SECRET_KEY = os.getenv('SECRET_KEY') or 'hard-to-guess-string'
