@@ -74,10 +74,15 @@ responseの内容について
 '''
 responce = {'data' : []}
 for action in actions:
+    prompt = action + "の気をつけた方が良いポイントをおばあちゃん口調で60字以内で教えてください。"
+    description = model.generate_content(prompt).text
+    prompt_face = action + "の最中に危険が起こる一般的な確率を0~1で評価し、0~2で数字のみを返してください。"
+    face = model.generate_content(prompt_face).text
+    print(description, face)
     responce['data'].append({
         'face': 1,
         'title': action,
         'description': 'AIからの注意'
     })
 
-print(responce)
+#print(responce)
