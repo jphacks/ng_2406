@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   TextField,
   Button,
@@ -24,19 +24,37 @@ function GrandmaForm() {
   const [aiResponses, setAiResponses] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [pastDiaries, setPastDiaries] = useState([]);
+  const [open, setOpen] = useState(false);
 
-  const pastConsultations = ['相談1', '相談2', '相談3', '相談4'];
+  useEffect(() => {
+    const fetchDiaries = async () => {
+      try {
+        const response = await fetch('/api/get_diaries');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setPastDiaries(data.diaries);
+        console.log('取得した日記:', data);
+      } catch (error) {
+        console.error('日記の取得に失敗しました:', error);
+        setPastDiaries([]);
+      }
+    };
+
+    fetchDiaries();
+  }, []);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
+    setOpen(true);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
+    setOpen(false);
   };
-
-  const open = Boolean(anchorEl);
-  const id = open ? 'simple-popover' : undefined;
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -70,16 +88,51 @@ function GrandmaForm() {
     }
   }, [query]);
 
+  const handlePastId = useCallback(async (diaryId) => {
+    setIsLoading(true);
+    setAiResponses([]);
+    setIsSubmitted(true);
+
+    try {
+      const response = await fetch('/api/get_feedbacks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ diary_id: diaryId })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.message) {
+        console.error('サーバーエラー:', data.message);
+      } else {
+        setQuery(data.action);
+        setAiResponses(data.data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleDiarySelect = (id, action) => {
+    setQuery(action);
+    handleClose();
+    handlePastId(id);
+  };
+
+
   const handleKeyDown = useCallback((event) => {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
       handleSubmit(event);
     }
   }, [handleSubmit]);
 
-  const handleSearchPast = () => {
-    // ヘルプボタンがクリックされたときの処理をここに書きます
-    console.log('ヘルプボタンがクリックされました');
-  };
   return (
     <Container maxWidth="sm">
       <Box
@@ -95,10 +148,9 @@ function GrandmaForm() {
           onClick={handleClick}
           sx={{ bgcolor: 'background.paper' }}
         >
-          過去の相談
+          過去の日記
         </Button>
         <Popover
-          id={id}
           open={open}
           anchorEl={anchorEl}
           onClose={handleClose}
@@ -112,18 +164,22 @@ function GrandmaForm() {
           }}
         >
           <List>
-            {pastConsultations.map((consultation, index) => (
-              <ListItem key={index} disablePadding>
-                <ListItemButton onClick={() => {
-                  console.log(`${consultation}が選択されました`);
-                  setQuery(consultation);
-                  handleClose();
-                  handleSubmit({ preventDefault: () => { } });
-                }}>
-                  <ListItemText primary={consultation} />
-                </ListItemButton>
+            {pastDiaries.length > 0 ? (
+              pastDiaries.map((diary) => (
+                <ListItem key={diary.id} disablePadding>
+                  <ListItemButton onClick={() => handleDiarySelect(diary.id, diary.action)}>
+                    <ListItemText
+                      primary={`${new Date(diary.date).toLocaleString('ja-JP')}`}
+                      secondary={diary.action}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))
+            ) : (
+              <ListItem>
+                <ListItemText primary="日記がありません" />
               </ListItem>
-            ))}
+            )}
           </List>
         </Popover>
       </Box>
@@ -191,7 +247,8 @@ function GrandmaForm() {
                   sx={{
                     bgcolor: response.face === 0 ? 'blue' :
                       response.face === 1 ? 'orange ' :
-                        response.face === 2 ? 'red' : 'blue',
+                        response.face === 2 ? 'red' :
+                          response.face === 3 ? "black" : 'blue',
                     mr: 2,
                     width: 56,
                     height: 56
