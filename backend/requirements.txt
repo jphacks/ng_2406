@@ -5,3 +5,10 @@ itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==3.0.2
 Werkzeug==3.0.6
+flask-cors
+flask-jwt-extended
+google-generativeai
+python-dotenv
+Flask-Migrate
+flask-bcrypt
+pymysql
