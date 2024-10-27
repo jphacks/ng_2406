@@ -1,6 +1,6 @@
 # 安心打診おばあ
 
-![2024-10-27 11 04の画像](https://github.com/user-attachments/assets/d436fa32-05ec-4a7e-aeff-ec8fc51caaf2)
+![2024-10-27 11 04の画像 (1)](https://github.com/user-attachments/assets/b41391e4-8875-4d36-981e-96848e568c97)
 
 ## 製品概要
 ### 背景（製品開発のきっかけ、課題等）
