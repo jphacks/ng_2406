@@ -7,11 +7,13 @@ import {
   Box,
   Avatar,
   CircularProgress,
-  Paper
+  Paper,
+  Popover,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText
 } from '@mui/material';
-import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
-import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral';
-import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import './App.css';
 import titleImage from './images/title.png';
 import grandmaImage from './images/grandma.png';
@@ -21,6 +23,20 @@ function GrandmaForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [aiResponses, setAiResponses] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const pastConsultations = ['相談1', '相談2', '相談3', '相談4'];
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -60,8 +76,57 @@ function GrandmaForm() {
     }
   }, [handleSubmit]);
 
+  const handleSearchPast = () => {
+    // ヘルプボタンがクリックされたときの処理をここに書きます
+    console.log('ヘルプボタンがクリックされました');
+  };
   return (
     <Container maxWidth="sm">
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 16,
+          right: 20,
+          zIndex: 1000,
+        }}
+      >
+        <Button
+          variant='outlined'
+          onClick={handleClick}
+          sx={{ bgcolor: 'background.paper' }}
+        >
+          過去の相談
+        </Button>
+        <Popover
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <List>
+            {pastConsultations.map((consultation, index) => (
+              <ListItem key={index} disablePadding>
+                <ListItemButton onClick={() => {
+                  console.log(`${consultation}が選択されました`);
+                  setQuery(consultation);
+                  handleClose();
+                  handleSubmit({ preventDefault: () => { } });
+                }}>
+                  <ListItemText primary={consultation} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Popover>
+      </Box>
       <Box sx={{
         minHeight: '100vh',
         display: 'flex',
@@ -71,7 +136,7 @@ function GrandmaForm() {
         transition: 'all 0.3s ease-in-out',
         pt: isSubmitted ? 4 : 0
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center',  }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', }}>
           <Box
             component="img"
             sx={{
@@ -125,7 +190,7 @@ function GrandmaForm() {
                 <Avatar
                   sx={{
                     bgcolor: response.face === 0 ? 'blue' :
-                      response.face === 1 ? 'green' :
+                      response.face === 1 ? 'orange ' :
                         response.face === 2 ? 'red' : 'blue',
                     mr: 2,
                     width: 56,
