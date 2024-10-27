@@ -11,7 +11,7 @@ GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 # プロンプトの設定
 prompt_action = "今日は朝起きて卵を食べて、名城大学に来て帰りました。"
 prompt = (prompt_action
-+ "という文章から行動を抜き出してpythonの配列として出力してください。")
+          + "という文章から行動を抜き出してpythonの配列として出力してください。")
 
 # APIキーの設定
 genai.configure(api_key=GOOGLE_API_KEY)
@@ -37,7 +37,8 @@ while True:
         array_match = re.search(array_pattern, code_block_match.group(1))
         if array_match:
             # 配列部分をPythonリストに変換
-            actions = [action.strip().strip('"') for action in array_match.group(1).split(",")]
+            actions = [action.strip().strip('"')
+                       for action in array_match.group(1).split(",")]
             print(actions)
             break
         else:
@@ -72,7 +73,7 @@ responseの内容について
     }
 }
 '''
-responce = {'data' : []}
+responce = {'data': []}
 for action in actions:
     responce['data'].append({
         'face': 1,
