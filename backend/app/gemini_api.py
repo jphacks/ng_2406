@@ -130,4 +130,4 @@ class GeminiAPI:
                 break
             else:
                 print(f"不正な応答 '{face}' が返されました。再試行します。")
-        return face
+        return int(face)
