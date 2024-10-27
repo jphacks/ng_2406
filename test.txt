@@ -1,0 +1,44 @@
+エンドポイント設計をしよう
+・1つめのやつ
+過去の日記一覧を取得するエンドポイント
+url:/api/get_diaries
+GETメソッド
+response
+{
+    'diaries':[
+        {
+            'id' : int, diaryのid
+            'date' : datetime,投稿された日時
+        },
+        {
+            'id' : int, diaryのid
+            'date' : datetime,投稿された日時(〇〇:〇〇)の形（何時何分）
+        },
+    ]
+}
+・2つめのやつ
+日記idを送ると、内容が返ってくるエンドポイント
+url:/api/get_diary_info
+POSTメソッド
+request
+{
+    'diary_id' : int
+}
+response
+{
+    'id' : int(diaryのid)
+    'date' : int（投稿された日時）
+    'action':str（ユーザーの行動）
+    'data' : [
+        {
+            'face' : int (0から2の注意度を表示)
+            'title' : str(どの行動についてのやつか)
+            'description':str(行動に対してのAIからのフィードバック)
+        },
+                {
+            'face' : int (0から2の注意度を表示)
+            'title' : str(どの行動についてのやつか)
+            'description':str(行動に対してのAIからのフィードバック)
+        }
+    ]
+}
