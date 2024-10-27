@@ -46,17 +46,21 @@ def register():
 
 # 日記一覧取得API
 @api.route('/get_diaries', methods=['GET'])
-def get_diaries_list():
-    diaries = Diary.query.order_by(Diary.id.desc()).all()
-    response_diaries = [
-        {
-            'id': diary.id,
-            'date': diary.date.isoformat(),
-            'action': diary.action
-        }
-        for diary in diaries
-    ]
-    return jsonify({'diaries': response_diaries}), 200
+def get_diaries():
+    try:
+        diaries = Diary.query.order_by(Diary.id.desc()).all()
+        response_diaries = [
+            {
+                'id': diary.id,
+                'date': diary.date.isoformat(),
+                'action': str(diary.action)
+            }
+            for diary in diaries
+        ]
+        return jsonify({'diaries': response_diaries}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 # フィードバック取得API
