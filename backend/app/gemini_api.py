@@ -4,7 +4,6 @@ import re
 from dotenv import load_dotenv
 import sys
 from app.weather_api import WeatherAPI
-import time
 
 
 class GeminiAPI:
@@ -135,5 +134,5 @@ class GeminiAPI:
                 break
             else:
                 print(f"不正な応答 '{face}' が返されました。再試行します。")
-                time.sleep(0.5)
+        
         return int(face)
