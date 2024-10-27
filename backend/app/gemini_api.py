@@ -4,6 +4,7 @@ import re
 from dotenv import load_dotenv
 import sys
 from app.weather_api import WeatherAPI
+import time
 
 
 class GeminiAPI:
@@ -16,7 +17,7 @@ class GeminiAPI:
         genai.configure(api_key=GOOGLE_API_KEY)
         self.model = genai.GenerativeModel("gemini-1.5-flash")
         self.weather = WeatherAPI()
-    
+
     def generate_content(self, data_action):
         '''
         ユーザーからの情報をもとにフィードバックを作成
@@ -39,7 +40,7 @@ class GeminiAPI:
         '''
         nagoya_city_number = 230010
         weather_data = self.weather.get_weather(nagoya_city_number)
-        prompt = (weather_data + "ここから天気の情報を取り出し、20字以内のアドバイスをください")
+        prompt = (weather_data + "ここから本日の天気情報を取り出し、おばあちゃん口調で30字以内のアドバイスをください")
         weather_data = self.model.generate_content(prompt).text
         return weather_data
 
@@ -51,7 +52,7 @@ class GeminiAPI:
         '''
         prompt_action = data_action
         prompt = (prompt_action
-        + "という文章から行動を抜き出してpythonの配列として出力してください。")
+                  + "という文章から行動を抜き出してpythonの配列として出力してください。")
         return prompt
 
     def action_extract(self, prompt):
@@ -63,19 +64,23 @@ class GeminiAPI:
         '''
         while True:
             feedback = self.model.generate_content(prompt).text
+            print(feedback)
 
             # 正規表現で ```で囲まれた部分とその中の配列部分を抽出
             code_block_pattern = r"```(.+?)```"  # ```で囲まれた部分を取得
             array_pattern = r"\[([^\]]+)\]"     # []で囲まれた配列部分を取得
 
             # ```で囲まれたコードブロックを検索
-            code_block_match = re.search(code_block_pattern, feedback, re.DOTALL)
+            code_block_match = re.search(
+                code_block_pattern, feedback, re.DOTALL)
             if code_block_match:
                 # コードブロック内から配列部分を抽出
-                array_match = re.search(array_pattern, code_block_match.group(1))
+                array_match = re.search(
+                    array_pattern, code_block_match.group(1))
                 if array_match:
                     # 配列部分をPythonリストに変換
-                    actions = [action.strip().strip('"') for action in array_match.group(1).split(",")]
+                    actions = [action.strip().strip('"')
+                               for action in array_match.group(1).split(",")]
                     print(actions)
                     break
                 else:
@@ -90,9 +95,9 @@ class GeminiAPI:
         input: actions(list[str]) : ユーザーが入力した行動, weather_data(str) : 天気情報
         output(dict) : response
         '''
-        response = {'data' : []}
+        response = {'data': []}
         response['data'].append({
-            'face': 2,
+            'face': 3,
             'title': '天気情報',
             'description': weather_data
         })
@@ -119,15 +124,16 @@ class GeminiAPI:
             "2は危険度が高い、1は中程度、0は低い。"
             "回答は必ず数値のみで「0」「1」「2」のいずれかを返してください。"
         )
-        
+
         while True:
             # プロンプトの応答取得
             face = self.model.generate_content(prompt_face).text.strip()
-            
+
             # 正規表現で数値判定
             if re.fullmatch("[0-2]", face):
                 print(face)
                 break
             else:
                 print(f"不正な応答 '{face}' が返されました。再試行します。")
-        return face
+                time.sleep(0.5)
+        return int(face)

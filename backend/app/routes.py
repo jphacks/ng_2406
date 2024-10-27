@@ -10,6 +10,8 @@ api = Blueprint('api', __name__)
 gemini = GeminiAPI()
 
 # アドバイス生成API
+
+
 @api.route('/feedback', methods=['POST'])
 def register():
     try:
@@ -19,7 +21,7 @@ def register():
             return jsonify({'message': 'リクエストが不正です'}), 400
         response = gemini.generate_content(data_action)
         # データベースへの登録
-        ## Diaryテーブルへの登録
+        # Diaryテーブルへの登録
         time_now = datetime.utcnow()
         diary = Diary(
             date=time_now,
@@ -28,7 +30,7 @@ def register():
         db.session.add(diary)
         db.session.commit()
         diary_id = diary.id
-        ## Feedbackテーブルへの登録
+        # Feedbackテーブルへの登録
         for data in response['data']:
             feedback = Feedback(
                 diary_id=diary_id,
@@ -46,17 +48,20 @@ def register():
 
 # 日記一覧取得API
 @api.route('/get_diaries', methods=['GET'])
-def get_diaries_list():
-    diaries = Diary.query.order_by(Diary.id.desc()).all()
-    response_diaries = [
-        {
-            'id': diary.id,
-            'date': diary.date.isoformat(),
-            'action': diary.action
-        }
-        for diary in diaries
-    ]
-    return jsonify({'diaries': response_diaries}), 200
+def get_diaries():
+    try:
+        diaries = Diary.query.order_by(Diary.id.desc()).all()
+        response_diaries = [
+            {
+                'id': diary.id,
+                'date': diary.date.isoformat() + 'Z',
+                'action': str(diary.action)
+            }
+            for diary in diaries
+        ]
+        return jsonify({'diaries': response_diaries}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 # フィードバック取得API
@@ -77,7 +82,8 @@ def get_feedbacks():
             'data': []
         }
 
-        feedbacks = Feedback.query.filter_by(diary_id=diary_id).order_by(Feedback.id).all()
+        feedbacks = Feedback.query.filter_by(
+            diary_id=diary_id).order_by(Feedback.id).all()
         response['data'] = [
             {
                 'face': feedback.face,
@@ -105,6 +111,8 @@ def delete_data():
         return jsonify({'message': '削除に失敗しました', 'error': str(e)}), 400
 
 # データベースに情報を登録するためのAPI
+
+
 @api.route('/register_info', methods=['PUT'])
 def register_info():
     try:
