@@ -24,7 +24,7 @@
 ### 活用した技術
 #### API・データ
 * GeminiAPI 
-* つくみ島天気予報API
+* [天気予報 API](https://github.com/tsukumijima/weather-api)
 
 #### フレームワーク・ライブラリ・モジュール
 * Flask
