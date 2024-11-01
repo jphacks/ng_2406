@@ -9,9 +9,8 @@ from app.gemini_api import GeminiAPI
 api = Blueprint('api', __name__)
 gemini = GeminiAPI()
 
+
 # アドバイス生成API
-
-
 @api.route('/feedback', methods=['POST'])
 def register():
     try:
@@ -110,9 +109,8 @@ def delete_data():
         db.session.rollback()
         return jsonify({'message': '削除に失敗しました', 'error': str(e)}), 400
 
+
 # データベースに情報を登録するためのAPI
-
-
 @api.route('/register_info', methods=['PUT'])
 def register_info():
     try:

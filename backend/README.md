@@ -1,4 +1,12 @@
 # バックエンドの実行環境作成
+0. .envファイルを作成する
+```
+GeminiAPI_KEY = GeminiAPIのAPI_Key
+SECRET_KEY = "適当な文字列"
+SQLALCHEMY_DATABASE_URI= "mysql+pymysql://ユーザー名:パスワード@localhost/使用するデータベース名"
+JWT_SECRET_KEY = "適当な文字列"
+```
+
 1. 仮想環境の作成と有効化
 ```
 python -m venv venv
