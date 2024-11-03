@@ -2,11 +2,9 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Container, Box } from '@mui/material';
 import './App.css';
 import Header from './components/Header';
-import PastDiariesPopover from './components/PastDiariesPopover';
 import QueryInput from './components/QueryInput';
 import LoadingIndicator from './components/LoadingIndicator';
 import ResponseList from './components/ResponseList';
-
 
 function App() {
   const [query, setQuery] = useState('');
@@ -95,21 +93,18 @@ function App() {
     setQuery(action);
     handlePastId(id);
   };
+
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4 }}>
-        <Header />
-        <PastDiariesPopover pastDiaries={pastDiaries} onDiarySelect={handleDiarySelect} />
-        <QueryInput
-          query={query}
-          setQuery={setQuery}
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-        />
-        {isLoading && <LoadingIndicator />}
-        {isSubmitted && <ResponseList responses={aiResponses} />}
+    <div className="App">
+      <Header pastDiaries={pastDiaries} onDiarySelect={handleDiarySelect} />
+      <Box sx={{ paddingTop: '64px' }}> {/* ヘッダーの高さ分のパディングを追加 */}
+        <Container maxWidth="sm">
+          <QueryInput query={query} setQuery={setQuery} onSubmit={handleSubmit} />
+          {isLoading && <LoadingIndicator />}
+          {isSubmitted && <ResponseList responses={aiResponses} />}
+        </Container>
       </Box>
-    </Container>
+    </div>
   );
 }
 

@@ -34,7 +34,10 @@ const PastDiariesPopover = ({ pastDiaries, onDiarySelect }) => {
                                     onDiarySelect(diary.id, diary.action);
                                     handleClose();
                                 }}>
-                                    <ListItemText primary={diary.action} />
+                                    <ListItemText
+                                        primary={`${new Date(diary.date).toLocaleString('ja-JP')}`}
+                                        secondary={diary.action}
+                                    />
                                 </ListItemButton>
                             </ListItem>
                         ))
