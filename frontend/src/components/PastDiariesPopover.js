@@ -1,10 +1,8 @@
-// src/components/PastDiariesPopover.js
 import React, { useState } from 'react';
-import { Button, Popover, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { Button, Popover, List, ListItem, ListItemButton, ListItemText, Box } from '@mui/material';
 
 const PastDiariesPopover = ({ pastDiaries, onDiarySelect }) => {
     const [anchorEl, setAnchorEl] = useState(null);
-    const open = Boolean(anchorEl);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -14,9 +12,11 @@ const PastDiariesPopover = ({ pastDiaries, onDiarySelect }) => {
         setAnchorEl(null);
     };
 
+    const open = Boolean(anchorEl);
+
     return (
-        <>
-            <Button onClick={handleClick}>過去の日記</Button>
+        <Box sx={{ mb: 2 }}>
+            <Button onClick={handleClick} variant="outlined">過去の日記</Button>
             <Popover
                 open={open}
                 anchorEl={anchorEl}
@@ -26,7 +26,7 @@ const PastDiariesPopover = ({ pastDiaries, onDiarySelect }) => {
                     horizontal: 'left',
                 }}
             >
-                <List>
+                <List sx={{ maxWidth: 300, maxHeight: 300, overflow: 'auto' }}>
                     {pastDiaries.length > 0 ? (
                         pastDiaries.map((diary) => (
                             <ListItem key={diary.id} disablePadding>
@@ -45,7 +45,7 @@ const PastDiariesPopover = ({ pastDiaries, onDiarySelect }) => {
                     )}
                 </List>
             </Popover>
-        </>
+        </Box>
     );
 };
 

@@ -1,12 +1,12 @@
-// src/App.js
 import React, { useState, useCallback, useEffect } from 'react';
-import { Container } from '@mui/material';
+import { Container, Box } from '@mui/material';
 import './App.css';
 import Header from './components/Header';
 import PastDiariesPopover from './components/PastDiariesPopover';
 import QueryInput from './components/QueryInput';
 import LoadingIndicator from './components/LoadingIndicator';
 import ResponseList from './components/ResponseList';
+
 
 function App() {
   const [query, setQuery] = useState('');
@@ -95,19 +95,20 @@ function App() {
     setQuery(action);
     handlePastId(id);
   };
-
   return (
     <Container maxWidth="sm">
-      <Header />
-      <PastDiariesPopover pastDiaries={pastDiaries} onDiarySelect={handleDiarySelect} />
-      <QueryInput
-        query={query}
-        setQuery={setQuery}
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-      />
-      {isLoading && <LoadingIndicator />}
-      {isSubmitted && <ResponseList responses={aiResponses} />}
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4 }}>
+        <Header />
+        <PastDiariesPopover pastDiaries={pastDiaries} onDiarySelect={handleDiarySelect} />
+        <QueryInput
+          query={query}
+          setQuery={setQuery}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
+        {isLoading && <LoadingIndicator />}
+        {isSubmitted && <ResponseList responses={aiResponses} />}
+      </Box>
     </Container>
   );
 }

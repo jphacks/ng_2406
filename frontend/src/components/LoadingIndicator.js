@@ -1,4 +1,3 @@
-// src/components/LoadingIndicator.js
 import React from 'react';
 import { Box, CircularProgress } from '@mui/material';
 

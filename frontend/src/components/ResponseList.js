@@ -1,4 +1,3 @@
-// src/components/ResponseList.js
 import React from 'react';
 import { Box, Paper, Avatar, Typography } from '@mui/material';
 import grandmaImage from '../images/grandma.png';
