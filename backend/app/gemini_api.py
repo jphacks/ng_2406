@@ -10,10 +10,10 @@ class GeminiAPI:
     def __init__(self):
         # 環境変数の読み込み
         load_dotenv()
-        GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+        GeminiAPI_KEY = os.getenv('GeminiAPI_KEY')
 
         # APIキーの設定
-        genai.configure(api_key=GOOGLE_API_KEY)
+        genai.configure(api_key=GeminiAPI_KEY)
         self.model = genai.GenerativeModel("gemini-1.5-flash")
         self.weather = WeatherAPI()
 
