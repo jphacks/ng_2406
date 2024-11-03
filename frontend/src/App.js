@@ -3,6 +3,7 @@ import { Container, Box } from '@mui/material';
 import './App.css';
 import Header from './components/Header';
 import QueryInput from './components/QueryInput';
+import GrandmaText from './components/GrandmaText';
 import LoadingIndicator from './components/LoadingIndicator';
 import ResponseList from './components/ResponseList';
 
@@ -12,6 +13,7 @@ function App() {
   const [aiResponses, setAiResponses] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [pastDiaries, setPastDiaries] = useState([]);
+
 
   useEffect(() => {
     const fetchDiaries = async () => {
@@ -36,6 +38,7 @@ function App() {
     setIsLoading(true);
     setAiResponses([]);
     setIsSubmitted(true);
+
     try {
       const response = await fetch('/api/feedback', {
         method: 'POST',
@@ -44,9 +47,11 @@ function App() {
         },
         body: JSON.stringify({ action: query })
       });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       const data = await response.json();
       if (data.message) {
         console.error('サーバーエラー:', data.message);
@@ -64,6 +69,7 @@ function App() {
     setIsLoading(true);
     setAiResponses([]);
     setIsSubmitted(true);
+
     try {
       const response = await fetch('/api/get_feedbacks', {
         method: 'POST',
@@ -72,9 +78,11 @@ function App() {
         },
         body: JSON.stringify({ diary_id: diaryId })
       });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       const data = await response.json();
       if (data.message) {
         console.error('サーバーエラー:', data.message);
@@ -95,16 +103,43 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header pastDiaries={pastDiaries} onDiarySelect={handleDiarySelect} />
-      <Box sx={{ paddingTop: '64px' }}> {/* ヘッダーの高さ分のパディングを追加 */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          pt: '64px',
+          transition: 'all 0.3s ease-in-out',
+        }}
+      >
         <Container maxWidth="sm">
-          <QueryInput query={query} setQuery={setQuery} onSubmit={handleSubmit} />
-          {isLoading && <LoadingIndicator />}
-          {isSubmitted && <ResponseList responses={aiResponses} />}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              minHeight: 'calc(100vh - 64px)', // ビューポートの高さからヘッダーの高さを引く
+              justifyContent: isSubmitted ? 'flex-start' : 'center',
+              transition: 'all 0.3s ease-in-out',
+            }}
+          >
+            <GrandmaText/>
+            <QueryInput
+              query={query}
+              setQuery={setQuery}
+              onSubmit={handleSubmit}
+              isLoading={isLoading}
+            />
+            {isLoading && <LoadingIndicator />}
+            {isSubmitted && !isLoading && aiResponses && aiResponses.length > 0 && (
+              <ResponseList aiResponses={aiResponses} />
+            )}
+          </Box>
         </Container>
       </Box>
-    </div>
+    </Box>
   );
 }
 

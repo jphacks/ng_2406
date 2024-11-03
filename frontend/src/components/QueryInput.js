@@ -9,26 +9,29 @@ const QueryInput = ({ query, setQuery, onSubmit, isLoading }) => {
     };
 
     return (
-        <Box component="form" onSubmit={onSubmit} sx={{ mt: 1, mb: 2 }}>
+        <Box sx={{ width: '100%', mt: 3, mb: 2 }}>
             <TextField
                 fullWidth
-                margin='normal'
-                value={query}
                 multiline
-                rows={3}
+                rows={4}
+                value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="今日は朝名古屋駅から学校へ行って、2限に授業を受けて..."
                 className="zen-maru-gothic-regular"
-                sx={{ mb: 1 }}
+                sx={{ mb: 2 }}
+                variant="outlined"
             />
             <Button
-                type="submit"
-                variant="contained"
-                disabled={isLoading}
-                sx={{ mt: 3, mb: 2 }}
                 fullWidth
-                className="zen-maru-gothic-regular"
+                variant="contained"
+                onClick={onSubmit}
+                disabled={isLoading}
+                sx={{
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold'
+                }}
             >
                 {isLoading ? 'おばあを呼んでいます...' : 'おばあを呼ぶ'}
             </Button>

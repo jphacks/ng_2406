@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Popover, List, ListItem, ListItemButton, ListItemText, Box } from '@mui/material';
+import { Button, Popover, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 
 const PastDiariesPopover = ({ pastDiaries, onDiarySelect }) => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -15,21 +15,27 @@ const PastDiariesPopover = ({ pastDiaries, onDiarySelect }) => {
     const open = Boolean(anchorEl);
 
     return (
-        <Box sx={{ mb: 2 }}>
-            <Button onClick={handleClick} variant="outlined">過去の日記</Button>
+        <>
+            <Button onClick={handleClick} color="inherit" variant='outlined'>
+                過去の相談
+            </Button>
             <Popover
                 open={open}
                 anchorEl={anchorEl}
                 onClose={handleClose}
                 anchorOrigin={{
                     vertical: 'bottom',
-                    horizontal: 'left',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
                 }}
             >
-                <List sx={{ maxWidth: 300, maxHeight: 300, overflow: 'auto' }}>
+                <List sx={{ maxWidth: '300px' }}>
                     {pastDiaries.length > 0 ? (
                         pastDiaries.map((diary) => (
-                            <ListItem key={diary.id} disablePadding>
+                            <ListItem key={diary.id} sx={{ width: 'auto' }} >
                                 <ListItemButton onClick={() => {
                                     onDiarySelect(diary.id, diary.action);
                                     handleClose();
@@ -42,13 +48,13 @@ const PastDiariesPopover = ({ pastDiaries, onDiarySelect }) => {
                             </ListItem>
                         ))
                     ) : (
-                        <ListItem>
-                            <ListItemText primary="過去の日記はありません" />
+                        <ListItem sx={{ width: 'auto' }} >
+                            <ListItemText primary="過去の相談はありません" />
                         </ListItem>
                     )}
                 </List>
             </Popover>
-        </Box>
+        </>
     );
 };
 
