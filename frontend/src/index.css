@@ -15,3 +15,30 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  src: url('./fonts/ZenMaruGothic-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Yuji Mai';
+  src: url('./fonts/YujiMai-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Zen Maru Gothic', sans-serif !important;
+}
+
+.zen-maru-gothic-regular {
+  font-family: 'Zen Maru Gothic', sans-serif !important;
+}
+
+.yuji-mai-regular {
+  font-family: 'Yuji Mai', serif !important;
+}
