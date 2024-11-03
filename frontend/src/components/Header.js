@@ -6,7 +6,7 @@ import {
     Box
 } from '@mui/material';
 import PastDiariesPopover from './PastDiariesPopover';
-import titleImage from '../images/title.png';
+import logoImage from '../images/logo.png';
 
 const Header = ({ pastDiaries, onDiarySelect }) => {
     return (
@@ -14,7 +14,7 @@ const Header = ({ pastDiaries, onDiarySelect }) => {
             <Toolbar>
                 <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
                     <Typography variant="h6" component="div">
-                        <img src={titleImage} alt="安心問診おばあ" style={{ height: '40px' }} />
+                        <img src={logoImage} alt="安心問診おばあ" style={{ height: '40px' }} />
                     </Typography>
                     <PastDiariesPopover pastDiaries={pastDiaries} onDiarySelect={onDiarySelect} />
                 </Box>
