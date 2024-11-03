@@ -125,7 +125,7 @@ function App() {
               transition: 'all 0.3s ease-in-out',
             }}
           >
-            <GrandmaText/>
+            <GrandmaText />
             <QueryInput
               query={query}
               setQuery={setQuery}

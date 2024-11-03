@@ -26,6 +26,7 @@ const QueryInput = ({ query, setQuery, onSubmit, isLoading }) => {
                 fullWidth
                 variant="contained"
                 onClick={onSubmit}
+                className="zen-maru-gothic-regular"
                 disabled={isLoading}
                 sx={{
                     py: 1.5,

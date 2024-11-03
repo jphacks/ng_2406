@@ -16,7 +16,7 @@ const PastDiariesPopover = ({ pastDiaries, onDiarySelect }) => {
 
     return (
         <>
-            <Button onClick={handleClick} color="inherit" variant='outlined'>
+            <Button onClick={handleClick} color="inherit" variant='outlined' className="zen-maru-gothic-regular">
                 過去の相談
             </Button>
             <Popover
