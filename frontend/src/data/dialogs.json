@@ -1,0 +1,11 @@
+{
+    "grandma": {
+        "initial": "今日の予定を教えておくれ",
+        "loading": "おばあは考えているよ...",
+        "inProgress": "もう少し考えさせておくれ...",
+        "waiting": "今日も精進しておくれ",
+        "pastResponse": "人生を振り返るのも悪くないねぇ",
+        "sharedContent": "の内容だよ",
+        "error": "耳が遠いから、もう一度頼むよ"
+    }
+}
