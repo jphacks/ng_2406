@@ -14,7 +14,6 @@ function App() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [pastDiaries, setPastDiaries] = useState([]);
 
-
   useEffect(() => {
     const fetchDiaries = async () => {
       try {
@@ -38,7 +37,6 @@ function App() {
     setIsLoading(true);
     setAiResponses([]);
     setIsSubmitted(true);
-
     try {
       const response = await fetch('/api/feedback', {
         method: 'POST',
@@ -47,11 +45,9 @@ function App() {
         },
         body: JSON.stringify({ action: query })
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
       if (data.message) {
         console.error('サーバーエラー:', data.message);
@@ -69,7 +65,6 @@ function App() {
     setIsLoading(true);
     setAiResponses([]);
     setIsSubmitted(true);
-
     try {
       const response = await fetch('/api/get_feedbacks', {
         method: 'POST',
@@ -78,11 +73,9 @@ function App() {
         },
         body: JSON.stringify({ diary_id: diaryId })
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
       if (data.message) {
         console.error('サーバーエラー:', data.message);
@@ -102,9 +95,18 @@ function App() {
     handlePastId(id);
   };
 
+  const handleCalendarEvents = (eventsQuery) => {
+    setQuery(eventsQuery);
+    handleSubmit({ preventDefault: () => { } });
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header pastDiaries={pastDiaries} onDiarySelect={handleDiarySelect} />
+      <Header
+        pastDiaries={pastDiaries}
+        onDiarySelect={handleDiarySelect}
+        onCalendarEvents={handleCalendarEvents}
+      />
       <Box
         sx={{
           flexGrow: 1,

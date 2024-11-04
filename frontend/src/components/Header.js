@@ -1,17 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     AppBar,
     Toolbar,
     Typography,
-    Box
+    Box,
+    Button
 } from '@mui/material';
 import PastDiariesPopover from './PastDiariesPopover';
+import GoogleCalendarService from './GoogleCalendarService';
 import logoImage from '../images/logo.png';
 
-const Header = ({ pastDiaries, onDiarySelect }) => {
+const Header = ({ pastDiaries, onDiarySelect, onCalendarEvents }) => {
+    const [isSignedIn, setIsSignedIn] = useState(false);
+
+    useEffect(() => {
+        GoogleCalendarService.loadGapiAndInitClient().then(() => {
+            setIsSignedIn(GoogleCalendarService.isSignedIn);
+        });
+    }, []);
+
     const handleLogoClick = () => {
         window.location.reload();
     };
+
+    const handleAuthClick = async () => {
+        try {
+            await GoogleCalendarService.handleAuthClick();
+            const eventsQuery = await GoogleCalendarService.getCalendarEvents();
+            onCalendarEvents(eventsQuery);
+        } catch (error) {
+            console.error('Error fetching calendar events:', error);
+        }
+    };
+
     return (
         <AppBar position="fixed" color="default" elevation={2} sx={{ width: '100%' }}>
             <Toolbar>
@@ -23,8 +44,16 @@ const Header = ({ pastDiaries, onDiarySelect }) => {
                             cursor: 'pointer'
                         }} onClick={handleLogoClick} />
                     </Typography>
-                    <PastDiariesPopover pastDiaries={pastDiaries} onDiarySelect={onDiarySelect} />
                 </Box>
+                <Button
+                    onClick={handleAuthClick}
+                    variant="contained"
+                    color="primary"
+                    sx={{ mr: 2 }}
+                >
+                    {isSignedIn ? 'カレンダーから予定を取得' : 'Googleアカウントでログイン'}
+                </Button>
+                <PastDiariesPopover pastDiaries={pastDiaries} onDiarySelect={onDiarySelect} />
             </Toolbar>
         </AppBar>
     );
