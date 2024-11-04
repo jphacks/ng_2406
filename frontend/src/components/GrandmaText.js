@@ -1,8 +1,9 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import titleImage from '../images/title.png';
-const GrandmaText = () => (
-    <Box sx={{ display: 'flex', alignItems: 'center', mt:2}}>
+
+const GrandmaText = ({ text }) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
         <Box
             component="img"
             sx={{
@@ -15,7 +16,7 @@ const GrandmaText = () => (
             src={titleImage}
         />
         <Typography className="zen-maru-gothic-regular" variant="h4" component="h1">
-            「今日の予定を教えておくれ」
+            「{text}」
         </Typography>
     </Box>
 );
