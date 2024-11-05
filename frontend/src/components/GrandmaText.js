@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import titleImage from '../images/title.png';
 
-const GrandmaText = () => {
+const GrandmaText = ({ isResponseDisplayed }) => {
     const handleClick = () => {
         console.log('画像がクリックされました');
     };
@@ -15,9 +15,6 @@ const GrandmaText = () => {
                     width: '50px',
                     height: '50px',
                     marginRight: 2,
-                    '&:hover::before': {
-                        opacity: 1,
-                    },
                     '&::before': {
                         content: '""',
                         position: 'absolute',
@@ -30,6 +27,17 @@ const GrandmaText = () => {
                         opacity: 0,
                         transition: 'opacity 0.3s ease-in-out',
                         zIndex: 1,
+                        ...(isResponseDisplayed && {
+                            animation: 'pulse 2s infinite',
+                        }),
+                    },
+                    '&:hover::before': {
+                        opacity: isResponseDisplayed ? 0 : 1,
+                    },
+                    '@keyframes pulse': {
+                        '0%': { opacity: 0 },
+                        '50%': { opacity: 1 },
+                        '100%': { opacity: 0 },
                     },
                 }}
             >

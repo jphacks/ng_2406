@@ -125,13 +125,8 @@ function App() {
               transition: 'all 0.3s ease-in-out',
             }}
           >
-            <GrandmaText />
-            <QueryInput
-              query={query}
-              setQuery={setQuery}
-              onSubmit={handleSubmit}
-              isLoading={isLoading}
-            />
+            <GrandmaText isResponseDisplayed={isSubmitted && !isLoading && aiResponses.length > 0} />
+            <QueryInput query={query} setQuery={setQuery} onSubmit={handleSubmit} />
             {isLoading && <LoadingIndicator />}
             {isSubmitted && !isLoading && aiResponses && aiResponses.length > 0 && (
               <ResponseList aiResponses={aiResponses} />
