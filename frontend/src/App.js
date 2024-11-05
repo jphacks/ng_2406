@@ -120,7 +120,7 @@ function App() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              minHeight: 'calc(100vh - 64px)', // ビューポートの高さからヘッダーの高さを引く
+              minHeight: 'calc(100vh - 64px)',
               justifyContent: isSubmitted ? 'flex-start' : 'center',
               transition: 'all 0.3s ease-in-out',
             }}
