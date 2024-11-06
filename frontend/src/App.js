@@ -13,6 +13,12 @@ function App() {
   const [aiResponses, setAiResponses] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [pastDiaries, setPastDiaries] = useState([]);
+  const [character, setCharacter] = useState(0);
+
+  const handleCharacterChange = (index) => {
+    setCharacter(index);
+    console.log(`選択されたキャラクター: ${index}`);
+  };
 
 
   useEffect(() => {
@@ -38,6 +44,8 @@ function App() {
     setIsLoading(true);
     setAiResponses([]);
     setIsSubmitted(true);
+    const requestBody = { action: query, character };
+    console.log('サーバーに送信するデータ:', requestBody);
 
     try {
       const response = await fetch('/api/feedback', {
@@ -45,9 +53,8 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ action: query })
+        body: JSON.stringify({ action: query, character })
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -63,7 +70,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [query]);
+  }, [query, character]);
 
   const handlePastId = useCallback(async (diaryId) => {
     setIsLoading(true);
@@ -125,7 +132,10 @@ function App() {
               transition: 'all 0.3s ease-in-out',
             }}
           >
-            <GrandmaText isResponseDisplayed={isSubmitted && !isLoading && aiResponses.length > 0} />
+            <GrandmaText
+              isResponseDisplayed={isSubmitted && !isLoading && aiResponses.length > 0}
+              onCharacterChange={handleCharacterChange}
+            />
             <QueryInput query={query} setQuery={setQuery} onSubmit={handleSubmit} />
             {isLoading && <LoadingIndicator />}
             {isSubmitted && !isLoading && aiResponses && aiResponses.length > 0 && (

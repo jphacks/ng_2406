@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Typography, Modal } from '@mui/material';
 import titleImage from '../images/title.png';
 
-const GrandmaText = ({ isResponseDisplayed }) => {
-    const [open, setOpen] = useState(false);
+const GrandmaText = ({ isResponseDisplayed, onCharacterChange }) => {
+    const [open, setOpen] = React.useState(false);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     const imageOptions = [
-        { src: titleImage, alt: 'おばあ1', color: '#FFA500' },
-        { src: titleImage, alt: 'おばあ2', color: '#FFFF00' },
-        { src: titleImage, alt: 'おばあ3', color: '#00FF00' },
-        { src: titleImage, alt: 'おばあ4', color: '#0000FF' },
+        { src: titleImage, alt: 'おばあ', color: '#FFA500' },
+        { src: titleImage, alt: 'おねぇ', color: '#FFFF00' },
+        { src: titleImage, alt: 'おにぃ', color: '#00FF00' },
+        { src: titleImage, alt: 'おとん', color: '#0000FF' },
     ];
 
     return (
@@ -64,7 +64,7 @@ const GrandmaText = ({ isResponseDisplayed }) => {
                     src={titleImage}
                 />
             </Box>
-            <Typography className="zen-maru-gothic-regular" variant="h4" component="h1">
+            <Typography variant="h4" component="h1">
                 「今日の予定を教えておくれ」
             </Typography>
             <Modal
@@ -123,7 +123,7 @@ const GrandmaText = ({ isResponseDisplayed }) => {
                                 src={image.src}
                                 alt={image.alt}
                                 onClick={() => {
-                                    console.log(`選択された画像: ${image.alt}`);
+                                    onCharacterChange(index);
                                     handleClose();
                                 }}
                             />
