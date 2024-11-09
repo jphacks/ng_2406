@@ -17,21 +17,48 @@ class GeminiAPI:
         self.model = genai.GenerativeModel("gemini-1.5-flash")
         self.weather = WeatherAPI()
 
-    def generate_content(self, data_action):
+    def _generate_prompt(self, schedule):
         '''
-        ユーザーからの情報をもとにフィードバックを作成
-        input(str) : data_action
-        output(dict) : response
+        ユーザーが入力した内容から行動を抜き出すためのプロンプトを作成
+        input(str) : schedule
+        output(str) : prompt
         '''
-        # 天気情報の取得
-        weather_data = self.get_wether_data()
-        # ユーザーからの情報をもとにフィードバックを作成
-        prompt = self.generate_prompt(data_action)
-        actions = self.action_extract(prompt)
-        response = self.action_response(actions, weather_data)
-        return response
+        prompt_action = schedule
+        prompt = (prompt_action
+                  + "という文章から行動を抜き出してpythonの配列として出力してください。")
+        return prompt
 
-    def get_wether_data(self):
+    def extract_actions(self, schedule):
+        prompt = self._generate_prompt(schedule)
+        for _ in range(5):
+            try:
+                feedback = self.model.generate_content(prompt).text
+                logger.info(feedback)
+                
+                # レスポンス形式の検証
+                code_block_match = re.search(r"```(.+?)```", feedback, re.DOTALL)
+                if code_block_match:
+                    array_match = re.search(r"\[([^\]]+)\]", code_block_match.group(1))
+                    if array_match:
+                        actions = [action.strip().strip('"') for action in array_match.group(1).split(",")]
+                        logger.info(actions)
+                        return actions
+                    else:
+                        logger.warning("配列が見つかりませんでした。")
+                else:
+                    logger.warning("コードブロックが見つかりませんでした。")
+            except Exception as e:
+                logger.error(f"アクション抽出中にエラーが発生しました: {e}")
+        raise ValueError("期待する形式のレスポンスが得られませんでした。")
+
+
+    def _is_used_weather_info(self, schedule):
+        '''
+        ユーザーの予定を見て、天気情報が必要かを判定する
+        '''
+        return True
+
+    def _get_weather_info(self):
         '''
         天気情報を取得する
         input : None
@@ -40,76 +67,26 @@ class GeminiAPI:
         nagoya_city_number = 230010
         weather_data = self.weather.get_weather(nagoya_city_number)
         prompt = (weather_data + "ここから本日の天気情報を取り出し、おばあちゃん口調で30字以内のアドバイスをください")
-        weather_data = self.model.generate_content(prompt).text
-        return weather_data
+        weather_info = self.model.generate_content(prompt).text
+        return weather_info
 
-    def generate_prompt(self, data_action):
+    def weather_feedback(self, schedule):
         '''
-        ユーザーが入力した内容から行動を抜き出すためのプロンプトを作成
-        input(str) : data_action
-        output(str) : prompt
+        ユーザーの予定を受け取り、行動を抽出するAPI
+        input : schedule(str)
+        output : response(dict)
         '''
-        prompt_action = data_action
-        prompt = (prompt_action
-                  + "という文章から行動を抜き出してpythonの配列として出力してください。")
-        return prompt
-
-    def action_extract(self, prompt):
-        '''
-        ユーザーが入力した内容から
-        行動を抜き出して配列にする
-        input(str) : prompt
-        output(list[str]) : actions
-        '''
-        while True:
-            feedback = self.model.generate_content(prompt).text
-            print(feedback)
-
-            # 正規表現で ```で囲まれた部分とその中の配列部分を抽出
-            code_block_pattern = r"```(.+?)```"  # ```で囲まれた部分を取得
-            array_pattern = r"\[([^\]]+)\]"     # []で囲まれた配列部分を取得
-
-            # ```で囲まれたコードブロックを検索
-            code_block_match = re.search(
-                code_block_pattern, feedback, re.DOTALL)
-            if code_block_match:
-                # コードブロック内から配列部分を抽出
-                array_match = re.search(
-                    array_pattern, code_block_match.group(1))
-                if array_match:
-                    # 配列部分をPythonリストに変換
-                    actions = [action.strip().strip('"')
-                               for action in array_match.group(1).split(",")]
-                    print(actions)
-                    break
-                else:
-                    print("配列が見つかりませんでした。", file=sys.stderr)
-            else:
-                print("コードブロックが見つかりませんでした。", file=sys.stderr)
-        return actions
-
-    def action_response(self, actions, weather_data):
-        '''
-        各イベントごとに処理を行う
-        input: actions(list[str]) : ユーザーが入力した行動, weather_data(str) : 天気情報
-        output(dict) : response
-        '''
-        response = {'data': []}
-        response['data'].append({
-            'face': 3,
-            'title': '天気情報',
-            'description': weather_data
-        })
-        for action in actions:
-            prompt_description = action + "の気をつけた方が良いポイントをおばあちゃん口調で60字以内で教えてください。"
-            description = self.model.generate_content(prompt_description).text
-            face = self._get_facescore(action)
-            response['data'].append({
-                'face': face,
-                'title': action,
-                'description': description
-            })
-        return response
+        is_used = self._is_used_weather_info(schedule)
+        response = {"is_used": is_used}
+        if is_used:
+            weather_info = self._get_weather_info()
+            response["face"] = 0
+            response["action"] = "天気情報"
+            response["feedback"] = weather_info
+            return response
+        else:
+            return response
+            
 
     def _get_facescore(self, action):
         '''
@@ -136,3 +113,35 @@ class GeminiAPI:
                 print(f"不正な応答 '{face}' が返されました。再試行します。")
         
         return int(face)
+
+    def _get_action_feedback(self, action):
+        '''
+        行動からフィードバックを生成する
+        input : action(str) : 行動
+        output : str : フィードバック
+        '''
+        prompt_description = (
+            f"{action}の気をつけた方が良いポイントをおばあちゃん口調で60字以内で教えてください。"
+        )
+        for _ in range(5):
+            try:
+                feedback = self.model.generate_content(prompt_description).text
+                break
+            except Exception as e:
+                print(f"おばあが怒っています: {e}")
+        return feedback
+        
+    def action_feedback(self, action):
+        '''
+        ユーザーの行動データを受け取り、行動を抽出するAPI
+        input : action(str)
+        output : response(dict)
+        '''
+        face = self._get_facescore(action)
+        feedback = self._get_action_feedback(action)
+        response = {
+            'face': face,
+            'action': action,
+            'feedback': feedback
+        }
+        return response
