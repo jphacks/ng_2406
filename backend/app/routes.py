@@ -5,89 +5,139 @@ from . import bcrypt
 from flask_jwt_extended import create_access_token, jwt_required
 from datetime import datetime
 from app.gemini_api import GeminiAPI
+import random
+import string
+from hashids import Hashids
+
 
 api = Blueprint('api', __name__)
 gemini = GeminiAPI()
 
 
-# アドバイス生成API
-@api.route('/feedback', methods=['POST'])
-def register():
+# diary idをURLに使用する10桁のハッシュ値に変換する
+def hash_diary_id(diary_id):
+    hashids = Hashids(salt="f84fSgda", min_length=10)
+    diary_url = hashids.encode(diary_id)
+    return diary_url
+
+
+# ユーザーの予定から行動を抽出するAPI
+@api.route('/extract-actions', methods=['POST'])
+def extract_actions():
     try:
-        data = request.get_json()
-        data_action = data.get('action')
-        if data_action is None:
-            return jsonify({'message': 'リクエストが不正です'}), 400
-        response = gemini.generate_content(data_action)
-        # データベースへの登録
-        # Diaryテーブルへの登録
+        request_data = request.get_json()
+        schedule = request_data.get('schedule')
+
+        actions = gemini.extract_actions(schedule)
+
         time_now = datetime.utcnow()
         diary = Diary(
-            date=time_now,
-            action=data_action
+            created_at=time_now,
+            schedule=schedule
         )
         db.session.add(diary)
         db.session.commit()
+
         diary_id = diary.id
-        # Feedbackテーブルへの登録
-        for data in response['data']:
-            feedback = Feedback(
-                diary_id=diary_id,
-                face=data['face'],
-                title=data['title'],
-                description=data['description'],
-            )
-            db.session.add(feedback)
+        diary_url = hash_diary_id(diary_id)
+        diary.diary_url = diary_url
+
         db.session.commit()
+
+        response = {
+            "actions": actions,
+            "diary_id": diary_id,
+            "diary_url": diary_url
+        }
         return jsonify(response), 200
     except Exception as e:
         print(e)
         return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
 
 
-# 日記一覧取得API
-@api.route('/get_diaries', methods=['GET'])
-def get_diaries():
+# ユーザーの予定から行動を抽出するAPI
+@api.route('/extract-actions-from-calendar', methods=['POST'])
+def extract_actions_from_calendar():
+    pass
+    
+
+# 天気に関するフィードバックを生成するAPI
+@api.route('/weather-feedback', methods=['POST'])
+def weather_feedback():
     try:
-        diaries = Diary.query.order_by(Diary.id.desc()).all()
-        response_diaries = [
-            {
-                'id': diary.id,
-                'date': diary.date.isoformat() + 'Z',
-                'action': str(diary.action)
-            }
-            for diary in diaries
-        ]
-        return jsonify({'diaries': response_diaries}), 200
+        request_data = request.get_json()
+        schedule = request_data.get('schedule')
+        character = request_data.get('character')
+        diary_id = request_data.get('diary_id')
+
+        response = gemini.weather_feedback(schedule)
+        if response['is_used']:
+            feedback = Feedback(
+                diary_id=diary_id,
+                face=response['face'],
+                action=response['action'],
+                feedback=response['feedback']
+            )
+            db.session.add(feedback)
+            db.session.commit()
+        return jsonify(response), 200
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
 
 
-# フィードバック取得API
-@api.route('/get_feedbacks', methods=['POST'])
-def get_feedbacks():
+# ユーザーの行動に対するフィードバックを生成するAPI
+@api.route('/action-feedback', methods=['POST'])
+def action_feedback():
     try:
-        data = request.get_json()
-        diary_id = data.get('diary_id')
+        request_data = request.get_json()
+        action = request_data.get('action')
+        schedule = request_data.get('schedule')
+        character = request_data.get('character')
+        diary_id = request_data.get('diary_id')
 
-        diary = Diary.query.filter_by(id=diary_id).first()
+        response = gemini.action_feedback(action)
+        feedback = Feedback(
+            diary_id=diary_id,
+            face=response['face'],
+            action=response['action'],
+            feedback=response['feedback']
+        )
+        db.session.add(feedback)
+        db.session.commit()
+        return jsonify(response), 200
+
+    except Exception as e:
+        return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
+
+
+@api.route('add-feedback-to-calendar', methods=['PUT'])
+def add_feedback_to_calendar():
+    pass
+
+
+# 指定されたIDに対応する日記を取得するAPI
+@api.route('/get/diary/<diary_url>', methods=['GET'])
+def get_feedbacks(diary_url):
+    try:
+        diary = Diary.query.filter_by(diary_url=diary_url).first()
         if not diary:
             return jsonify({'message': '日記が見つかりませんでした'}), 404
 
+        diary_id = diary.id
         response = {
-            'id': diary.id,
-            'date': diary.date.isoformat(),
-            'action': diary.action,
-            'data': []
+            'created_at': diary.created_at.isoformat(),
+            'schedule': diary.schedule,
+            'actions': []
         }
 
         feedbacks = Feedback.query.filter_by(
             diary_id=diary_id).order_by(Feedback.id).all()
-        response['data'] = [
+        response['actions'] = [
             {
                 'face': feedback.face,
-                'title': feedback.title,
-                'description': feedback.description,
+                'action': feedback.action,
+                'feedback': feedback.feedback,
             }
             for feedback in feedbacks
         ]
@@ -95,62 +145,3 @@ def get_feedbacks():
         return jsonify(response), 200
     except Exception as e:
         return jsonify({'message': 'リクエストが不正です', 'error': str(e)}), 400
-
-
-# データベーステーブルの内容をすべて削除するAPI
-@api.route('/delete_data', methods=['DELETE'])
-def delete_data():
-    try:
-        Feedback.query.delete()
-        Diary.query.delete()
-        db.session.commit()
-        return jsonify({'message': 'データベースの全ての内容が削除されました'}), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'message': '削除に失敗しました', 'error': str(e)}), 400
-
-
-# データベースに情報を登録するためのAPI
-@api.route('/register_info', methods=['PUT'])
-def register_info():
-    try:
-        # Diaryテーブルへの登録
-        diary_info = Diary(
-            action="今日は何をしたんですか？？",
-            date=datetime.utcnow()
-        )
-        db.session.add(diary_info)
-        db.session.commit()
-        diary_id = diary_info.id
-
-        feedback_info = {
-            "data": [
-                {
-                    "diary_id": diary_id,
-                    "face": 1,
-                    "title": "test",
-                    "description": "test"
-                },
-                {
-                    "diary_id": diary_id,
-                    "face": 2,
-                    "title": "file",
-                    "description": "file"
-                }
-            ]
-        }
-
-        for feedback in feedback_info["data"]:
-            feed = Feedback(
-                diary_id=feedback["diary_id"],
-                face=feedback["face"],
-                title=feedback["title"],
-                description=feedback["description"]
-            )
-            db.session.add(feed)
-        db.session.commit()
-
-        return jsonify({'message': '処理が成功しました'}), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
