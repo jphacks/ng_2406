@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Container, Box } from '@mui/material';
+import { Container, Box, Button } from '@mui/material';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import './App.css';
 import Header from './components/Header';
 import QueryInput from './components/QueryInput';
@@ -18,6 +19,7 @@ function App() {
   const [diaryId, setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
   const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
+  const [accessToken, setAccessToken] = useState(null);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -26,7 +28,6 @@ function App() {
       fetchDiary(diaryParam);
     }
   }, []);
-
   const fetchDiary = async (diaryUrl) => {
     setIsLoading(true);
     setGrandmaState('loading');
@@ -50,8 +51,7 @@ function App() {
     }
   };
 
-  const handleSubmit = useCallback(async (event) => {
-    event.preventDefault();
+  const handleAction = useCallback(async (actionType, token = null) => {
     setGrandmaState('loading');
     setIsLoading(true);
     setActions([]);
@@ -59,13 +59,19 @@ function App() {
     setIsSubmitted(true);
 
     try {
-      // 最初に/api/extract-actionsの結果を取得して表示
-      const extractResponse = await fetch('/api/extract-actions', {
+      const endpoint = actionType === 'calendar' ? '/api/extract-actions-from-calendar' : '/api/extract-actions';
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      };
+      const body = actionType === 'calendar'
+        ? JSON.stringify({ date: new Date().toISOString() })
+        : JSON.stringify({ schedule: query });
+
+      const extractResponse = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ schedule: query })
+        headers,
+        body
       });
 
       if (!extractResponse.ok) {
@@ -79,14 +85,11 @@ function App() {
       setGrandmaState('waiting');
       setIsLoading(false);
 
-      // アクションごとのフィードバックの取得
       const feedbackPromises = extractData.actions.map(action =>
         fetch('/api/action-feedback', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ action: action, schedule: query, character: 1, diary_id: extractData.diary_id })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, schedule: query, character: 1, diary_id: extractData.diary_id })
         }).then(res => res.json())
       );
 
@@ -101,49 +104,73 @@ function App() {
     }
   }, [query]);
 
+  const handleSubmit = useCallback((event) => {
+    event.preventDefault();
+    handleAction('query');
+  }, [handleAction]);
+
+  const handleCalendarSubmit = useCallback(() => {
+    if (!accessToken) {
+      console.error('Google認証が必要です');
+      return;
+    }
+    handleAction('calendar', accessToken);
+  }, [accessToken, handleAction]);
+
+  const handleLoginSuccess = (res) => {
+    setAccessToken(res.accessToken);
+  };
+
+  const handleLoginFailure = (res) => {
+    console.log('ログインに失敗しました:', res);
+  };
+  
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header />
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          pt: '64px',
-          transition: 'all 0.3s ease-in-out',
-        }}
-      >
-        <Container maxWidth="sm">
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              minHeight: 'calc(100vh - 64px)',
-              justifyContent: isSubmitted ? 'flex-start' : 'center',
-              transition: 'all 0.3s ease-in-out',
-            }}
-          >
-            <GrandmaText text={dialogs.grandma[grandmaState]} />
-            <QueryInput
-              query={query}
-              setQuery={setQuery}
-              onSubmit={handleSubmit}
-              isLoading={isLoading}
-            />
-            {isLoading && <LoadingIndicator />}
-            {isSubmitted && !isLoading && actions.length > 0 && (
-              <ResponseList
-                actions={actions}
-                feedbacks={feedbacks}
-                diaryUrl={diaryUrl}
-                isLoadingAdditionalInfo={isLoadingAdditionalInfo}
+    <GoogleOAuthProvider clientId="504058961170-r44epg9gnhdbv2b7elr9f8eu1umhajff.apps.googleusercontent.com">
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Header onLoginSuccess={handleLoginSuccess} onLoginFailure={handleLoginFailure} />
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            pt: '64px',
+            transition: 'all 0.3s ease-in-out',
+          }}
+        >
+          <Container maxWidth="sm">
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                minHeight: 'calc(100vh - 64px)',
+                justifyContent: isSubmitted ? 'flex-start' : 'center',
+                transition: 'all 0.3s ease-in-out',
+              }}
+            >
+              <GrandmaText text={dialogs.grandma[grandmaState]} />
+              <QueryInput
+                query={query}
+                setQuery={setQuery}
+                onSubmit={handleSubmit}
+                isLoading={isLoading}
               />
-            )}
-          </Box>
-        </Container>
+              {isLoading && <LoadingIndicator />}
+              {isSubmitted && !isLoading && actions.length > 0 && (
+                <ResponseList
+                  actions={actions}
+                  feedbacks={feedbacks}
+                  diaryUrl={diaryUrl}
+                  isLoadingAdditionalInfo={isLoadingAdditionalInfo}
+                />
+              )}
+            </Box>
+          </Container>
+        </Box>
       </Box>
-    </Box>
+    </GoogleOAuthProvider>
   );
 }
+
 export default App;

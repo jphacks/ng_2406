@@ -3,21 +3,22 @@ import {
     AppBar,
     Toolbar,
     Typography,
-    Box
+    Box,
+    Button
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImage from '../images/logo.png';
+import { GoogleLogin } from '@react-oauth/google';
 
-const Header = () => {
-
+const Header = ({ onLoginSuccess, onLoginFailure }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
     const handleLogoClick = () => {
         if (location.pathname !== '/' || location.search !== '') {
             navigate('/', { replace: true });
+            window.location.reload();
         }
-        window.location.reload();
     };
 
     return (
@@ -31,6 +32,20 @@ const Header = () => {
                             cursor: 'pointer'
                         }} onClick={handleLogoClick} />
                     </Typography>
+                    <GoogleLogin
+                        render={renderProps => (
+                            <Button
+                                onClick={renderProps.onClick}
+                                disabled={renderProps.disabled}
+                                variant="contained"
+                            >
+                                Googleカレンダー連携
+                            </Button>
+                        )}
+                        onSuccess={onLoginSuccess}
+                        onFailure={onLoginFailure}
+                        cookiePolicy={'single_host_origin'}
+                    />
                 </Box>
             </Toolbar>
         </AppBar>
