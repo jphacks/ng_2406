@@ -16,10 +16,8 @@ gemini = GeminiAPI()
 
 # diary idをURLに使用する10桁のハッシュ値に変換する
 def hash_diary_id(diary_id):
-    hashids = Hashids(min_length=6)
+    hashids = Hashids(salt="f84fSgda", min_length=10)
     diary_url = hashids.encode(diary_id)
-    while len(diary_url) < 10:
-        diary_url += random.choice(string.ascii_letters + string.digits)
     return diary_url
 
 
@@ -39,10 +37,11 @@ def extract_actions():
         )
         db.session.add(diary)
         db.session.commit()
+
         diary_id = diary.id
         diary_url = hash_diary_id(diary_id)
-
         diary.diary_url = diary_url
+
         db.session.commit()
 
         response = {
@@ -72,6 +71,15 @@ def weather_feedback():
         diary_id = request_data.get('diary_id')
 
         response = gemini.weather_feedback(schedule)
+        if response['is_used']:
+            feedback = Feedback(
+                diary_id=diary_id,
+                face=response['face'],
+                action=response['action'],
+                feedback=response['feedback']
+            )
+            db.session.add(feedback)
+            db.session.commit()
         return jsonify(response), 200
 
     except Exception as e:
@@ -89,6 +97,14 @@ def action_feedback():
         diary_id = request_data.get('diary_id')
 
         response = gemini.action_feedback(action)
+        feedback = Feedback(
+            diary_id=diary_id,
+            face=response['face'],
+            action=response['action'],
+            feedback=response['feedback']
+        )
+        db.session.add(feedback)
+        db.session.commit()
         return jsonify(response), 200
 
     except Exception as e:

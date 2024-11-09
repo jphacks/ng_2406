@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import sys
 from app.weather_api import WeatherAPI
 
+DEBUG = True
+
 
 class GeminiAPI:
     def __init__(self):
@@ -31,26 +33,31 @@ class GeminiAPI:
     def extract_actions(self, schedule):
         prompt = self._generate_prompt(schedule)
         for _ in range(5):
-            try:
-                feedback = self.model.generate_content(prompt).text
-                logger.info(feedback)
-                
-                # レスポンス形式の検証
-                code_block_match = re.search(r"```(.+?)```", feedback, re.DOTALL)
-                if code_block_match:
-                    array_match = re.search(r"\[([^\]]+)\]", code_block_match.group(1))
-                    if array_match:
-                        actions = [action.strip().strip('"') for action in array_match.group(1).split(",")]
-                        logger.info(actions)
-                        return actions
-                    else:
-                        logger.warning("配列が見つかりませんでした。")
-                else:
-                    logger.warning("コードブロックが見つかりませんでした。")
-            except Exception as e:
-                logger.error(f"アクション抽出中にエラーが発生しました: {e}")
-        raise ValueError("期待する形式のレスポンスが得られませんでした。")
+            feedback = self.model.generate_content(prompt).text
+            if DEBUG: print(feedback)
 
+            # 正規表現で ```で囲まれた部分とその中の配列部分を抽出
+            code_block_pattern = r"```(.+?)```"  # ```で囲まれた部分を取得
+            array_pattern = r"\[([^\]]+)\]"     # []で囲まれた配列部分を取得
+
+            # ```で囲まれたコードブロックを検索
+            code_block_match = re.search(
+                code_block_pattern, feedback, re.DOTALL)
+            if code_block_match:
+                # コードブロック内から配列部分を抽出
+                array_match = re.search(
+                    array_pattern, code_block_match.group(1))
+                if array_match:
+                    # 配列部分をPythonリストに変換
+                    actions = [action.strip().strip('"')
+                               for action in array_match.group(1).split(",")]
+                    if DEBUG: print(actions)
+                    break
+                else:
+                    if DEBUG: print("配列が見つかりませんでした。", file=sys.stderr)
+            else:
+                if DEBUG: print("コードブロックが見つかりませんでした。", file=sys.stderr)
+        return actions
 
     def _is_used_weather_info(self, schedule):
         '''
@@ -107,10 +114,10 @@ class GeminiAPI:
 
             # 正規表現で数値判定
             if re.fullmatch("[0-2]", face):
-                print(face)
+                if DEBUG: print(face)
                 break
             else:
-                print(f"不正な応答 '{face}' が返されました。再試行します。")
+                if DEBUG: print(f"不正な応答 '{face}' が返されました。再試行します。")
         
         return int(face)
 
@@ -128,7 +135,7 @@ class GeminiAPI:
                 feedback = self.model.generate_content(prompt_description).text
                 break
             except Exception as e:
-                print(f"おばあが怒っています: {e}")
+                if DEBUG: print(f"おばあが怒っています: {e}")
         return feedback
         
     def action_feedback(self, action):
