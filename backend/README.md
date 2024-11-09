@@ -18,7 +18,7 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-3. Google calendar apiを使用するためのcredentials.jsonを同じディレクトリ上に配置する  
+3. Google calendar apiを使用するためのcredentials.jsonを/backend/app/google_calendar_api上に配置する
 このurlを参考に同じディレクトリにcredentials.jsonを配置する(名前を変更する必要あり)  
 [GoogleカレンダーにPythonから予定を追加・編集してみた](https://dev.classmethod.jp/articles/google-calendar-api-create-schedule/)  
 
