@@ -9,7 +9,7 @@ const QueryInput = ({ query, setQuery, onSubmit, isLoading }) => {
     };
 
     return (
-        <Box sx={{ width: '100%', mt: 3, mb: 2 }}>
+        <Box sx={{ width: '100%', mt: 3, mb: 1 }}>
             <TextField
                 fullWidth
                 multiline

@@ -5,13 +5,21 @@ import {
     Typography,
     Box
 } from '@mui/material';
-import PastDiariesPopover from './PastDiariesPopover';
+import { useNavigate, useLocation } from 'react-router-dom';
 import logoImage from '../images/logo.png';
 
-const Header = ({ pastDiaries, onDiarySelect }) => {
+const Header = () => {
+
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const handleLogoClick = () => {
+        if (location.pathname !== '/' || location.search !== '') {
+            navigate('/', { replace: true });
+        }
         window.location.reload();
     };
+
     return (
         <AppBar position="fixed" color="default" elevation={2} sx={{ width: '100%' }}>
             <Toolbar>
@@ -23,7 +31,6 @@ const Header = ({ pastDiaries, onDiarySelect }) => {
                             cursor: 'pointer'
                         }} onClick={handleLogoClick} />
                     </Typography>
-                    <PastDiariesPopover pastDiaries={pastDiaries} onDiarySelect={onDiarySelect} />
                 </Box>
             </Toolbar>
         </AppBar>

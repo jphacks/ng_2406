@@ -59,7 +59,7 @@ def extract_actions():
 @api.route('/extract-actions-from-calendar', methods=['POST'])
 def extract_actions_from_calendar():
     pass
-    
+
 
 # 天気に関するフィードバックを生成するAPI
 @api.route('/weather-feedback', methods=['POST'])
