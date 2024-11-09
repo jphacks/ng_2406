@@ -5,7 +5,6 @@ import {
     Typography,
     Box
 } from '@mui/material';
-import PastDiariesPopover from './PastDiariesPopover';
 import logoImage from '../images/logo.png';
 
 const Header = ({ pastDiaries, onDiarySelect }) => {
@@ -23,7 +22,6 @@ const Header = ({ pastDiaries, onDiarySelect }) => {
                             cursor: 'pointer'
                         }} onClick={handleLogoClick} />
                     </Typography>
-                    <PastDiariesPopover pastDiaries={pastDiaries} onDiarySelect={onDiarySelect} />
                 </Box>
             </Toolbar>
         </AppBar>

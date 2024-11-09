@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Box, Paper, Avatar, Typography, IconButton, Tooltip, Snackbar } from '@mui/material';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Box, Paper, Avatar, Typography, IconButton, Tooltip, Snackbar, CircularProgress } from '@mui/material';
 import shareIcon from '../images/share.png';
 import grandmaImage from '../images/grandma.png';
 
-const ResponseList = ({ actions, feedbacks, diaryUrl }) => {
+const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo }) => {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [tooltipText, setTooltipText] = useState("大切な人に共有");
 
@@ -37,17 +37,24 @@ const ResponseList = ({ actions, feedbacks, diaryUrl }) => {
 
     return (
         <Box>
-            {feedbacks.map((feedback, index) => (
+            {actions.map((action, index) => (
                 <Paper key={index} elevation={3} sx={{ my: 2, p: 2 }}>
-                    <Box display="flex" alignItems="center">
-                        <Avatar src={grandmaImage} alt="おばあ" sx={{ mr: 2 }} />
-                        <Typography variant="h6">{feedback.action}</Typography>
-                    </Box>
-                    <Typography variant="body1" sx={{ mt: 1 }}>
-                        {feedback.feedback}
-                    </Typography>
+                    <Typography variant="h6">{action}</Typography>
+                    {feedbacks[index] ? (
+                        <Typography>{feedbacks[index].feedback}</Typography>
+                    ) : (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <CircularProgress size={20} sx={{ mr: 1 }} />
+                            <Typography>フィードバックを読み込み中...</Typography>
+                        </Box>
+                    )}
                 </Paper>
             ))}
+            {isLoadingAdditionalInfo && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                    <CircularProgress />
+                </Box>
+            )}
             <Tooltip title={tooltipText}>
                 <IconButton onClick={handleShare}>
                     <img src={shareIcon} alt="共有" style={{ width: 24, height: 24 }} />

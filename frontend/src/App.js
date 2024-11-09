@@ -18,24 +18,7 @@ function App() {
   const [grandmaState, setGrandmaState] = useState('initial');
   const [diaryId, setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
-
-  useEffect(() => {
-    const fetchDiaries = async () => {
-      try {
-        const response = await fetch('/api/get_diaries');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setPastDiaries(data.diaries);
-        console.log('取得した日記:', data);
-      } catch (error) {
-        console.error('日記の取得に失敗しました:', error);
-        setPastDiaries([]);
-      }
-    };
-    fetchDiaries();
-  }, []);
+  const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -46,7 +29,7 @@ function App() {
     setIsSubmitted(true);
 
     try {
-      // 行動を抽出
+      // 最初に/api/extract-actionsの結果を取得して表示
       const extractResponse = await fetch('/api/extract-actions', {
         method: 'POST',
         headers: {
@@ -64,8 +47,12 @@ function App() {
       setDiaryId(extractData.diary_id);
       setDiaryUrl(extractData.diary_url);
       setGrandmaState('waiting');
+      setIsLoading(false);
 
-      // 天気に関するフィードバックを取得
+      // 追加情報の取得を開始
+      setIsLoadingAdditionalInfo(true);
+
+      // 天気情報の取得
       const weatherResponse = await fetch('/api/weather-feedback', {
         method: 'POST',
         headers: {
@@ -81,7 +68,7 @@ function App() {
         }
       }
 
-      // 各行動に対してフィードバックを取得
+      // アクションごとのフィードバックの取得
       const feedbackPromises = extractData.actions.map(action =>
         fetch('/api/action-feedback', {
           method: 'POST',
@@ -99,44 +86,14 @@ function App() {
       console.error('Error:', error);
       setGrandmaState('error');
     } finally {
-      setIsLoading(false);
+      setIsLoadingAdditionalInfo(false);
     }
   }, [query]);
 
-  const handlePastDiary = useCallback(async (diaryUrl) => {
-    setGrandmaState('loading');
-    setIsLoading(true);
-    setActions([]);
-    setFeedbacks([]);
-    setIsSubmitted(true);
-
-    try {
-      const response = await fetch(`/api/get/diary/${diaryUrl}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setQuery(data.schedule);
-      setActions(data.actions.map(action => action.action));
-      setFeedbacks(data.actions);
-      setGrandmaState('pastResponse');
-    } catch (error) {
-      console.error('Error:', error);
-      setGrandmaState('error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const handleDiarySelect = (diaryUrl, schedule) => {
-    setQuery(schedule);
-    handlePastDiary(diaryUrl);
-  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header pastDiaries={pastDiaries} onDiarySelect={handleDiarySelect} />
+      <Header />
       <Box
         sx={{
           flexGrow: 1,
@@ -166,7 +123,12 @@ function App() {
             />
             {isLoading && <LoadingIndicator />}
             {isSubmitted && !isLoading && actions.length > 0 && (
-              <ResponseList actions={actions} feedbacks={feedbacks} diaryUrl={diaryUrl} />
+              <ResponseList
+                actions={actions}
+                feedbacks={feedbacks}
+                diaryUrl={diaryUrl}
+                isLoadingAdditionalInfo={isLoadingAdditionalInfo}
+              />
             )}
           </Box>
         </Container>
@@ -174,5 +136,4 @@ function App() {
     </Box>
   );
 }
-
 export default App;
