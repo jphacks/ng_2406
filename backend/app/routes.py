@@ -55,7 +55,7 @@ def extract_actions():
         return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
 
 
-# ユーザーの予定から行動を抽出するAPI
+# Googleカレンダーの予定から行動を抽出するAPI
 @api.route('/extract-actions-from-calendar', methods=['POST'])
 def extract_actions_from_calendar():
     pass
@@ -111,6 +111,7 @@ def action_feedback():
         return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
 
 
+# カレンダーにフィードバックを追加するAPI
 @api.route('add-feedback-to-calendar', methods=['PUT'])
 def add_feedback_to_calendar():
     pass
