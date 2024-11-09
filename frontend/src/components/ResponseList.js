@@ -1,15 +1,49 @@
-import React from 'react';
-import { Box, Paper, Avatar, Typography, IconButton, Tooltip } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Paper, Avatar, Typography, IconButton, Tooltip, Snackbar } from '@mui/material';
 import shareIcon from '../images/share.png';
 import grandmaImage from '../images/grandma.png';
 
-const ResponseList = ({ aiResponses }) => {
+const ResponseList = ({ }) => {
+    //const ResponseList = ({ aiResponses }) => {
+
+    let aiResponses = {
+
+        "actions": ["図書館に行った", "論理学の課題をやった"],
+        "diary_id": "fasiFKja"
+
+    }
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [tooltipText, setTooltipText] = useState("大切な人に共有");
+
+
+
     if (!aiResponses || aiResponses.length === 0) {
         return null;
     }
 
     const handleShare = () => {
-        console.log('共有ボタンがクリックされました');
+        const textToCopy = aiResponses.map(response =>
+            `${response.actions}\n${response.actions}`
+        ).join('\n\n');
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            setOpenSnackbar(true);
+            setTooltipText("コピー完了！");
+            console.log('テキストがクリップボードにコピーされました');
+
+            setTimeout(() => {
+                setTooltipText("大切な人に共有！");
+            }, 3000);
+        }, (err) => {
+            console.error('クリップボードへのコピーに失敗しました', err);
+        });
+    };
+
+    const handleCloseSnackbar = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpenSnackbar(false);
     };
 
     return (
@@ -41,7 +75,7 @@ const ResponseList = ({ aiResponses }) => {
             ))}
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 2 }}>
                 <Tooltip
-                    title="大切な人に共有！"
+                    title={tooltipText}
                     open={true}
                     placement="right"
                     arrow
