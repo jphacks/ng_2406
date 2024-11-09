@@ -18,4 +18,4 @@ class Feedback(db.Model):
     diary_id = db.Column(db.Integer, db.ForeignKey('diary.id', ondelete='CASCADE'), nullable=False)
     face = db.Column(db.Integer, nullable=False)
     action = db.Column(db.Text)
-    feedback = db.Column(db.Text)
+    action_feedback = db.Column(db.Text)
