@@ -76,7 +76,7 @@ def weather_feedback():
                 diary_id=diary_id,
                 face=response['face'],
                 action=response['action'],
-                feedback=response['feedback']
+                action_feedback=response['feedback']
             )
             db.session.add(feedback)
             db.session.commit()
@@ -101,7 +101,7 @@ def action_feedback():
             diary_id=diary_id,
             face=response['face'],
             action=response['action'],
-            feedback=response['feedback']
+            action_feedback=response['feedback']
         )
         db.session.add(feedback)
         db.session.commit()
@@ -137,7 +137,7 @@ def get_feedbacks(diary_url):
             {
                 'face': feedback.face,
                 'action': feedback.action,
-                'feedback': feedback.feedback,
+                'feedback': feedback.action_feedback,
             }
             for feedback in feedbacks
         ]
