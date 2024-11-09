@@ -5,6 +5,7 @@ from . import bcrypt
 from flask_jwt_extended import create_access_token, jwt_required
 from datetime import datetime
 from app.gemini_api import GeminiAPI
+from app.google_calendar_api.calendar_api import CalendarAPI
 import random
 import string
 from hashids import Hashids
@@ -12,6 +13,7 @@ from hashids import Hashids
 
 api = Blueprint('api', __name__)
 gemini = GeminiAPI()
+calendar = CalendarAPI()
 
 
 # diary idをURLに使用する10桁のハッシュ値に変換する
@@ -58,7 +60,13 @@ def extract_actions():
 # Googleカレンダーの予定から行動を抽出するAPI
 @api.route('/extract-actions-from-calendar', methods=['POST'])
 def extract_actions_from_calendar():
-    pass
+    try:
+        # 認証情報はフロントで取得される
+        # request_data = request.get_json()
+        response = calendar.get_events()
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
 
 
 # 天気に関するフィードバックを生成するAPI
@@ -112,9 +120,15 @@ def action_feedback():
 
 
 # カレンダーにフィードバックを追加するAPI
-@api.route('add-feedback-to-calendar', methods=['PUT'])
+@api.route('/add-feedback-to-calendar', methods=['PUT'])
 def add_feedback_to_calendar():
-    pass
+    try:
+        request_data = request.get_json()
+        events = request_data.get('events')
+        calendar.add_feedback_to_event(events)
+        return jsonify({'message': "カレンダーへの登録に成功しました"}), 200
+    except Exception as e:
+        return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
 
 
 # 指定されたIDに対応する日記を取得するAPI
