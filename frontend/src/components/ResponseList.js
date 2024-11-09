@@ -4,7 +4,6 @@ import shareIcon from '../images/share.png';
 import grandmaImage from '../images/grandma.png';
 
 const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo }) => {
-    const [openSnackbar, setOpenSnackbar] = useState(false);
     const [tooltipText, setTooltipText] = useState("大切な人に共有");
 
     if (!actions || actions.length === 0) {
@@ -12,10 +11,9 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo })
     }
 
     const handleShare = () => {
-        const urlToCopy = `${window.location.origin}?${diaryUrl}`;
+        const urlToCopy = `${window.location.origin}?diary=${diaryUrl}`;
 
         navigator.clipboard.writeText(urlToCopy).then(() => {
-            setOpenSnackbar(true);
             setTooltipText("コピー完了！");
             console.log('URLがクリップボードにコピーされました');
             setTimeout(() => {
@@ -26,15 +24,14 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo })
         });
     };
 
-    const handleCloseSnackbar = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setOpenSnackbar(false);
-    };
 
     return (
         <Box sx={{ width: '100%', mt: 2 }}>
+            <Tooltip title={tooltipText} placement="right" arrow open={true} >
+                <IconButton onClick={handleShare}>
+                    <img src={shareIcon} alt="共有" style={{ width: 24, height: 24 }} />
+                </IconButton>
+            </Tooltip>
             {actions.map((action, index) => (
                 <Paper key={index} elevation={3} sx={{ p: 2, mt: 2, width: '100%', bgcolor: '#e9e9e9' }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
@@ -72,17 +69,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo })
                     <CircularProgress />
                 </Box>
             )}
-            <Tooltip title={tooltipText}>
-                <IconButton onClick={handleShare}>
-                    <img src={shareIcon} alt="共有" style={{ width: 24, height: 24 }} />
-                </IconButton>
-            </Tooltip>
-            <Snackbar
-                open={openSnackbar}
-                autoHideDuration={3000}
-                onClose={handleCloseSnackbar}
-                message="テキストがクリップボードにコピーされました"
-            />
+            
         </Box>
     );
 };

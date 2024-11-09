@@ -14,11 +14,41 @@ function App() {
   const [actions, setActions] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [pastDiaries, setPastDiaries] = useState([]);
   const [grandmaState, setGrandmaState] = useState('initial');
   const [diaryId, setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
   const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const diaryParam = urlParams.get('diary');
+    if (diaryParam) {
+      fetchDiary(diaryParam);
+    }
+  }, []);
+
+  const fetchDiary = async (diaryUrl) => {
+    setIsLoading(true);
+    setGrandmaState('loading');
+    try {
+      const response = await fetch(`/api/get/diary/${diaryUrl}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setQuery(data.schedule);
+      setActions(data.actions.map(action => action.action));
+      setFeedbacks(data.actions);
+      setDiaryUrl(diaryUrl);
+      setIsSubmitted(true);
+      setGrandmaState('waiting');
+    } catch (error) {
+      console.error('Error fetching diary:', error);
+      setGrandmaState('error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -49,25 +79,6 @@ function App() {
       setGrandmaState('waiting');
       setIsLoading(false);
 
-      // 追加情報の取得を開始
-      setIsLoadingAdditionalInfo(true);
-
-      // 天気情報の取得
-      const weatherResponse = await fetch('/api/weather-feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ schedule: query, character: 1, diary_id: extractData.diary_id })
-      });
-
-      if (weatherResponse.ok) {
-        const weatherData = await weatherResponse.json();
-        if (weatherData.is_used) {
-          setFeedbacks(prevFeedbacks => [...prevFeedbacks, weatherData]);
-        }
-      }
-
       // アクションごとのフィードバックの取得
       const feedbackPromises = extractData.actions.map(action =>
         fetch('/api/action-feedback', {
@@ -89,7 +100,6 @@ function App() {
       setIsLoadingAdditionalInfo(false);
     }
   }, [query]);
-
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
