@@ -1,11 +1,16 @@
 import React from 'react';
-import { Box, Paper, Avatar, Typography } from '@mui/material';
+import { Box, Paper, Avatar, Typography, IconButton, Tooltip } from '@mui/material';
+import shareIcon from '../images/share.png';
 import grandmaImage from '../images/grandma.png';
 
 const ResponseList = ({ aiResponses }) => {
     if (!aiResponses || aiResponses.length === 0) {
         return null;
     }
+
+    const handleShare = () => {
+        console.log('共有ボタンがクリックされました');
+    };
 
     return (
         <Box sx={{ width: '100%', mt: 2 }}>
@@ -34,6 +39,54 @@ const ResponseList = ({ aiResponses }) => {
                     </Box>
                 </Paper>
             ))}
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 2 }}>
+                <Tooltip
+                    title="大切な人に共有！"
+                    open={true}
+                    placement="right"
+                    arrow
+                    sx={{
+                        alignItems: 'center',
+                        '& .MuiTooltip-tooltip': {
+                            backgroundColor: 'white',
+                            color: 'black',
+                            border: '2px solid black',
+                            borderRadius: '15px',
+                            padding: '8px 12px',
+                            fontSize: '1rem',
+                            fontWeight: 'bold',
+                        },
+                        '& .MuiTooltip-arrow': {
+                            color: 'white',
+                            '&::before': {
+                                border: '2px solid black',
+                                backgroundColor: 'white',
+                            },
+                        },
+                    }}
+                >
+                    <IconButton
+                        onClick={handleShare}
+                        sx={{
+                            width: 32,
+                            height: 32,
+                            padding: 0,
+                            bgcolor: 'transparent',
+                            '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' },
+                        }}
+                    >
+                        <img
+                            src={shareIcon}
+                            alt="共有"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                            }}
+                        />
+                    </IconButton>
+                </Tooltip>
+            </Box>
         </Box>
     );
 };
