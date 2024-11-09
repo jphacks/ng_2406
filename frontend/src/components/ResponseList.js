@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, Paper, Avatar, Typography, IconButton, Tooltip, Snackbar, CircularProgress } from '@mui/material';
 import shareIcon from '../images/share.png';
 import grandmaImage from '../images/grandma.png';
@@ -12,14 +12,12 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo })
     }
 
     const handleShare = () => {
-        const textToCopy = `日記URL: ${window.location.origin}/diary/${diaryUrl}\n\n` +
-            feedbacks.map(feedback =>
-                `${feedback.action}\n${feedback.feedback}`
-            ).join('\n\n');
-        navigator.clipboard.writeText(textToCopy).then(() => {
+        const urlToCopy = `${window.location.origin}?${diaryUrl}`;
+
+        navigator.clipboard.writeText(urlToCopy).then(() => {
             setOpenSnackbar(true);
             setTooltipText("コピー完了！");
-            console.log('テキストがクリップボードにコピーされました');
+            console.log('URLがクリップボードにコピーされました');
             setTimeout(() => {
                 setTooltipText("大切な人に共有！");
             }, 3000);
@@ -36,18 +34,37 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo })
     };
 
     return (
-        <Box>
+        <Box sx={{ width: '100%', mt: 2 }}>
             {actions.map((action, index) => (
-                <Paper key={index} elevation={3} sx={{ my: 2, p: 2 }}>
-                    <Typography variant="h6">{action}</Typography>
-                    {feedbacks[index] ? (
-                        <Typography>{feedbacks[index].feedback}</Typography>
-                    ) : (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <CircularProgress size={20} sx={{ mr: 1 }} />
-                            <Typography>フィードバックを読み込み中...</Typography>
+                <Paper key={index} elevation={3} sx={{ p: 2, mt: 2, width: '100%', bgcolor: '#e9e9e9' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                        <Avatar
+                            sx={{
+                                bgcolor: feedbacks[index]?.face === 0 ? 'blue' :
+                                    feedbacks[index]?.face === 1 ? 'orange' :
+                                        feedbacks[index]?.face === 2 ? 'red' :
+                                            feedbacks[index]?.face === 3 ? "black" : 'blue',
+                                mr: 2,
+                                width: 56,
+                                height: 56
+                            }}
+                            src={grandmaImage}
+                            alt="おばあちゃん"
+                        >
+                            おばあ
+                        </Avatar>
+                        <Box>
+                            <Typography className="yuji-mai-regular" variant="h6">{action}</Typography>
+                            {feedbacks[index] ? (
+                                <Typography className="yuji-mai-regular" variant="body1">{feedbacks[index].feedback}</Typography>
+                            ) : (
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                                    <Typography className="yuji-mai-regular">フィードバックを読み込み中...</Typography>
+                                </Box>
+                            )}
                         </Box>
-                    )}
+                    </Box>
                 </Paper>
             ))}
             {isLoadingAdditionalInfo && (
