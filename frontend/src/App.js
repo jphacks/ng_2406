@@ -11,10 +11,13 @@ import dialogs from './data/dialogs.json';
 function App() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [aiResponses, setAiResponses] = useState([]);
+  const [actions, setActions] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [pastDiaries, setPastDiaries] = useState([]);
   const [grandmaState, setGrandmaState] = useState('initial');
+  const [diaryId, setDiaryId] = useState(null);
+  const [diaryUrl, setDiaryUrl] = useState(null);
 
   useEffect(() => {
     const fetchDiaries = async () => {
@@ -38,27 +41,60 @@ function App() {
     event.preventDefault();
     setGrandmaState('loading');
     setIsLoading(true);
-    setAiResponses([]);
+    setActions([]);
+    setFeedbacks([]);
     setIsSubmitted(true);
+
     try {
-      const response = await fetch('/api/feedback', {
+      // 行動を抽出
+      const extractResponse = await fetch('/api/extract-actions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ action: query })
+        body: JSON.stringify({ schedule: query })
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+      if (!extractResponse.ok) {
+        throw new Error(`HTTP error! status: ${extractResponse.status}`);
       }
-      const data = await response.json();
-      if (data.message) {
-        console.error('サーバーエラー:', data.message);
-        setGrandmaState('error');
-      } else {
-        setAiResponses(data.data);
-        setGrandmaState('waiting');
+
+      const extractData = await extractResponse.json();
+      setActions(extractData.actions);
+      setDiaryId(extractData.diary_id);
+      setDiaryUrl(extractData.diary_url);
+      setGrandmaState('waiting');
+
+      // 天気に関するフィードバックを取得
+      const weatherResponse = await fetch('/api/weather-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ schedule: query, character: 1, diary_id: extractData.diary_id })
+      });
+
+      if (weatherResponse.ok) {
+        const weatherData = await weatherResponse.json();
+        if (weatherData.is_used) {
+          setFeedbacks(prevFeedbacks => [...prevFeedbacks, weatherData]);
+        }
       }
+
+      // 各行動に対してフィードバックを取得
+      const feedbackPromises = extractData.actions.map(action =>
+        fetch('/api/action-feedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ action: action, schedule: query, character: 1, diary_id: extractData.diary_id })
+        }).then(res => res.json())
+      );
+
+      const feedbackResults = await Promise.all(feedbackPromises);
+      setFeedbacks(prevFeedbacks => [...prevFeedbacks, ...feedbackResults]);
+
     } catch (error) {
       console.error('Error:', error);
       setGrandmaState('error');
@@ -67,31 +103,24 @@ function App() {
     }
   }, [query]);
 
-  const handlePastId = useCallback(async (diaryId) => {
+  const handlePastDiary = useCallback(async (diaryUrl) => {
     setGrandmaState('loading');
     setIsLoading(true);
-    setAiResponses([]);
+    setActions([]);
+    setFeedbacks([]);
     setIsSubmitted(true);
+
     try {
-      const response = await fetch('/api/get_feedbacks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ diary_id: diaryId })
-      });
+      const response = await fetch(`/api/get/diary/${diaryUrl}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       const data = await response.json();
-      if (data.message) {
-        console.error('サーバーエラー:', data.message);
-        setGrandmaState('error');
-      } else {
-        setQuery(data.action);
-        setAiResponses(data.data);
-        setGrandmaState('pastResponse');
-      }
+      setQuery(data.schedule);
+      setActions(data.actions.map(action => action.action));
+      setFeedbacks(data.actions);
+      setGrandmaState('pastResponse');
     } catch (error) {
       console.error('Error:', error);
       setGrandmaState('error');
@@ -100,10 +129,11 @@ function App() {
     }
   }, []);
 
-  const handleDiarySelect = (id, action) => {
-    setQuery(action);
-    handlePastId(id);
+  const handleDiarySelect = (diaryUrl, schedule) => {
+    setQuery(schedule);
+    handlePastDiary(diaryUrl);
   };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header pastDiaries={pastDiaries} onDiarySelect={handleDiarySelect} />
@@ -135,8 +165,8 @@ function App() {
               isLoading={isLoading}
             />
             {isLoading && <LoadingIndicator />}
-            {isSubmitted && !isLoading && aiResponses && aiResponses.length > 0 && (
-              <ResponseList aiResponses={aiResponses} />
+            {isSubmitted && !isLoading && actions.length > 0 && (
+              <ResponseList actions={actions} feedbacks={feedbacks} diaryUrl={diaryUrl} />
             )}
           </Box>
         </Container>

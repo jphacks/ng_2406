@@ -3,34 +3,23 @@ import { Box, Paper, Avatar, Typography, IconButton, Tooltip, Snackbar } from '@
 import shareIcon from '../images/share.png';
 import grandmaImage from '../images/grandma.png';
 
-const ResponseList = ({ }) => {
-    //const ResponseList = ({ aiResponses }) => {
-
-    let aiResponses = {
-
-        "actions": ["図書館に行った", "論理学の課題をやった"],
-        "diary_id": "fasiFKja"
-
-    }
+const ResponseList = ({ actions, feedbacks, diaryUrl }) => {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [tooltipText, setTooltipText] = useState("大切な人に共有");
 
-
-
-    if (!aiResponses || aiResponses.length === 0) {
+    if (!actions || actions.length === 0) {
         return null;
     }
 
     const handleShare = () => {
-        const textToCopy = aiResponses.map(response =>
-            `${response.actions}\n${response.actions}`
-        ).join('\n\n');
-
+        const textToCopy = `日記URL: ${window.location.origin}/diary/${diaryUrl}\n\n` +
+            feedbacks.map(feedback =>
+                `${feedback.action}\n${feedback.feedback}`
+            ).join('\n\n');
         navigator.clipboard.writeText(textToCopy).then(() => {
             setOpenSnackbar(true);
             setTooltipText("コピー完了！");
             console.log('テキストがクリップボードにコピーされました');
-
             setTimeout(() => {
                 setTooltipText("大切な人に共有！");
             }, 3000);
@@ -47,80 +36,29 @@ const ResponseList = ({ }) => {
     };
 
     return (
-        <Box sx={{ width: '100%', mt: 2 }}>
-            {aiResponses.map((response, index) => (
-                <Paper key={index} elevation={3} sx={{ p: 2, mt: 2, width: '100%', bgcolor: '#e9e9e9' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                        <Avatar
-                            sx={{
-                                bgcolor: response.face === 0 ? 'blue' :
-                                    response.face === 1 ? 'orange' :
-                                        response.face === 2 ? 'red' :
-                                            response.face === 3 ? "black" : 'blue',
-                                mr: 2,
-                                width: 56,
-                                height: 56
-                            }}
-                            src={grandmaImage}
-                            alt="おばあちゃん"
-                        >
-                            おばあ
-                        </Avatar>
-                        <Box>
-                            <Typography className="yuji-mai-regular" variant="h6">{response.title}</Typography>
-                            <Typography className="yuji-mai-regular" variant="body1">{response.description}</Typography>
-                        </Box>
+        <Box>
+            {feedbacks.map((feedback, index) => (
+                <Paper key={index} elevation={3} sx={{ my: 2, p: 2 }}>
+                    <Box display="flex" alignItems="center">
+                        <Avatar src={grandmaImage} alt="おばあ" sx={{ mr: 2 }} />
+                        <Typography variant="h6">{feedback.action}</Typography>
                     </Box>
+                    <Typography variant="body1" sx={{ mt: 1 }}>
+                        {feedback.feedback}
+                    </Typography>
                 </Paper>
             ))}
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 2 }}>
-                <Tooltip
-                    title={tooltipText}
-                    open={true}
-                    placement="right"
-                    arrow
-                    sx={{
-                        alignItems: 'center',
-                        '& .MuiTooltip-tooltip': {
-                            backgroundColor: 'white',
-                            color: 'black',
-                            border: '2px solid black',
-                            borderRadius: '15px',
-                            padding: '8px 12px',
-                            fontSize: '1rem',
-                            fontWeight: 'bold',
-                        },
-                        '& .MuiTooltip-arrow': {
-                            color: 'white',
-                            '&::before': {
-                                border: '2px solid black',
-                                backgroundColor: 'white',
-                            },
-                        },
-                    }}
-                >
-                    <IconButton
-                        onClick={handleShare}
-                        sx={{
-                            width: 32,
-                            height: 32,
-                            padding: 0,
-                            bgcolor: 'transparent',
-                            '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' },
-                        }}
-                    >
-                        <img
-                            src={shareIcon}
-                            alt="共有"
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain',
-                            }}
-                        />
-                    </IconButton>
-                </Tooltip>
-            </Box>
+            <Tooltip title={tooltipText}>
+                <IconButton onClick={handleShare}>
+                    <img src={shareIcon} alt="共有" style={{ width: 24, height: 24 }} />
+                </IconButton>
+            </Tooltip>
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={3000}
+                onClose={handleCloseSnackbar}
+                message="テキストがクリップボードにコピーされました"
+            />
         </Box>
     );
 };
