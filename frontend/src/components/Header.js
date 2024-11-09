@@ -6,20 +6,18 @@ import {
     Box,
     Button
 } from '@mui/material';
-import PastDiariesPopover from './PastDiariesPopover';
-import GoogleCalendarService from './GoogleCalendarService';
+import { useNavigate, useLocation } from 'react-router-dom';
 import logoImage from '../images/logo.png';
 
-const Header = ({ pastDiaries, onDiarySelect, onCalendarEvents }) => {
-    const [isSignedIn, setIsSignedIn] = useState(false);
+const Header = () => {
 
-    useEffect(() => {
-        GoogleCalendarService.loadGapiAndInitClient().then(() => {
-            setIsSignedIn(GoogleCalendarService.isSignedIn);
-        });
-    }, []);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const handleLogoClick = () => {
+        if (location.pathname !== '/' || location.search !== '') {
+            navigate('/', { replace: true });
+        }
         window.location.reload();
     };
 
