@@ -5,12 +5,11 @@ import {
     Typography,
     Box
 } from '@mui/material';
-import PastDiariesPopover from './PastDiariesPopover';
+import { useNavigate, useLocation } from 'react-router-dom';
 import logoImage from '../images/logo.png';
 import otnImage from '../images/otn-logo.png';
 import oneImage from '../images/one-logo.png';
 import wnkImage from '../images/wnk-logo.png';
-
 
 const logoOptions = [
     { src: logoImage, alt: '安心打診おばあ' },
@@ -19,11 +18,17 @@ const logoOptions = [
     { src: wnkImage, alt: '安心打診わんこ' },
 ];
 
-
 const Header = ({ pastDiaries, onDiarySelect, character }) => {
+
+    const navigate = useNavigate();
+    const location = useLocation();
     const handleLogoClick = () => {
+        if (location.pathname !== '/' || location.search !== '') {
+            navigate('/', { replace: true });
+        }
         window.location.reload();
     };
+
     return (
         <AppBar position="fixed" color="default" elevation={2} sx={{ width: '100%' }}>
             <Toolbar>
@@ -36,7 +41,6 @@ const Header = ({ pastDiaries, onDiarySelect, character }) => {
                                 cursor: 'pointer'
                             }} onClick={handleLogoClick} />
                     </Typography>
-                    <PastDiariesPopover pastDiaries={pastDiaries} onDiarySelect={onDiarySelect} />
                 </Box>
             </Toolbar>
         </AppBar>

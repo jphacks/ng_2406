@@ -6,6 +6,7 @@ import QueryInput from './components/QueryInput';
 import GrandmaText from './components/GrandmaText';
 import LoadingIndicator from './components/LoadingIndicator';
 import ResponseList from './components/ResponseList';
+import dialogs from './data/dialogs.json';
 
 import logoImage from './images/logo.png';
 import otnLogoImage from './images/otn-logo.png';
@@ -13,9 +14,9 @@ import otnLogoImage from './images/otn-logo.png';
 function App() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [aiResponses, setAiResponses] = useState([]);
+  const [actions, setActions] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [pastDiaries, setPastDiaries] = useState([]);
   const [character, setCharacter] = useState(0);
 
   const backgroundColors = [
@@ -32,26 +33,21 @@ function App() {
   };
 
 
+  const [grandmaState, setGrandmaState] = useState('initial');
+  const [diaryId, setDiaryId] = useState(null);
+  const [diaryUrl, setDiaryUrl] = useState(null);
+  const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
+
+
   useEffect(() => {
-    const fetchDiaries = async () => {
-      try {
-        const response = await fetch('/api/get_diaries');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setPastDiaries(data.diaries);
-        console.log('取得した日記:', data);
-      } catch (error) {
-        console.error('日記の取得に失敗しました:', error);
-        setPastDiaries([]);
-      }
-    };
-    fetchDiaries();
+    const urlParams = new URLSearchParams(window.location.search);
+    const diaryParam = urlParams.get('diary');
+    if (diaryParam) {
+      fetchDiary(diaryParam);
+    }
   }, []);
 
-  const handleSubmit = useCallback(async (event) => {
-    event.preventDefault();
+  const fetchDiary = async (diaryUrl) => {
     setIsLoading(true);
     setAiResponses([]);
     setIsSubmitted(true);
@@ -69,56 +65,71 @@ function App() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
-      if (data.message) {
-        console.error('サーバーエラー:', data.message);
-      } else {
-        setAiResponses(data.data);
-      }
+      setQuery(data.schedule);
+      setActions(data.actions.map(action => action.action));
+      setFeedbacks(data.actions);
+      setDiaryUrl(diaryUrl);
+      setIsSubmitted(true);
+      setGrandmaState('waiting');
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error fetching diary:', error);
+      setGrandmaState('error');
     } finally {
       setIsLoading(false);
     }
   }, [query, character]);
 
-  const handlePastId = useCallback(async (diaryId) => {
+  const handleSubmit = useCallback(async (event) => {
+    event.preventDefault();
+    setGrandmaState('loading');
     setIsLoading(true);
-    setAiResponses([]);
+    setActions([]);
+    setFeedbacks([]);
     setIsSubmitted(true);
 
     try {
-      const response = await fetch('/api/get_feedbacks', {
+      // 最初に/api/extract-actionsの結果を取得して表示
+      const extractResponse = await fetch('/api/extract-actions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ diary_id: diaryId })
+        body: JSON.stringify({ schedule: query })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!extractResponse.ok) {
+        throw new Error(`HTTP error! status: ${extractResponse.status}`);
       }
 
-      const data = await response.json();
-      if (data.message) {
-        console.error('サーバーエラー:', data.message);
-      } else {
-        setQuery(data.action);
-        setAiResponses(data.data);
-      }
+      const extractData = await extractResponse.json();
+      setActions(extractData.actions);
+      setDiaryId(extractData.diary_id);
+      setDiaryUrl(extractData.diary_url);
+      setGrandmaState('waiting');
+      setIsLoading(false);
+
+      // アクションごとのフィードバックの取得
+      const feedbackPromises = extractData.actions.map(action =>
+        fetch('/api/action-feedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ action: action, schedule: query, character: 1, diary_id: extractData.diary_id })
+        }).then(res => res.json())
+      );
+
+      const feedbackResults = await Promise.all(feedbackPromises);
+      setFeedbacks(prevFeedbacks => [...prevFeedbacks, ...feedbackResults]);
+
     } catch (error) {
       console.error('Error:', error);
+      setGrandmaState('error');
     } finally {
-      setIsLoading(false);
+      setIsLoadingAdditionalInfo(false);
     }
-  }, []);
-
-  const handleDiarySelect = (id, action) => {
-    setQuery(action);
-    handlePastId(id);
-  };
+  }, [query]);
 
   return (
     <Box sx={{
@@ -153,15 +164,23 @@ function App() {
               transition: 'all 0.3s ease-in-out',
             }}
           >
-            <GrandmaText
-              isResponseDisplayed={isSubmitted && !isLoading && aiResponses.length > 0}
-              onCharacterChange={handleCharacterChange}
-              character={character}
+            <GrandmaText text={dialogs.grandma[grandmaState]} onCharacterChange={handleCharacterChange}
+              character={character} />
+            <QueryInput
+              query={query}
+              setQuery={setQuery}
+              onSubmit={handleSubmit}
+              isLoading={isLoading}
             />
             <QueryInput query={query} setQuery={setQuery} onSubmit={handleSubmit} character={character} />
             {isLoading && <LoadingIndicator />}
-            {isSubmitted && !isLoading && aiResponses && aiResponses.length > 0 && (
-              <ResponseList aiResponses={aiResponses} />
+            {isSubmitted && !isLoading && actions.length > 0 && (
+              <ResponseList
+                actions={actions}
+                feedbacks={feedbacks}
+                diaryUrl={diaryUrl}
+                isLoadingAdditionalInfo={isLoadingAdditionalInfo}
+              />
             )}
           </Box>
         </Container>
@@ -169,5 +188,4 @@ function App() {
     </Box>
   );
 }
-
 export default App;

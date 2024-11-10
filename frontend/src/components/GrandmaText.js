@@ -20,7 +20,14 @@ const GrandmaText = ({ isResponseDisplayed, onCharacterChange, character }) => {
     ];
 
     return (
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+        <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            overflow: 'hidden',
+            mt: 2
+        }}>
             <Box
                 sx={{
                     position: 'relative',
@@ -68,9 +75,19 @@ const GrandmaText = ({ isResponseDisplayed, onCharacterChange, character }) => {
                     src={imageOptions[character].src}
                 />
             </Box>
-            <Typography variant="h4" component="h1">
-                「今日の予定を教えておくれ」
-            </Typography>
+        <Typography
+            variant="h5"
+            component="div"
+            sx={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: '100%',
+                fontFamily: '"Zen Maru Gothic", sans-serif',
+            }}
+        >
+            「{text}」
+        </Typography>
             <Modal
                 open={open}
                 onClose={handleClose}
