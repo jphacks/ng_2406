@@ -8,16 +8,36 @@ import LoadingIndicator from './components/LoadingIndicator';
 import ResponseList from './components/ResponseList';
 import dialogs from './data/dialogs.json';
 
+import logoImage from './images/logo.png';
+import otnLogoImage from './images/otn-logo.png';
+
 function App() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [actions, setActions] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [character, setCharacter] = useState(0);
+
+  const backgroundColors = [
+    '#F5F5F5',// おばあ
+    '#E6F3FF',// おとん
+    '#F0FFE6',// おねえ
+    '#FFE6E6'// わんこ
+  ];
+
+
+  const handleCharacterChange = (index) => {
+    setCharacter(index);
+    console.log(`選択されたキャラクター: ${index}`);
+  };
+
+
   const [grandmaState, setGrandmaState] = useState('initial');
   const [diaryId, setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
   const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
+
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -29,9 +49,19 @@ function App() {
 
   const fetchDiary = async (diaryUrl) => {
     setIsLoading(true);
-    setGrandmaState('loading');
+    setAiResponses([]);
+    setIsSubmitted(true);
+    const requestBody = { action: query, character };
+    console.log('サーバーに送信するデータ:', requestBody);
+
     try {
-      const response = await fetch(`/api/get/diary/${diaryUrl}`);
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: query, character })
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -48,7 +78,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [query, character]);
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -102,8 +132,18 @@ function App() {
   }, [query]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header />
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      backgroundColor: backgroundColors[character],
+      transition: 'background-color 0.3s ease-in-out'
+    }}>
+      <Header
+        pastDiaries={pastDiaries}
+        onDiarySelect={handleDiarySelect}
+        character={character}
+      />
       <Box
         sx={{
           flexGrow: 1,
@@ -124,13 +164,15 @@ function App() {
               transition: 'all 0.3s ease-in-out',
             }}
           >
-            <GrandmaText text={dialogs.grandma[grandmaState]} />
+            <GrandmaText text={dialogs.grandma[grandmaState]} onCharacterChange={handleCharacterChange}
+              character={character} />
             <QueryInput
               query={query}
               setQuery={setQuery}
               onSubmit={handleSubmit}
               isLoading={isLoading}
             />
+            <QueryInput query={query} setQuery={setQuery} onSubmit={handleSubmit} character={character} />
             {isLoading && <LoadingIndicator />}
             {isSubmitted && !isLoading && actions.length > 0 && (
               <ResponseList

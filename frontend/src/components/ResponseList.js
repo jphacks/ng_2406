@@ -2,9 +2,24 @@ import React, { useState } from 'react';
 import { Box, Paper, Avatar, Typography, IconButton, Tooltip, Snackbar, CircularProgress } from '@mui/material';
 import shareIcon from '../images/share.png';
 import grandmaImage from '../images/grandma.png';
+import otnImage from '../images/otn.png';
+import oneImage from '../images/one.png';
+import wnkImage from '../images/wnk.png';
 
-const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo }) => {
+
+const fontOptions = [
+    "yuji-mai-regular", "reggae-one-regular", "hachi-maru-pop-regular", "zen-antique-regular"
+];
+
+const imageOptions = [
+    grandmaImage, otnImage, oneImage, wnkImage
+];
+
+const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, character }) => {
     const [tooltipText, setTooltipText] = useState("大切な人に共有");
+  
+    const selectedFont = fontOptions[character];
+    const selectedImage = imageOptions[character];
 
     if (!actions || actions.length === 0) {
         return null;
@@ -23,7 +38,6 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo })
             console.error('クリップボードへのコピーに失敗しました', err);
         });
     };
-
 
     return (
         <Box sx={{ width: '100%', mt: 2 }}>
@@ -45,15 +59,15 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo })
                                 width: 56,
                                 height: 56
                             }}
-                            src={grandmaImage}
-                            alt="おばあちゃん"
+                            src={selectedImage}
+                            alt="キャラクター"
                         >
-                            おばあ
+                            キャラ
                         </Avatar>
                         <Box>
-                            <Typography className="yuji-mai-regular" variant="h6">{action}</Typography>
+                            <Typography className={selectedFont} variant="h6">{action}</Typography>
                             {feedbacks[index] ? (
-                                <Typography className="yuji-mai-regular" variant="body1">{feedbacks[index].feedback}</Typography>
+                                <Typography className={selectedFont} variant="body1">{feedbacks[index].feedback}</Typography>
                             ) : (
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                     <CircularProgress size={20} sx={{ mr: 1 }} />
