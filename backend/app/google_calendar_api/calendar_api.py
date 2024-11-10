@@ -6,34 +6,10 @@ import pickle
 
 class CalendarAPI:
     def __init__(self):
-        scopes = ['https://www.googleapis.com/auth/calendar']
-        credentials_path = os.path.join(os.path.dirname(__file__), 'credentials.json')
-        flow = InstalledAppFlow.from_client_secrets_file(credentials_path, scopes)
-        creds = self._get_tokens(scopes, flow)
-        self.service = build('calendar', 'v3', credentials=creds)
+        pass
 
-    def _get_tokens(self, scopes, flow):
-        creds = None
-        # The file token.pickle stores the user's access and refresh tokens, and is
-        # created automatically when the authorization flow completes for the first
-        # time.
-        credentials_path = os.path.join(os.path.dirname(__file__), 'credentials.json')
-        token_path = os.path.join(os.path.dirname(__file__), 'token.pickle')
-
-        if os.path.exists(token_path):
-            with open(token_path, 'rb') as token:
-                creds = pickle.load(token)
-        # If there are no (valid) credentials available, let the user log in.
-        if not creds or not creds.valid:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                credentials_path, scopes)
-            creds = flow.run_local_server()
-            # Save the credentials for the next run
-            with open(token_path, 'wb') as token:
-                pickle.dump(creds, token)
-        return creds
-
-    def get_events(self):
+    def get_events(self, creds):
+        service = build('calendar', 'v3', credentials=creds)
         # タイムゾーン対応の現在の時刻を取得
         now_utc = datetime.now(timezone.utc)
         now_jst = now_utc.astimezone(timezone(timedelta(hours=9)))
@@ -47,7 +23,7 @@ class CalendarAPI:
         time_end_str = time_end.isoformat()
 
         # イベントを取得
-        events_result = self.service.events().list(
+        events_result = service.events().list(
             calendarId='primary',
             timeMin=time_start_str,
             timeMax=time_end_str,
@@ -72,15 +48,16 @@ class CalendarAPI:
         response = {'event_list': event_list}
         return response
 
-    def add_feedback_to_event(self, feedbacks):
+    def add_feedback_to_event(self, feedbacks, creds):
         '''
         カレンダーにフィードバックを追加する
         '''
+        service = build('calendar', 'v3', credentials=creds)
         for feedback in feedbacks:
             event_id = feedback['event_id']
             feedback_text = feedback['feedback']
 
-            self.service.events().patch(
+            service.events().patch(
                 calendarId='primary',
                 eventId=event_id,
                 body={
