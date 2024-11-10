@@ -2,7 +2,7 @@ from flask_cors import CORS
 from flask import Blueprint, request, jsonify
 from .models import Diary, Feedback, db
 from . import bcrypt
-from flask_jwt_extended import create_access_token, jwt_required
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import datetime
 from app.gemini_api import GeminiAPI
 from app.google_calendar_api.calendar_api import CalendarAPI
@@ -11,10 +11,40 @@ import string
 from hashids import Hashids
 
 
+YOUR_GOOGLE_CLIENT_ID = "your-google-client-id"
+
+
 api = Blueprint('api', __name__)
 gemini = GeminiAPI()
 calendar = CalendarAPI()
 
+# Google認証トークンを確認し、JWTを返すエンドポイント
+@app.route('/auth/google', methods=['POST'])
+def auth_google():
+    data = request.get_json()
+    token_id = data.get("tokenId")
+
+    try:
+        # Googleのトークンを検証
+        idinfo = id_token.verify_oauth2_token(token_id, requests.Request(), YOUR_GOOGLE_CLIENT_ID)
+        
+        # トークンが有効であればユーザーIDやメールアドレスを取得
+        user_id = idinfo["sub"]
+        email = idinfo["email"]
+
+        # JWTを発行
+        access_token = create_access_token(identity={"user_id": user_id, "email": email})
+        return jsonify(access_token=access_token), 200
+    except ValueError:
+        # トークンが無効な場合
+        return jsonify({"message": "Invalid token"}), 401
+
+# 認証が必要なエンドポイント
+@app.route('/protected-endpoint', methods=['GET'])
+@jwt_required()
+def protected():
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
 
 # diary idをURLに使用する10桁のハッシュ値に変換する
 def hash_diary_id(diary_id):
@@ -59,12 +89,30 @@ def extract_actions():
 
 # Googleカレンダーの予定から行動を抽出するAPI
 @api.route('/extract-actions-from-calendar', methods=['POST'])
+@jwt_required()  # JWT認証が必要
 def extract_actions_from_calendar():
     try:
-        # 認証情報はフロントで取得される
-        # request_data = request.get_json()
-        response = calendar.get_events()
-        return jsonify(response), 200
+        # JWTトークンからユーザー情報を取得
+        current_user = get_jwt_identity()
+        user_id = current_user["user_id"]  # JWTから取得したuser_idを使用
+
+        # Google OAuth 2.0用の認証情報を取得するためにリクエストを送信
+        # リクエストにはGoogle APIからのアクセストークンが必要です
+        google_token = current_user.get("google_token")  # これはJWTに保存されたGoogleのアクセストークン
+
+        if not google_token:
+            return jsonify({"message": "Google authentication required"}), 401
+
+        # Googleのアクセストークンを検証
+        idinfo = id_token.verify_oauth2_token(google_token, Request(), YOUR_GOOGLE_CLIENT_ID)
+        
+        # Google APIの認証情報を作成
+        creds = id_token.credentials_from_token(google_token)
+
+        # カレンダーの予定を取得
+        events = get_events(creds)
+        return jsonify(events=events), 200
+
     except Exception as e:
         return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
 
@@ -121,12 +169,35 @@ def action_feedback():
 
 # カレンダーにフィードバックを追加するAPI
 @api.route('/add-feedback-to-calendar', methods=['PUT'])
+@jwt_required()  # JWT認証が必要
 def add_feedback_to_calendar():
     try:
+        # JWTからユーザー情報を取得
+        current_user = get_jwt_identity()
+        user_id = current_user["user_id"]  # JWTから取得したuser_idを使用
+
+        # リクエストボディからイベント情報を取得
         request_data = request.get_json()
         events = request_data.get('events')
-        calendar.add_feedback_to_event(events)
+
+        if not events:
+            return jsonify({'message': 'No events provided'}), 400
+        
+        # Googleアクセストークンの取得（もしJWT内に保存されている場合）
+        google_token = current_user.get("google_token")
+        
+        if not google_token:
+            return jsonify({"message": "Google authentication required"}), 401
+        
+        # Google API認証
+        idinfo = id_token.verify_oauth2_token(google_token, requests.Request(), YOUR_GOOGLE_CLIENT_ID)
+        
+        # Googleの認証情報を使用して、カレンダーにフィードバックを追加
+        creds = id_token.credentials_from_token(google_token)
+        calendar.add_feedback_to_event(events, creds)
+
         return jsonify({'message': "カレンダーへの登録に成功しました"}), 200
+
     except Exception as e:
         return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
 
