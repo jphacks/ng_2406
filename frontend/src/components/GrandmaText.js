@@ -6,7 +6,7 @@ import otnImage from '../images/otn.png';
 import wnkImage from '../images/wnk.png';
 
 
-const GrandmaText = ({ isResponseDisplayed, onCharacterChange }) => {
+const GrandmaText = ({ isResponseDisplayed, onCharacterChange, character }) => {
     const [open, setOpen] = React.useState(false);
 
     const handleOpen = () => setOpen(true);
@@ -14,9 +14,9 @@ const GrandmaText = ({ isResponseDisplayed, onCharacterChange }) => {
 
     const imageOptions = [
         { src: titleImage, alt: 'おばあ', color: '#FFA500' },
-        { src: otnImage, alt: 'おとん', color: '#FFFF00' },
-        { src: oneImage, alt: 'おねぇ', color: '#00FF00' },
-        { src: wnkImage, alt: 'わんこ', color: '#0000FF' },
+        { src: otnImage, alt: 'おとん', color: '#E6F3FF' },
+        { src: oneImage, alt: 'おねぇ', color: '#F0FFE6' },
+        { src: wnkImage, alt: 'わんこ', color: '#FFE6E6' },
     ];
 
     return (
@@ -64,8 +64,8 @@ const GrandmaText = ({ isResponseDisplayed, onCharacterChange }) => {
                         zIndex: 2,
                     }}
                     onClick={handleOpen}
-                    alt="タイトルおばあ"
-                    src={titleImage}
+                    alt={imageOptions[character].alt}
+                    src={imageOptions[character].src}
                 />
             </Box>
             <Typography variant="h4" component="h1">

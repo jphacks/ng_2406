@@ -7,6 +7,9 @@ import GrandmaText from './components/GrandmaText';
 import LoadingIndicator from './components/LoadingIndicator';
 import ResponseList from './components/ResponseList';
 
+import logoImage from './images/logo.png';
+import otnLogoImage from './images/otn-logo.png';
+
 function App() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -14,6 +17,14 @@ function App() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [pastDiaries, setPastDiaries] = useState([]);
   const [character, setCharacter] = useState(0);
+
+  const backgroundColors = [
+    '#F5F5F5',// おばあ
+    '#E6F3FF',// おとん
+    '#F0FFE6',// おねえ
+    '#FFE6E6'// わんこ
+  ];
+
 
   const handleCharacterChange = (index) => {
     setCharacter(index);
@@ -110,8 +121,18 @@ function App() {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header pastDiaries={pastDiaries} onDiarySelect={handleDiarySelect} />
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      backgroundColor: backgroundColors[character],
+      transition: 'background-color 0.3s ease-in-out'
+    }}>
+      <Header
+        pastDiaries={pastDiaries}
+        onDiarySelect={handleDiarySelect}
+        character={character}
+      />
       <Box
         sx={{
           flexGrow: 1,
@@ -135,8 +156,9 @@ function App() {
             <GrandmaText
               isResponseDisplayed={isSubmitted && !isLoading && aiResponses.length > 0}
               onCharacterChange={handleCharacterChange}
+              character={character}
             />
-            <QueryInput query={query} setQuery={setQuery} onSubmit={handleSubmit} />
+            <QueryInput query={query} setQuery={setQuery} onSubmit={handleSubmit} character={character} />
             {isLoading && <LoadingIndicator />}
             {isSubmitted && !isLoading && aiResponses && aiResponses.length > 0 && (
               <ResponseList aiResponses={aiResponses} />

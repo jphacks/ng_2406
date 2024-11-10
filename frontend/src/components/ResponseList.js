@@ -1,11 +1,28 @@
 import React from 'react';
 import { Box, Paper, Avatar, Typography } from '@mui/material';
 import grandmaImage from '../images/grandma.png';
+import otnImage from '../images/otn.png';
+import oneImage from '../images/one.png';
+import wnkImage from '../images/wnk.png';
 
-const ResponseList = ({ aiResponses }) => {
+const fontOptions = [
+    "yuji-mai-regular", "reggae-one-regular", "hachi-maru-pop-regular", "zen-antique-regular"
+];
+
+const imageOptions = [
+    grandmaImage, otnImage, oneImage, wnkImage
+];
+
+const ResponseList = ({ aiResponses, character }) => {
     if (!aiResponses || aiResponses.length === 0) {
-        return null;
+        return {"face":1,
+            "title": "あいうえお",
+            "description": "あいうえお"
+        };
     }
+
+    const selectedFont = fontOptions[character];
+    const selectedImage = imageOptions[character];
 
     return (
         <Box sx={{ width: '100%', mt: 2 }}>
@@ -22,14 +39,14 @@ const ResponseList = ({ aiResponses }) => {
                                 width: 56,
                                 height: 56
                             }}
-                            src={grandmaImage}
-                            alt="おばあちゃん"
+                            src={selectedImage}
+                            alt="キャラクター"
                         >
-                            おばあ
+                            キャラ
                         </Avatar>
                         <Box>
-                            <Typography className="yuji-mai-regular" variant="h6">{response.title}</Typography>
-                            <Typography className="yuji-mai-regular" variant="body1">{response.description}</Typography>
+                            <Typography className={selectedFont} variant="h6">{response.title}</Typography>
+                            <Typography className={selectedFont} variant="body1">{response.description}</Typography>
                         </Box>
                     </Box>
                 </Paper>
