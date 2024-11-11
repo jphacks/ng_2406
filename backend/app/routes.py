@@ -57,16 +57,19 @@ def extract_actions():
         return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
 
 
-# Googleカレンダーの予定から行動を抽出するAPI
 @api.route('/extract-actions-from-calendar', methods=['POST'])
 def extract_actions_from_calendar():
     try:
-        # 認証情報はフロントで取得される
-        request_data = request.get_json()
-        access_token = data.get('access_token')
-        response = calendar.get_events(access_token)
+        # ヘッダーからid_tokenを取得
+        id_token = request.headers.get('Authorization').split('Bearer ')[1]
+        
+        # calendar.get_events()でGoogleカレンダーから予定を取得
+        response = calendar.get_events(id_token)
+        
+        # 結果を返す
         return jsonify(response), 200
     except Exception as e:
+        # エラーハンドリング
         return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
 
 

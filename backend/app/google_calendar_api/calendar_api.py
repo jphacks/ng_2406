@@ -1,17 +1,31 @@
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
+from google.auth.transport import requests
 from google_auth_oauthlib.flow import InstalledAppFlow
 from datetime import datetime, timezone, timedelta
-import os.path
-import pickle
+from google.oauth2 import id_token
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+CLIENT_ID = os.getenv("CLIENT_ID")
 
 class CalendarAPI:
     def __init__(self):
         pass
 
-    def get_events(self, access_token):
-        creds = Credentials(token=access_token)
+    def get_events(self, id_token):
+        idinfo = id_token.verify_oauth2_token(id_token, Request(), CLIENT_ID)
+        user_id = idinfo['sub']
+        refresh_token = get_refresh_token_from_database(user_id)
+        creds = Credentials.from_authorized_user_file(
+            None,
+            ['https://www.googleapis.com/auth/calendar.readonly']
+        )
+        creds.refresh(requests.Request())
         service = build('calendar', 'v3', credentials=creds)
+
+
         # タイムゾーン対応の現在の時刻を取得
         now_utc = datetime.now(timezone.utc)
         now_jst = now_utc.astimezone(timezone(timedelta(hours=9)))
@@ -67,4 +81,4 @@ class CalendarAPI:
                     'description': feedback_text
                 }
             ).execute()
-        return
+        return True
