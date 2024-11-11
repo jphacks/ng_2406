@@ -10,11 +10,34 @@
 }
 
 @font-face {
+  font-family: 'Zen Antique';
+  src: url('./fonts/ZenAntique-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Hachi Maru Pop';
+  src: url('./fonts/HachiMaruPop-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
   font-family: 'Yuji Mai';
   src: url('./fonts/YujiMai-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
+
+
+@font-face {
+  font-family: 'Reggae One';
+  src: url('./fonts/ReggaeOne-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 
 body {
   margin: 0;
@@ -32,6 +55,18 @@ code {
 
 .zen-maru-gothic-regular {
   font-family: 'Zen Maru Gothic', sans-serif !important;
+}
+
+.reggae-one-regular {
+  font-family: 'Reggae One', sans-serif !important;
+}
+
+.zen-antique-regular {
+  font-family: 'Zen Antique', sans-serif !important;
+}
+
+.hachi-maru-pop-regular {
+  font-family: 'Hachi Maru Pop', sans-serif !important;
 }
 
 .yuji-mai-regular {

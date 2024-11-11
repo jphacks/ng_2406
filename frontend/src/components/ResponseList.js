@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
 import { Box, Paper, Avatar, Typography, IconButton, Tooltip, Snackbar, CircularProgress } from '@mui/material';
 import shareIcon from '../images/share.png';
-import grandmaImage from '../images/grandma.png';
+import grandmaImage from '../images/oba-white.png';
+import otnImage from '../images/otn-white.png';
+import oneImage from '../images/one-white.png';
+import wnkImage from '../images/wnk-white.png';
 
-const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo }) => {
+const imageOptions = [
+    { src: grandmaImage, alt: 'おばあ', font: "Yuji Mai" },
+    { src: otnImage, alt: 'おとん', font: "Reggae One" },
+    { src: oneImage, alt: 'おねぇ', font: "Hachi Maru Pop" },
+    { src: wnkImage, alt: 'わんこ', font: "Zen Antique" }
+];
+
+const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, character }) => {
     const [tooltipText, setTooltipText] = useState("大切な人に共有");
+
+    const selectedImage = imageOptions[character] || imageOptions[0];
+    const selectedFont = selectedImage.font;
 
     if (!actions || actions.length === 0) {
         return null;
@@ -24,7 +37,6 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo })
         });
     };
 
-
     return (
         <Box sx={{ width: '100%', mt: 2 }}>
             <Tooltip title={tooltipText} placement="right" arrow open={true} >
@@ -40,24 +52,38 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo })
                                 bgcolor: feedbacks[index]?.face === 0 ? 'blue' :
                                     feedbacks[index]?.face === 1 ? 'orange' :
                                         feedbacks[index]?.face === 2 ? 'red' :
-                                            feedbacks[index]?.face === 3 ? "black" : 'blue',
+                                            feedbacks[index]?.face === 3 ? "black" : 'black',
                                 mr: 2,
                                 width: 56,
                                 height: 56
                             }}
-                            src={grandmaImage}
-                            alt="おばあちゃん"
-                        >
-                            おばあ
-                        </Avatar>
+                            src={selectedImage.src}
+                            alt={selectedImage.alt}
+                        />
                         <Box>
-                            <Typography className="yuji-mai-regular" variant="h6">{action}</Typography>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontFamily: selectedFont,
+                                    '&.MuiTypography-root': { fontFamily: selectedFont }
+                                }}
+                            >
+                                {action}
+                            </Typography>
                             {feedbacks[index] ? (
-                                <Typography className="yuji-mai-regular" variant="body1">{feedbacks[index].feedback}</Typography>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        fontFamily: selectedFont,
+                                        '&.MuiTypography-root': { fontFamily: selectedFont }
+                                    }}
+                                >
+                                    {feedbacks[index].feedback}
+                                </Typography>
                             ) : (
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                     <CircularProgress size={20} sx={{ mr: 1 }} />
-                                    <Typography className="yuji-mai-regular">フィードバックを読み込み中...</Typography>
+                                    <Typography sx={{ fontFamily: selectedFont }}>フィードバックを読み込み中...</Typography>
                                 </Box>
                             )}
                         </Box>
@@ -69,7 +95,6 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo })
                     <CircularProgress />
                 </Box>
             )}
-            
         </Box>
     );
 };
