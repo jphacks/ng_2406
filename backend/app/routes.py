@@ -5,6 +5,7 @@ from . import bcrypt
 from flask_jwt_extended import create_access_token, jwt_required
 from datetime import datetime
 from app.gemini_api import GeminiAPI
+from app.google_calendar_api.calendar_api import CalendarAPI
 import random
 import string
 from hashids import Hashids
@@ -12,6 +13,7 @@ from hashids import Hashids
 
 api = Blueprint('api', __name__)
 gemini = GeminiAPI()
+calendar = CalendarAPI()
 
 
 # diary idをURLに使用する10桁のハッシュ値に変換する
@@ -119,10 +121,12 @@ def get_feedbacks(diary_url):
 
 
 # カレンダーからユーザーの行動を抽出するAPI
-@api.route('/extract-actions-from-calendar', methods=['GET'])
-def extract_actions_from_calendar():
+@api.route('/get/calendar_events', methods=['GET'])
+def get_calendar_events():
     try:
-        response = calendar.get_events(id_token)
+        response = calendar.get_events()
+        if response is None:
+            return jsonify({'message': '行動が見つかりませんでした'}), 400
         return jsonify(response), 200
     except Exception as e:
         print(str(e))
@@ -130,18 +134,19 @@ def extract_actions_from_calendar():
 
 
 # カレンダーのユーザーの行動に対するフィードバックを生成するAPI
-@api.route('/calendar-action-feedback', methods=['POST'])
-def calendar_action_feedback():
+@api.route('/calendar-event-feedback', methods=['POST'])
+def calendar_event_feedback():
     try:
         request_data = request.get_json()
         action = request_data.get('action')
         character = request_data.get('character')
 
-        response = gemini.calendar_action_feedback(action)
+        response = gemini.action_feedback(action)
         return jsonify(response), 200
 
     except Exception as e:
-        return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
+        print(str(e))
+        return jsonify({'message': '処理が失敗しました'}), 400
 
 
 # カレンダーにフィードバックを追加するAPI
@@ -153,4 +158,5 @@ def add_feedback_to_calendar():
         calendar.add_feedback_to_event(events)
         return jsonify({'message': "カレンダーへの登録に成功しました"}), 200
     except Exception as e:
-        return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
+        print(str(e))
+        return jsonify({'message': '処理が失敗しました'}), 400
