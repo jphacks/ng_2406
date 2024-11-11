@@ -8,9 +8,6 @@ import LoadingIndicator from './components/LoadingIndicator';
 import ResponseList from './components/ResponseList';
 import dialogs from './data/dialogs.json';
 
-import logoImage from './images/logo.png';
-import otnLogoImage from './images/otn-logo.png';
-
 function App() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -18,27 +15,22 @@ function App() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [character, setCharacter] = useState(0);
-
-  const backgroundColors = [
-    '#F5F5F5',// おばあ
-    '#E6F3FF',// おとん
-    '#F0FFE6',// おねえ
-    '#FFE6E6'// わんこ
-  ];
-
-
-  const handleCharacterChange = (index) => {
-    setCharacter(index);
-    console.log(`選択されたキャラクター: ${index}`);
-  };
-
-
   const [grandmaState, setGrandmaState] = useState('initial');
   const [diaryId, setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
   const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
 
+  const backgroundColors = [
+    '#F5F5F5', // おばあ
+    '#E6F3FF', // おとん
+    '#F0FFE6', // おねえ
+    '#FFE6E6'  // わんこ
+  ];
 
+  const handleCharacterChange = (index) => {
+    setCharacter(index);
+    console.log(`選択されたキャラクター: ${index}`);
+  };
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const diaryParam = urlParams.get('diary');
@@ -49,27 +41,29 @@ function App() {
 
   const fetchDiary = async (diaryUrl) => {
     setIsLoading(true);
-    setAiResponses([]);
+    setActions([]);
+    setFeedbacks([]);
     setIsSubmitted(true);
-    const requestBody = { action: query, character };
-    console.log('サーバーに送信するデータ:', requestBody);
+    setGrandmaState('loading');
 
     try {
-      const response = await fetch('/api/feedback', {
-        method: 'POST',
+      const response = await fetch(`/api/get/diary/${diaryUrl}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ action: query, character })
       });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       const data = await response.json();
       setQuery(data.schedule);
       setActions(data.actions.map(action => action.action));
       setFeedbacks(data.actions);
       setDiaryUrl(diaryUrl);
+      setDiaryId(diaryUrl);
       setIsSubmitted(true);
       setGrandmaState('waiting');
     } catch (error) {
@@ -78,7 +72,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [query, character]);
+  };
 
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -89,7 +83,6 @@ function App() {
     setIsSubmitted(true);
 
     try {
-      // 最初に/api/extract-actionsの結果を取得して表示
       const extractResponse = await fetch('/api/extract-actions', {
         method: 'POST',
         headers: {
@@ -109,14 +102,13 @@ function App() {
       setGrandmaState('waiting');
       setIsLoading(false);
 
-      // アクションごとのフィードバックの取得
       const feedbackPromises = extractData.actions.map(action =>
         fetch('/api/action-feedback', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ action: action, schedule: query, character: 1, diary_id: extractData.diary_id })
+          body: JSON.stringify({ action, schedule: query, character, diary_id: extractData.diary_id })
         }).then(res => res.json())
       );
 
@@ -129,7 +121,7 @@ function App() {
     } finally {
       setIsLoadingAdditionalInfo(false);
     }
-  }, [query]);
+  }, [query, character]);
 
   return (
     <Box sx={{
@@ -140,8 +132,6 @@ function App() {
       transition: 'background-color 0.3s ease-in-out'
     }}>
       <Header
-        pastDiaries={pastDiaries}
-        onDiarySelect={handleDiarySelect}
         character={character}
       />
       <Box
@@ -170,9 +160,8 @@ function App() {
               query={query}
               setQuery={setQuery}
               onSubmit={handleSubmit}
-              isLoading={isLoading}
+              character={character}
             />
-            <QueryInput query={query} setQuery={setQuery} onSubmit={handleSubmit} character={character} />
             {isLoading && <LoadingIndicator />}
             {isSubmitted && !isLoading && actions.length > 0 && (
               <ResponseList
@@ -180,6 +169,7 @@ function App() {
                 feedbacks={feedbacks}
                 diaryUrl={diaryUrl}
                 isLoadingAdditionalInfo={isLoadingAdditionalInfo}
+                character={character}
               />
             )}
           </Box>
@@ -188,4 +178,5 @@ function App() {
     </Box>
   );
 }
+
 export default App;

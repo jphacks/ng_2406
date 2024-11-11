@@ -6,7 +6,7 @@ import otnImage from '../images/otn.png';
 import wnkImage from '../images/wnk.png';
 
 
-const GrandmaText = ({ isResponseDisplayed, onCharacterChange, character }) => {
+const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character }) => {
     const [open, setOpen] = React.useState(false);
 
     const handleOpen = () => setOpen(true);
@@ -83,7 +83,7 @@ const GrandmaText = ({ isResponseDisplayed, onCharacterChange, character }) => {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 maxWidth: '100%',
-                fontFamily: '"Zen Maru Gothic", sans-serif',
+                fontFamily: '"Zen Maru Gothic"',
             }}
         >
             「{text}」
