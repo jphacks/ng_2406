@@ -31,6 +31,7 @@ class GeminiAPI:
         return prompt
 
     def extract_actions(self, schedule):
+        actions = []
         prompt = self._generate_prompt(schedule)
         for _ in range(5):
             feedback = self.model.generate_content(prompt).text
@@ -57,6 +58,8 @@ class GeminiAPI:
                     if DEBUG: print("配列が見つかりませんでした。", file=sys.stderr)
             else:
                 if DEBUG: print("コードブロックが見つかりませんでした。", file=sys.stderr)
+        if actions == []:
+            return None
         return actions
 
     def _is_used_weather_info(self, schedule):
@@ -108,18 +111,16 @@ class GeminiAPI:
             "回答は必ず数値のみで「0」「1」「2」のいずれかを返してください。"
         )
 
-        while True:
+        for _ in range(5):
             # プロンプトの応答取得
             face = self.model.generate_content(prompt_face).text.strip()
 
             # 正規表現で数値判定
             if re.fullmatch("[0-2]", face):
-                if DEBUG: print(face)
-                break
+                return int(face)
             else:
                 if DEBUG: print(f"不正な応答 '{face}' が返されました。再試行します。")
-        
-        return int(face)
+        return 1
 
     def _get_action_feedback(self, action):
         '''
@@ -130,6 +131,7 @@ class GeminiAPI:
         prompt_description = (
             f"{action}の気をつけた方が良いポイントをおばあちゃん口調で60字以内で教えてください。"
         )
+        feedback = "いまなんといったのかい？おばあちゃんが分かるようにゆっくり話しておくれ。"
         for _ in range(5):
             try:
                 feedback = self.model.generate_content(prompt_description).text
