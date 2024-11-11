@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Container, Box, Button } from '@mui/material';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import { Container, Box, Button, Typography } from '@mui/material';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import './App.css';
 import Header from './components/Header';
 import QueryInput from './components/QueryInput';
@@ -28,6 +28,7 @@ function App() {
       fetchDiary(diaryParam);
     }
   }, []);
+
   const fetchDiary = async (diaryUrl) => {
     setIsLoading(true);
     setGrandmaState('loading');
@@ -57,28 +58,40 @@ function App() {
     setActions([]);
     setFeedbacks([]);
     setIsSubmitted(true);
-
     try {
-      const endpoint = actionType === 'calendar' ? '/api/extract-actions-from-calendar' : '/api/extract-actions';
-      const headers = {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` })
-      };
-      const body = actionType === 'calendar'
-        ? JSON.stringify({ date: new Date().toISOString() })
-        : JSON.stringify({ schedule: query });
+      let extractData;
 
-      const extractResponse = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body
-      });
+      if (actionType === 'calendar') {
+        
+        const response = await fetch('/api/get-calendar-events', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (!extractResponse.ok) {
-        throw new Error(`HTTP error! status: ${extractResponse.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        extractData = await response.json();
+      } else {
+        const extractResponse = await fetch('/api/extract-actions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ schedule: query })
+        });
+
+        if (!extractResponse.ok) {
+          throw new Error(`HTTP error! status: ${extractResponse.status}`);
+        }
+
+        extractData = await extractResponse.json();
       }
 
-      const extractData = await extractResponse.json();
       setActions(extractData.actions);
       setDiaryId(extractData.diary_id);
       setDiaryUrl(extractData.diary_url);
@@ -117,18 +130,22 @@ function App() {
     handleAction('calendar', accessToken);
   }, [accessToken, handleAction]);
 
-  const handleLoginSuccess = (res) => {
-    setAccessToken(res.accessToken);
+  const handleLoginSuccess = (credentialResponse) => {
+    setAccessToken(credentialResponse.credential);
   };
 
-  const handleLoginFailure = (res) => {
-    console.log('ログインに失敗しました:', res);
+  const handleLoginFailure = () => {
+    console.log('ログインに失敗しました');
   };
-  
+
   return (
-    <GoogleOAuthProvider clientId="504058961170-r44epg9gnhdbv2b7elr9f8eu1umhajff.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header onLoginSuccess={handleLoginSuccess} onLoginFailure={handleLoginFailure} />
+        <Header
+          onLoginSuccess={handleLoginSuccess}
+          onLoginFailure={handleLoginFailure}
+          accessToken={accessToken}
+        />
         <Box
           sx={{
             flexGrow: 1,
@@ -156,6 +173,9 @@ function App() {
                 onSubmit={handleSubmit}
                 isLoading={isLoading}
               />
+              <Button onClick={handleCalendarSubmit} disabled={!accessToken}>
+                カレンダーから予定を取得
+              </Button>
               {isLoading && <LoadingIndicator />}
               {isSubmitted && !isLoading && actions.length > 0 && (
                 <ResponseList
@@ -167,6 +187,7 @@ function App() {
               )}
             </Box>
           </Container>
+          <Typography>{accessToken} </Typography>
         </Box>
       </Box>
     </GoogleOAuthProvider>

@@ -10,7 +10,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import logoImage from '../images/logo.png';
 import { GoogleLogin } from '@react-oauth/google';
 
-const Header = ({ onLoginSuccess, onLoginFailure }) => {
+const Header = ({ onLoginSuccess, onLoginFailure, accessToken }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -32,20 +32,21 @@ const Header = ({ onLoginSuccess, onLoginFailure }) => {
                             cursor: 'pointer'
                         }} onClick={handleLogoClick} />
                     </Typography>
-                    <GoogleLogin
-                        render={renderProps => (
-                            <Button
-                                onClick={renderProps.onClick}
-                                disabled={renderProps.disabled}
-                                variant="contained"
-                            >
-                                Googleカレンダー連携
-                            </Button>
-                        )}
-                        onSuccess={onLoginSuccess}
-                        onFailure={onLoginFailure}
-                        cookiePolicy={'single_host_origin'}
-                    />
+                    {!accessToken ? (
+                        <GoogleLogin
+                            onSuccess={onLoginSuccess}
+                            onError={onLoginFailure}
+                            useOneTap
+                        />
+                    ) : (
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => {/* ログアウト処理 */ }}
+                        >
+                            ログアウト
+                        </Button>
+                    )}
                 </Box>
             </Toolbar>
         </AppBar>
