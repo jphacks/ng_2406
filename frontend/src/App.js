@@ -31,7 +31,6 @@ function App() {
     setCharacter(index);
     console.log(`選択されたキャラクター: ${index}`);
   };
-
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const diaryParam = urlParams.get('diary');
@@ -43,26 +42,28 @@ function App() {
   const fetchDiary = async (diaryUrl) => {
     setIsLoading(true);
     setActions([]);
+    setFeedbacks([]);
     setIsSubmitted(true);
-    const requestBody = { action: query, character };
-    console.log('サーバーに送信するデータ:', requestBody);
+    setGrandmaState('loading');
 
     try {
-      const response = await fetch('/api/feedback', {
-        method: 'POST',
+      const response = await fetch(`/api/get/diary/${diaryUrl}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody)
       });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       const data = await response.json();
       setQuery(data.schedule);
       setActions(data.actions.map(action => action.action));
       setFeedbacks(data.actions);
       setDiaryUrl(diaryUrl);
+      setDiaryId(diaryUrl);
       setIsSubmitted(true);
       setGrandmaState('waiting');
     } catch (error) {
