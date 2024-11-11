@@ -2,6 +2,3 @@ __pycache__
 venv
 .env
 migrations
-
-credentials.json
-token.pickle

@@ -18,29 +18,25 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-3. Google calendar apiを使用するためのcredentials.jsonを/backend/app/google_calendar_api上に配置する
-このurlを参考に同じディレクトリにcredentials.jsonを配置する(名前を変更する必要あり)  
-[GoogleカレンダーにPythonから予定を追加・編集してみた](https://dev.classmethod.jp/articles/google-calendar-api-create-schedule/)  
-
-4. MySQLに入っての操作
+3. MySQLに入っての操作
 ```
 mysql -u root -p
 CREATE DATABASE your_database_name;
 ```
 
-5. .envファイルの編集
+4. .envファイルの編集
 ```
 SQLALCHEMY_DATABASE_URI= "mysql+pymysql://ユーザー名:パスワード@localhost/使用するデータベース"
 ```
 
-6. データベースのマイグレーション
+5. データベースのマイグレーション
 ```
 flask db init
 flask db migrate -m "Initial migration"
 flask db upgrade
 ```
 
-7. 実行  
+6. 実行  
 ./backendのディレクトリで
 ```
 flask run
