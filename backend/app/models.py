@@ -9,7 +9,7 @@ class Diary(db.Model):
     diary_url = db.Column(db.Text)
     created_at = db.Column(db.DateTime)
     schedule = db.Column(db.Text)
-    character = db.Column(db.Text)
+    character = db.Column(db.Integer)
     
 
 class Feedback(db.Model):

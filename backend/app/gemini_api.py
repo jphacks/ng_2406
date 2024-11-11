@@ -111,15 +111,18 @@ class GeminiAPI:
             "回答は必ず数値のみで「0」「1」「2」のいずれかを返してください。"
         )
 
-        for _ in range(5):
+        for _ in range(3):
             # プロンプトの応答取得
-            face = self.model.generate_content(prompt_face).text.strip()
-
-            # 正規表現で数値判定
-            if re.fullmatch("[0-2]", face):
-                return int(face)
-            else:
-                if DEBUG: print(f"不正な応答 '{face}' が返されました。再試行します。")
+            try:
+                face = self.model.generate_content(prompt_face).text.strip()
+                
+                # 正規表現で数値判定
+                if re.fullmatch("[0-2]", face):
+                    return int(face)
+                else:
+                    if DEBUG: print(f"不正な応答 '{face}' が返されました。再試行します。")
+            except Exception as e:
+                if DEBUG: print(f"おばあが怒っています: {e}")
         return 1
 
     def _get_action_feedback(self, action):
@@ -131,14 +134,14 @@ class GeminiAPI:
         prompt_description = (
             f"{action}の気をつけた方が良いポイントをおばあちゃん口調で60字以内で教えてください。"
         )
-        feedback = "いまなんといったのかい？おばあちゃんが分かるようにゆっくり話しておくれ。"
-        for _ in range(5):
+        for _ in range(3):
             try:
                 feedback = self.model.generate_content(prompt_description).text
-                break
+                return feedback
             except Exception as e:
                 if DEBUG: print(f"おばあが怒っています: {e}")
-        return feedback
+        feedback_ng = "いまなんといったのかい？おばあちゃんが分かるようにゆっくり話しておくれ。"
+        return feedback_ng 
         
     def action_feedback(self, action):
         '''
