@@ -62,8 +62,9 @@ def extract_actions():
 def extract_actions_from_calendar():
     try:
         # 認証情報はフロントで取得される
-        # request_data = request.get_json()
-        response = calendar.get_events()
+        request_data = request.get_json()
+        access_token = data.get('access_token')
+        response = calendar.get_events(access_token)
         return jsonify(response), 200
     except Exception as e:
         return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400
@@ -124,8 +125,9 @@ def action_feedback():
 def add_feedback_to_calendar():
     try:
         request_data = request.get_json()
+        access_token = data.get('access_token')
         events = request_data.get('events')
-        calendar.add_feedback_to_event(events)
+        calendar.add_feedback_to_event(access_token, events)
         return jsonify({'message': "カレンダーへの登録に成功しました"}), 200
     except Exception as e:
         return jsonify({'message': '処理が失敗しました', 'error': str(e)}), 400

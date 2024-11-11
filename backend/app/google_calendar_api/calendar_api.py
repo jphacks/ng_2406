@@ -1,4 +1,5 @@
 from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from datetime import datetime, timezone, timedelta
 import os.path
@@ -8,7 +9,8 @@ class CalendarAPI:
     def __init__(self):
         pass
 
-    def get_events(self, creds):
+    def get_events(self, access_token):
+        creds = Credentials(token=access_token)
         service = build('calendar', 'v3', credentials=creds)
         # タイムゾーン対応の現在の時刻を取得
         now_utc = datetime.now(timezone.utc)
@@ -48,10 +50,11 @@ class CalendarAPI:
         response = {'event_list': event_list}
         return response
 
-    def add_feedback_to_event(self, feedbacks, creds):
+    def add_feedback_to_event(self, access_token, feedbacks):
         '''
         カレンダーにフィードバックを追加する
         '''
+        creds = Credentials(token=access_token)
         service = build('calendar', 'v3', credentials=creds)
         for feedback in feedbacks:
             event_id = feedback['event_id']
