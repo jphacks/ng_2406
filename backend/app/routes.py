@@ -141,7 +141,7 @@ def calendar_event_feedback():
         action = request_data.get('action')
         character = request_data.get('character')
 
-        response = gemini.action_feedback(action)
+        response = gemini.calendar_action_feedback(action)
         return jsonify(response), 200
 
     except Exception as e:

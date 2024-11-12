@@ -64,7 +64,7 @@ class CalendarAPI:
                 'action': action
             }
             event_list.append(event_info)
-        response = {'event_list': event_list}
+        response = {'events': event_list}
         return response
 
     def add_feedback_to_event(self, feedbacks):

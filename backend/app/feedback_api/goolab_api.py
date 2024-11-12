@@ -3,20 +3,44 @@ import os
 import json
 import requests
 
-load_dotenv()
-app_id = os.getenv('GOOLAB_APP_ID')
 
-headers = {'Content-Type': 'application/json'}
+class GoolabAPI:
+    def __init__(self):
+        load_dotenv()
+        self.app_id = os.getenv('GOOLAB_APP_ID')
 
-parameters = {
-    "app_id": app_id,
-    "sentence": "高橋さんはアメリカに出張に行きました。"
-}
+    def has_action_content(self, sentence):
+        if len(sentence) <= 1:
+            return False
 
-# APIエンドポイント
-url = 'https://labs.goo.ne.jp/api/morph'
+        headers = {'Content-Type': 'application/json'}
+        url = 'https://labs.goo.ne.jp/api/morph'
 
-# リクエスト送信
-res = requests.post(url, headers=headers, data=json.dumps(parameters))
-response = res.json()
-print(response)
+        parameters = {
+            "app_id": self.app_id,
+            "sentence": sentence,
+            "pos_filter": "動詞語幹|動詞活用語尾|動詞接尾辞"
+        }
+
+        # リクエスト送信
+        res = requests.post(url, headers=headers, data=json.dumps(parameters)).json()
+        word_list = res['word_list']
+        print(res)
+        if len(word_list[0]) == 0:
+            return False
+        return True
+    
+    def calculate_text_similarity(self, text1, text2):
+        headers = {'Content-Type': 'application/json'}
+        url = 'https://labs.goo.ne.jp/api/textpair'
+
+        parameters = {
+            "app_id": self.app_id,
+            "text1": text1,
+            "text2": text2
+        }
+
+        # リクエスト送信
+        res = requests.post(url, headers=headers, data=json.dumps(parameters)).json()
+        similarity = res['score']
+        return similarity
