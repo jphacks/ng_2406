@@ -2,10 +2,10 @@ class Dog:
     def __init__(self):
         pass
 
-    def weather_feedback(self, weather):
+    def weather_feedback(self, weather_data):
         '''
         天気情報に対するフィードバックを生成するためのプロンプトを返す
-        input(str) : weather
+        input(str) : weather_data
         output(str) : feedback
         '''
         prompt = (weather_data + "ここから本日の天気情報を取り出し、注意すべきレベルに応じて忠告するように30字以内で「ワン」と「!」のみの文字列を返してください")
@@ -22,7 +22,7 @@ class Dog:
         )
         return prompt
     
-    def gemini_error(self):
+    def error_message(self):
         '''
         エラーが起きた時に返すメッセージ
         input : None

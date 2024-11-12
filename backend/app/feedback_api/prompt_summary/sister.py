@@ -2,10 +2,10 @@ class Sister:
     def __init__(self):
         pass
 
-    def weather_feedback(self, weather):
+    def weather_feedback(self, weather_data):
         '''
         天気情報に対するフィードバックを生成するためのプロンプトを返す
-        input(str) : weather
+        input(str) : weather_data
         output(str) : feedback
         '''
         prompt = (weather_data + "ここから本日の天気情報を取り出し、お姉さん口調で30字以内のアドバイスをください")
@@ -22,7 +22,7 @@ class Sister:
         )
         return prompt
     
-    def gemini_error(self):
+    def error_message(self):
         '''
         エラーが起きた時に返すメッセージ
         input : None
