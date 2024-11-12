@@ -33,7 +33,6 @@ function App() {
     setCharacter(index);
     console.log(`選択されたキャラクター: ${index}`);
   };
-
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const diaryParam = urlParams.get('diary');
@@ -50,10 +49,17 @@ function App() {
     setGrandmaState('loading');
 
     try {
-      const response = await fetch(`/api/get/diary/${diaryUrl}`);
+      const response = await fetch(`/api/get/diary/${diaryUrl}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       const data = await response.json();
       setQuery(data.schedule);
       setActions(data.actions.map(action => action.action));
@@ -70,7 +76,7 @@ function App() {
     }
   };
 
-  const handleAction = useCallback(async (actionType) => {
+  const handleAction = useCallback(async (actionType, token = null) => {
     setGrandmaState('loading');
     setIsLoading(true);
     setActions([]);
@@ -78,17 +84,28 @@ function App() {
     setIsSubmitted(true);
     try {
       let extractData;
+      const extractResponse = await fetch('/api/extract-actions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ schedule: query })
+      });
+
       if (actionType === 'calendar') {
-        const response = await fetch('/api/extract-actions-from-calendar', {
-          method: 'POST',
+        
+        const response = await fetch('/api/get-calendar-events', {
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
+
         extractData = await response.json();
       } else {
         const extractResponse = await fetch('/api/extract-actions', {
@@ -98,9 +115,11 @@ function App() {
           },
           body: JSON.stringify({ schedule: query })
         });
+
         if (!extractResponse.ok) {
           throw new Error(`HTTP error! status: ${extractResponse.status}`);
         }
+
         extractData = await extractResponse.json();
       }
 
@@ -108,6 +127,7 @@ function App() {
       setDiaryId(extractData.diary_id);
       setDiaryUrl(extractData.diary_url);
       setGrandmaState('waiting');
+      setIsLoading(false);
 
       const feedbackPromises = extractData.actions.map(action =>
         fetch('/api/action-feedback', {
@@ -126,10 +146,9 @@ function App() {
       console.error('Error:', error);
       setGrandmaState('error');
     } finally {
-      setIsLoading(false);
       setIsLoadingAdditionalInfo(false);
     }
-  }, [query, character, accessToken]);
+  }, [query, character]);
 
   const handleSubmit = useCallback((event) => {
     event.preventDefault();
@@ -141,7 +160,7 @@ function App() {
       console.error('Google認証が必要です');
       return;
     }
-    handleAction('calendar');
+    handleAction('calendar', accessToken);
   }, [accessToken, handleAction]);
 
   const handleLoginSuccess = (credentialResponse) => {
@@ -153,51 +172,49 @@ function App() {
   };
 
   return (
-    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        backgroundColor: backgroundColors[character],
-        transition: 'background-color 0.3s ease-in-out'
-      }}>
-        <Header
-          onLoginSuccess={handleLoginSuccess}
-          onLoginFailure={handleLoginFailure}
-          accessToken={accessToken}
-          character={character}
-        />
-        <Box
-          sx={{
-            flexGrow: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            pt: '64px',
-            transition: 'all 0.3s ease-in-out',
-          }}
-        >
-          <Container maxWidth="sm">
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                minHeight: 'calc(100vh - 64px)',
-                justifyContent: isSubmitted ? 'flex-start' : 'center',
-                transition: 'all 0.3s ease-in-out',
-              }}
-            >
-              <GrandmaText 
-                text={dialogs.grandma[grandmaState]} 
-                onCharacterChange={handleCharacterChange}
-                character={character} 
-              />
-              <QueryInput
-                query={query}
-                setQuery={setQuery}
-                onSubmit={handleSubmit}
-                character={character}
-              />
+<GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      backgroundColor: backgroundColors[character],
+      transition: 'background-color 0.3s ease-in-out'
+    }}>
+      <Header
+      onLoginSuccess={handleLoginSuccess}
+      onLoginFailure={handleLoginFailure}
+      accessToken={accessToken}
+        character={character}
+      />
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          pt: '64px',
+          transition: 'all 0.3s ease-in-out',
+        }}
+      >
+        <Container maxWidth="sm">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              minHeight: 'calc(100vh - 64px)',
+              justifyContent: isSubmitted ? 'flex-start' : 'center',
+              transition: 'all 0.3s ease-in-out',
+            }}
+          >
+            <GrandmaText text={dialogs.grandma[grandmaState]} onCharacterChange={handleCharacterChange}
+              character={character} />
+            <QueryInput
+              query={query}
+              setQuery={setQuery}
+              onSubmit={handleSubmit}
+              character={character}
+            />
+              
               <Button onClick={handleCalendarSubmit} disabled={!accessToken}>
                 カレンダーから予定を取得
               </Button>
@@ -213,6 +230,7 @@ function App() {
               )}
             </Box>
           </Container>
+          <Typography>{accessToken} </Typography>
         </Box>
       </Box>
     </GoogleOAuthProvider>
