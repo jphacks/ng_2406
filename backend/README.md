@@ -2,6 +2,7 @@
 0. .envファイルを作成する
 ```
 GeminiAPI_KEY = GeminiAPIのAPI_Key
+GOOLAB_APP_ID = gooラボapiのapp_id
 SECRET_KEY = "適当な文字列"
 SQLALCHEMY_DATABASE_URI= "mysql+pymysql://ユーザー名:パスワード@localhost/使用するデータベース名"
 JWT_SECRET_KEY = "適当な文字列"
