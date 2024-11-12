@@ -4,7 +4,7 @@ from .models import Diary, Feedback, db
 from . import bcrypt
 from flask_jwt_extended import create_access_token, jwt_required
 from datetime import datetime
-from app.gemini_api import GeminiAPI
+from app.feedback_api.gemini_api import GeminiAPI
 from app.google_calendar_api.calendar_api import CalendarAPI
 import random
 import string

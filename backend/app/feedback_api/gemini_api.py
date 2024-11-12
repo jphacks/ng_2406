@@ -3,7 +3,7 @@ import os
 import re
 from dotenv import load_dotenv
 import sys
-from app.weather_api import WeatherAPI
+from .weather_api import WeatherAPI
 
 DEBUG = True
 
@@ -29,6 +29,18 @@ class GeminiAPI:
         prompt = (prompt_action
                   + "という文章から行動を抜き出してpythonの配列として出力してください。")
         return prompt
+
+    def _is_used_weather_info(self, schedule):
+        '''
+        ユーザーの予定を見て、天気情報が必要かを判定する
+        '''
+        prompt = (schedule
+                  + "という文章の行動がすべて家でする場合には0を、それ以外の場合は1を出力してください。"
+                  "回答は必ず数値のみで「0」「1」のどちらかを返してください。")
+        response = self.model.generate_content(prompt).text
+        if DEBUG: print(response)
+        res = int(response)
+        return res
 
     def extract_actions(self, schedule):
         actions = []
@@ -60,43 +72,9 @@ class GeminiAPI:
                 if DEBUG: print("コードブロックが見つかりませんでした。", file=sys.stderr)
         if actions == []:
             return None
+        if self._is_used_weather_info(schedule):
+            actions.append("天気情報")
         return actions
-
-    def _is_used_weather_info(self, schedule):
-        '''
-        ユーザーの予定を見て、天気情報が必要かを判定する
-        '''
-        return True
-
-    def _get_weather_info(self):
-        '''
-        天気情報を取得する
-        input : None
-        output : str : 天気情報
-        '''
-        nagoya_city_number = 230010
-        weather_data = self.weather.get_weather(nagoya_city_number)
-        prompt = (weather_data + "ここから本日の天気情報を取り出し、おばあちゃん口調で30字以内のアドバイスをください")
-        weather_info = self.model.generate_content(prompt).text
-        return weather_info
-
-    def weather_feedback(self, schedule):
-        '''
-        ユーザーの予定を受け取り、行動を抽出するAPI
-        input : schedule(str)
-        output : response(dict)
-        '''
-        is_used = self._is_used_weather_info(schedule)
-        response = {"is_used": is_used}
-        if is_used:
-            weather_info = self._get_weather_info()
-            response["face"] = 0
-            response["action"] = "天気情報"
-            response["feedback"] = weather_info
-            return response
-        else:
-            return response
-            
 
     def _get_facescore(self, action):
         '''
@@ -125,6 +103,18 @@ class GeminiAPI:
                 if DEBUG: print(f"おばあが怒っています: {e}")
         return 1
 
+    def _get_weather_info(self):
+        '''
+        天気情報を取得する
+        input : None
+        output : str : 天気情報
+        '''
+        nagoya_city_number = 230010
+        weather_data = self.weather.get_weather(nagoya_city_number)
+        prompt = (weather_data + "ここから本日の天気情報を取り出し、おばあちゃん口調で30字以内のアドバイスをください")
+        weather_info = self.model.generate_content(prompt).text
+        return weather_info
+
     def _get_action_feedback(self, action):
         '''
         行動からフィードバックを生成する
@@ -149,8 +139,12 @@ class GeminiAPI:
         input : action(str)
         output : response(dict)
         '''
-        face = self._get_facescore(action)
-        feedback = self._get_action_feedback(action)
+        if action == "天気情報":
+            face = 1
+            feedback = self._get_weather_info()
+        else:
+            face = self._get_facescore(action)
+            feedback = self._get_action_feedback(action)
         response = {
             'face': face,
             'action': action,
