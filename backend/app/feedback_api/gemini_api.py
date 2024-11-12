@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 import sys
 from .weather_api import WeatherAPI
 from .goolab_api import GoolabAPI
+from .prompt_summary.grand_mother import GrandMother
+from .prompt_summary.father import Father
+from .prompt_summary.sister import Sister
+from .prompt_summary.dog import Dog
 
 DEBUG = True
 
@@ -20,6 +24,7 @@ class GeminiAPI:
         self.model = genai.GenerativeModel("gemini-1.5-flash")
         self.weather = WeatherAPI()
         self.goolab = GoolabAPI()
+        self.prompt_summary = [GrandMother(), Father(), Sister(), Dog()]
 
     def _generate_prompt(self, schedule):
         '''
@@ -98,7 +103,7 @@ class GeminiAPI:
             print(f"危険度の計算に失敗しました: {e}")
             return 0
 
-    def _get_weather_info(self):
+    def _get_weather_info(self, character):
         '''
         天気情報を取得する
         input : None
@@ -106,29 +111,27 @@ class GeminiAPI:
         '''
         nagoya_city_number = 230010
         weather_data = self.weather.get_weather(nagoya_city_number)
-        prompt = (weather_data + "ここから本日の天気情報を取り出し、おばあちゃん口調で30字以内のアドバイスをください")
+        prompt = self.prompt_summary[character].weather_feedback(weather_data)
         weather_info = self.model.generate_content(prompt).text
         return weather_info
 
-    def _get_action_feedback(self, action):
+    def _get_action_feedback(self, action, character):
         '''
         行動からフィードバックを生成する
         input : action(str) : 行動
         output : str : フィードバック
         '''
-        prompt_description = (
-            f"{action}の気をつけた方が良いポイントをおばあちゃん口調で60字以内で教えてください。"
-        )
+        prompt_description = self.prompt_summary[character].action_feedback(action)
         for _ in range(3):
             try:
                 feedback = self.model.generate_content(prompt_description).text
                 return feedback
             except Exception as e:
-                if DEBUG: print(f"おばあが怒っています: {e}")
-        feedback_ng = "いまなんといったのかい？おばあちゃんが分かるようにゆっくり話しておくれ。"
-        return feedback_ng 
+                if DEBUG: print(f"ハラスメントエラーです: {e}")
+        error_message = self.prompt_summary[character].error_message()
+        return error_message
         
-    def action_feedback(self, action):
+    def action_feedback(self, action, character):
         '''
         ユーザーの行動データを受け取り、行動を抽出するAPI
         input : action(str)
@@ -136,10 +139,10 @@ class GeminiAPI:
         '''
         if action == "天気情報":
             face = 1
-            feedback = self._get_weather_info()
+            feedback = self._get_weather_info(character)
         else:
             face = self._get_facescore(action)
-            feedback = self._get_action_feedback(action)
+            feedback = self._get_action_feedback(action, character)
         response = {
             'face': face,
             'action': action,
@@ -147,14 +150,14 @@ class GeminiAPI:
         }
         return response
 
-    def calendar_action_feedback(self, action):
+    def calendar_action_feedback(self, action, character):
         '''
         カレンダーの行動データを受け取り、行動を抽出するAPI
         input : action(str)
         output : response(dict)
         '''
         face = self._get_facescore(action)
-        feedback = self._get_action_feedback(action)
+        feedback = self._get_action_feedback(action, character)
         response = {
             'face': face,
             'action': action,
