@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Container, Box } from '@mui/material';
+import { Container, Box, Button, Typography } from '@mui/material';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import './App.css';
 import Header from './components/Header';
 import QueryInput from './components/QueryInput';
@@ -19,6 +20,7 @@ function App() {
   const [diaryId, setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
   const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
+  const [accessToken, setAccessToken] = useState(null);
 
   const backgroundColors = [
     '#F5F5F5', // おばあ
@@ -74,28 +76,53 @@ function App() {
     }
   };
 
-  const handleSubmit = useCallback(async (event) => {
-    event.preventDefault();
+  const handleAction = useCallback(async (actionType, token = null) => {
     setGrandmaState('loading');
     setIsLoading(true);
     setActions([]);
     setFeedbacks([]);
     setIsSubmitted(true);
-
     try {
+      let extractData;
       const extractResponse = await fetch('/api/extract-actions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ schedule: query })
+        body: JSON.stringify({ schedule: query, character }),
       });
 
-      if (!extractResponse.ok) {
-        throw new Error(`HTTP error! status: ${extractResponse.status}`);
+      if (actionType === 'calendar') {
+        
+        const response = await fetch('/api/get/calendar_events', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        extractData = await response.json();
+      } else {
+        const extractResponse = await fetch('/api/extract-actions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ schedule: query, character }),
+        });
+
+        if (!extractResponse.ok) {
+          throw new Error(`HTTP error! status: ${extractResponse.status}`);
+        }
+
+        extractData = await extractResponse.json();
       }
 
-      const extractData = await extractResponse.json();
       setActions(extractData.actions);
       setDiaryId(extractData.diary_id);
       setDiaryUrl(extractData.diary_url);
@@ -123,7 +150,29 @@ function App() {
     }
   }, [query, character]);
 
+  const handleSubmit = useCallback((event) => {
+    event.preventDefault();
+    handleAction('query');
+  }, [handleAction]);
+
+  const handleCalendarSubmit = useCallback(() => {
+    if (!accessToken) {
+      console.error('Google認証が必要です');
+      return;
+    }
+    handleAction('calendar', accessToken);
+  }, [accessToken, handleAction]);
+
+  const handleLoginSuccess = (credentialResponse) => {
+    setAccessToken(credentialResponse.credential);
+  };
+
+  const handleLoginFailure = () => {
+    console.log('ログインに失敗しました');
+  };
+
   return (
+<GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
     <Box sx={{
       display: 'flex',
       flexDirection: 'column',
@@ -132,6 +181,9 @@ function App() {
       transition: 'background-color 0.3s ease-in-out'
     }}>
       <Header
+      onLoginSuccess={handleLoginSuccess}
+      onLoginFailure={handleLoginFailure}
+      accessToken={accessToken}
         character={character}
       />
       <Box
@@ -162,20 +214,26 @@ function App() {
               onSubmit={handleSubmit}
               character={character}
             />
-            {isLoading && <LoadingIndicator />}
-            {isSubmitted && !isLoading && actions.length > 0 && (
-              <ResponseList
-                actions={actions}
-                feedbacks={feedbacks}
-                diaryUrl={diaryUrl}
-                isLoadingAdditionalInfo={isLoadingAdditionalInfo}
-                character={character}
-              />
-            )}
-          </Box>
-        </Container>
+              
+              <Button onClick={handleCalendarSubmit} disabled={!accessToken}>
+                カレンダーから予定を取得
+              </Button>
+              {isLoading && <LoadingIndicator />}
+              {isSubmitted && !isLoading && actions.length > 0 && (
+                <ResponseList
+                  actions={actions}
+                  feedbacks={feedbacks}
+                  diaryUrl={diaryUrl}
+                  isLoadingAdditionalInfo={isLoadingAdditionalInfo}
+                  character={character}
+                />
+              )}
+            </Box>
+          </Container>
+          <Typography>{accessToken} </Typography>
+        </Box>
       </Box>
-    </Box>
+    </GoogleOAuthProvider>
   );
 }
 

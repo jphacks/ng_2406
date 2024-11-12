@@ -3,30 +3,30 @@ import {
     AppBar,
     Toolbar,
     Typography,
-    Box
+    Box,
+    Button
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImage from '../images/logo.png';
+import { GoogleLogin } from '@react-oauth/google';
 import otnImage from '../images/otn-logo.png';
 import oneImage from '../images/one-logo.png';
 import wnkImage from '../images/wnk-logo.png';
-
 const logoOptions = [
     { src: logoImage, alt: '安心打診おばあ' },
     { src: otnImage, alt: '安心打診おとん' },
     { src: oneImage, alt: '安心打診おねぇ' },
     { src: wnkImage, alt: '安心打診わんこ' },
 ];
-
-const Header = ({ pastDiaries, onDiarySelect, character }) => {
+const Header = ({ onLoginSuccess, onLoginFailure, accessToken, character }) => {
 
     const navigate = useNavigate();
     const location = useLocation();
     const handleLogoClick = () => {
         if (location.pathname !== '/' || location.search !== '') {
             navigate('/', { replace: true });
+            window.location.reload();
         }
-        window.location.reload();
     };
 
     return (
@@ -41,6 +41,21 @@ const Header = ({ pastDiaries, onDiarySelect, character }) => {
                                 cursor: 'pointer'
                             }} onClick={handleLogoClick} />
                     </Typography>
+                    {!accessToken ? (
+                        <GoogleLogin
+                            onSuccess={onLoginSuccess}
+                            onError={onLoginFailure}
+                            useOneTap
+                        />
+                    ) : (
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => {/* ログアウト処理 */ }}
+                        >
+                            ログアウト
+                        </Button>
+                    )}
                 </Box>
             </Toolbar>
         </AppBar>
