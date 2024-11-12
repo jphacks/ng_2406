@@ -89,12 +89,12 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ schedule: query })
+        body: JSON.stringify({ schedule: query, character }),
       });
 
       if (actionType === 'calendar') {
         
-        const response = await fetch('/api/get-calendar-events', {
+        const response = await fetch('/api/get/calendar_events', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -113,7 +113,7 @@ function App() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ schedule: query })
+          body: JSON.stringify({ schedule: query, character }),
         });
 
         if (!extractResponse.ok) {
