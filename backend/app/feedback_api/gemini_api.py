@@ -109,11 +109,16 @@ class GeminiAPI:
         input : None
         output : str : 天気情報
         '''
-        nagoya_city_number = 230010
-        weather_data = self.weather.get_weather(nagoya_city_number)
+        tokyo_city_number = 130010
+        weather_data = self.weather.get_weather(tokyo_city_number)
         prompt = self.prompt_summary[character].weather_feedback(weather_data)
-        weather_info = self.model.generate_content(prompt).text
-        return weather_info
+        try:
+            weather_info = self.model.generate_content(prompt).text
+            return weather_info
+        except Exception as e:
+            if DEBUG: print(f"ハラスメントエラーです: {prompt}")
+        error_weather = self.prompt_summary[character].error_weather()
+        return error_weather
 
     def __get_action_feedback(self, action, character):
         '''
@@ -127,16 +132,14 @@ class GeminiAPI:
                 feedback = self.model.generate_content(prompt_description).text
                 return False, feedback
             except Exception as e:
-                if DEBUG: print(f"ハラスメントエラーです: {e}")
+                if DEBUG: print(f"ハラスメントエラーです: {prompt_description}")
         error_message = self.prompt_summary[character].error_message()
         return True, error_message
 
     def _get_face_and_feedback(self, action, character):
         if action == "天気情報":
-            face = 1
-            is_error, feedback = self.__get_weather_info(character)
-            if is_error:
-                face = 2
+            face = 0
+            feedback = self.__get_weather_info(character)
         else:
             face = self.__get_facescore(action)
             (is_error, feedback) = self.__get_action_feedback(action, character)

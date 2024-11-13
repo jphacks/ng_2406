@@ -43,13 +43,13 @@ class GoolabAPI:
         # リクエスト送信
         res = requests.post(url, headers=headers, data=json.dumps(parameters)).json()
         similarity = res['score']
-        print(f"{text1}と{text2}の類似度: {similarity}")
         return similarity
     
     def calculate_risk_level(self, action):
         risk_check = []
         risk_check.append(self._calculate_similarity(action, "犯罪"))
         risk_check.append(self._calculate_similarity(action, "違反"))
-        risk_check.append(self._calculate_similarity(action, "事故"))
         risk_check.append(self._calculate_similarity(action, "事件"))
-        return max(risk_check)
+        sorted_risk_check = sorted(risk_check, reverse=True)
+        weighted_risk = sorted_risk_check[0] * 0.7 + sorted_risk_check[1] * 0.3
+        return weighted_risk

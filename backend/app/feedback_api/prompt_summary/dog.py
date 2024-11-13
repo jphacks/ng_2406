@@ -18,7 +18,7 @@ class Dog:
         output(str) : feedback
         '''
         prompt = (
-            f"{action}の危険さに応じて忠告するように「ワン」と「!」のみで６０字以内の文字列を返してください。"
+            f"{action}の危険さに応じて忠告するように「ワン」と「!」のみで40字以内の文字列を返してください。"
         )
         return prompt
     
@@ -29,4 +29,13 @@ class Dog:
         output : str : 怒っているメッセージ
         '''
         prompt = "ワン？"
+        return prompt
+
+    def error_weather(self):
+        '''
+        天気情報の取得に失敗した時に返すメッセージ
+        input : None
+        output : str : 怒っているメッセージ
+        '''
+        prompt = "ワンワン！"
         return prompt
