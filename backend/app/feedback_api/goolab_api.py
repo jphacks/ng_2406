@@ -1,0 +1,46 @@
+from dotenv import load_dotenv
+import os
+import json
+import requests
+
+
+class GoolabAPI:
+    def __init__(self):
+        load_dotenv()
+        self.app_id = os.getenv('GOOLAB_APP_ID')
+
+    def has_action_content(self, sentence):
+        if len(sentence) <= 1:
+            return False
+
+        headers = {'Content-Type': 'application/json'}
+        url = 'https://labs.goo.ne.jp/api/morph'
+
+        parameters = {
+            "app_id": self.app_id,
+            "sentence": sentence,
+            "pos_filter": "動詞語幹|動詞活用語尾|動詞接尾辞"
+        }
+
+        # リクエスト送信
+        res = requests.post(url, headers=headers, data=json.dumps(parameters)).json()
+        word_list = res['word_list']
+        print(res)
+        if len(word_list[0]) == 0:
+            return False
+        return True
+    
+    def calculate_text_similarity(self, text1, text2):
+        headers = {'Content-Type': 'application/json'}
+        url = 'https://labs.goo.ne.jp/api/textpair'
+
+        parameters = {
+            "app_id": self.app_id,
+            "text1": text1,
+            "text2": text2
+        }
+
+        # リクエスト送信
+        res = requests.post(url, headers=headers, data=json.dumps(parameters)).json()
+        similarity = res['score']
+        return similarity
