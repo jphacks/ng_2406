@@ -6,6 +6,7 @@ import QueryInput from './components/QueryInput';
 import GrandmaText from './components/GrandmaText';
 import LoadingIndicator from './components/LoadingIndicator';
 import ResponseList from './components/ResponseList';
+import Footer from './components/Footer';
 import dialogs from './data/dialogs.json';
 
 function App() {
@@ -84,7 +85,7 @@ function App() {
     try {
       let extractData;
       if (actionType === 'calendar') {
-        
+
         const response = await fetch('/api/get/calendar_events', {
           method: 'GET',
           headers: {
@@ -94,11 +95,14 @@ function App() {
         });
 
         if (!response.ok) {
+          setIsLoading(false);
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         extractData = await response.json();
       } else {
+        console.log(query)
+        console.log(character)
         const extractResponse = await fetch('/api/extract-actions', {
           method: 'POST',
           headers: {
@@ -108,6 +112,7 @@ function App() {
         });
 
         if (!extractResponse.ok) {
+          setIsLoading(false);
           throw new Error(`HTTP error! status: ${extractResponse.status}`);
         }
 
@@ -164,8 +169,8 @@ function App() {
       transition: 'background-color 0.3s ease-in-out'
     }}>
       <Header
-      handleCalendarSubmit={handleCalendarSubmit}
-      accessToken={accessToken}
+        handleCalendarSubmit={handleCalendarSubmit}
+        accessToken={accessToken}
         character={character}
       />
       <Box
@@ -196,21 +201,21 @@ function App() {
               onSubmit={handleSubmit}
               character={character}
             />
-              {isLoading && <LoadingIndicator />}
-              {isSubmitted && !isLoading && actions.length > 0 && (
-                <ResponseList
-                  actions={actions}
-                  feedbacks={feedbacks}
-                  diaryUrl={diaryUrl}
-                  isLoadingAdditionalInfo={isLoadingAdditionalInfo}
-                  character={character}
-                />
-              )}
-            </Box>
-          </Container>
-          <Typography>{accessToken} </Typography>
-        </Box>
+            {isLoading && <LoadingIndicator />}
+            {isSubmitted && !isLoading && actions.length > 0 && (
+              <ResponseList
+                actions={actions}
+                feedbacks={feedbacks}
+                diaryUrl={diaryUrl}
+                isLoadingAdditionalInfo={isLoadingAdditionalInfo}
+                character={character}
+              />
+            )}
+          </Box>
+        </Container>
+        <Footer />
       </Box>
+    </Box>
   );
 }
 
