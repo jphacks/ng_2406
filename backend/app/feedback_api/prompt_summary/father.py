@@ -30,3 +30,12 @@ class Father:
         '''
         prompt = "おい。変なことしようとしてるんじゃないだろうな。マジメに生きろよ。"
         return prompt
+
+    def error_weather(self):
+        '''
+        天気情報の取得に失敗した時に返すメッセージ
+        input : None
+        output : str : 怒っているメッセージ
+        '''
+        prompt = "天気情報なんか信じるな。窓の外見てこい。"
+        return prompt

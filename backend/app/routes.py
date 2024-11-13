@@ -28,11 +28,20 @@ def hash_diary_id(diary_id):
 def extract_actions():
     try:
         request_data = request.get_json()
+        if not request_data:
+            return jsonify({'message': 'リクエストボディが空です'}), 400
+
         schedule = request_data.get('schedule')
         character = request_data.get('character')
 
-        if not (0 <= character <= 3):
-            return jsonify({'message': 'キャラクターは0 ~ 3の間にしてください'}), 400
+        if schedule is None:
+            return jsonify({'message': 'scheduleが指定されていません'}), 400
+
+        if character is None:
+            return jsonify({'message': 'characterが指定されていません'}), 400
+
+        if not isinstance(character, int) or not (0 <= character <= 3):
+            return jsonify({'message': 'characterは0から3の整数である必要があります'}), 400
 
         actions = gemini.extract_actions(schedule)
         if actions is None:

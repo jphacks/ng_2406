@@ -29,8 +29,8 @@ class GoolabAPI:
         if len(word_list[0]) == 0:
             return False
         return True
-    
-    def calculate_text_similarity(self, text1, text2):
+
+    def _calculate_similarity(self, text1, text2):
         headers = {'Content-Type': 'application/json'}
         url = 'https://labs.goo.ne.jp/api/textpair'
 
@@ -44,3 +44,12 @@ class GoolabAPI:
         res = requests.post(url, headers=headers, data=json.dumps(parameters)).json()
         similarity = res['score']
         return similarity
+    
+    def calculate_risk_level(self, action):
+        risk_check = []
+        risk_check.append(self._calculate_similarity(action, "犯罪"))
+        risk_check.append(self._calculate_similarity(action, "違反"))
+        risk_check.append(self._calculate_similarity(action, "事件"))
+        sorted_risk_check = sorted(risk_check, reverse=True)
+        weighted_risk = sorted_risk_check[0] * 0.7 + sorted_risk_check[1] * 0.3
+        return weighted_risk

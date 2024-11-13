@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Container, Box } from '@mui/material';
+import { Container, Box, Button, Typography } from '@mui/material';
 import './App.css';
 import Header from './components/Header';
 import QueryInput from './components/QueryInput';
 import GrandmaText from './components/GrandmaText';
 import LoadingIndicator from './components/LoadingIndicator';
 import ResponseList from './components/ResponseList';
+import Footer from './components/Footer';
 import dialogs from './data/dialogs.json';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
   const [diaryId, setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
   const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
+  const [accessToken, setAccessToken] = useState(null);
 
   const backgroundColors = [
     '#F5F5F5', // おばあ
@@ -74,28 +76,49 @@ function App() {
     }
   };
 
-  const handleSubmit = useCallback(async (event) => {
-    event.preventDefault();
+  const handleAction = useCallback(async (actionType, token = null) => {
     setGrandmaState('loading');
     setIsLoading(true);
     setActions([]);
     setFeedbacks([]);
     setIsSubmitted(true);
-
     try {
-      const extractResponse = await fetch('/api/extract-actions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ schedule: query })
-      });
+      let extractData;
+      if (actionType === 'calendar') {
 
-      if (!extractResponse.ok) {
-        throw new Error(`HTTP error! status: ${extractResponse.status}`);
+        const response = await fetch('/api/get/calendar_events', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          setIsLoading(false);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        extractData = await response.json();
+      } else {
+        console.log(query)
+        console.log(character)
+        const extractResponse = await fetch('/api/extract-actions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ schedule: query, character }),
+        });
+
+        if (!extractResponse.ok) {
+          setIsLoading(false);
+          throw new Error(`HTTP error! status: ${extractResponse.status}`);
+        }
+
+        extractData = await extractResponse.json();
       }
 
-      const extractData = await extractResponse.json();
       setActions(extractData.actions);
       setDiaryId(extractData.diary_id);
       setDiaryUrl(extractData.diary_url);
@@ -123,6 +146,20 @@ function App() {
     }
   }, [query, character]);
 
+  const handleSubmit = useCallback((event) => {
+    event.preventDefault();
+    handleAction('query');
+  }, [handleAction]);
+
+  const handleCalendarSubmit = useCallback(() => {
+    if (!accessToken) {
+      console.error('Google認証が必要です');
+      return;
+    }
+    handleAction('calendar', accessToken);
+  }, [accessToken, handleAction]);
+
+
   return (
     <Box sx={{
       display: 'flex',
@@ -132,6 +169,8 @@ function App() {
       transition: 'background-color 0.3s ease-in-out'
     }}>
       <Header
+        handleCalendarSubmit={handleCalendarSubmit}
+        accessToken={accessToken}
         character={character}
       />
       <Box
@@ -174,6 +213,7 @@ function App() {
             )}
           </Box>
         </Container>
+        <Footer />
       </Box>
     </Box>
   );
