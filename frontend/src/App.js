@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Container, Box, Button, Typography } from '@mui/material';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import './App.css';
 import Header from './components/Header';
 import QueryInput from './components/QueryInput';
@@ -84,14 +83,6 @@ function App() {
     setIsSubmitted(true);
     try {
       let extractData;
-      const extractResponse = await fetch('/api/extract-actions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ schedule: query, character }),
-      });
-
       if (actionType === 'calendar') {
         
         const response = await fetch('/api/get/calendar_events', {
@@ -163,16 +154,8 @@ function App() {
     handleAction('calendar', accessToken);
   }, [accessToken, handleAction]);
 
-  const handleLoginSuccess = (credentialResponse) => {
-    setAccessToken(credentialResponse.credential);
-  };
-
-  const handleLoginFailure = () => {
-    console.log('ログインに失敗しました');
-  };
 
   return (
-<GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
     <Box sx={{
       display: 'flex',
       flexDirection: 'column',
@@ -181,8 +164,7 @@ function App() {
       transition: 'background-color 0.3s ease-in-out'
     }}>
       <Header
-      onLoginSuccess={handleLoginSuccess}
-      onLoginFailure={handleLoginFailure}
+      handleCalendarSubmit={handleCalendarSubmit}
       accessToken={accessToken}
         character={character}
       />
@@ -214,10 +196,6 @@ function App() {
               onSubmit={handleSubmit}
               character={character}
             />
-              
-              <Button onClick={handleCalendarSubmit} disabled={!accessToken}>
-                カレンダーから予定を取得
-              </Button>
               {isLoading && <LoadingIndicator />}
               {isSubmitted && !isLoading && actions.length > 0 && (
                 <ResponseList
@@ -233,7 +211,6 @@ function App() {
           <Typography>{accessToken} </Typography>
         </Box>
       </Box>
-    </GoogleOAuthProvider>
   );
 }
 

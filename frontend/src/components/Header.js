@@ -8,7 +8,6 @@ import {
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImage from '../images/logo.png';
-import { GoogleLogin } from '@react-oauth/google';
 import otnImage from '../images/otn-logo.png';
 import oneImage from '../images/one-logo.png';
 import wnkImage from '../images/wnk-logo.png';
@@ -18,7 +17,7 @@ const logoOptions = [
     { src: oneImage, alt: '安心打診おねぇ' },
     { src: wnkImage, alt: '安心打診わんこ' },
 ];
-const Header = ({ onLoginSuccess, onLoginFailure, accessToken, character }) => {
+const Header = ({ accessToken, character, handleCalendarSubmit }) => {
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -41,21 +40,9 @@ const Header = ({ onLoginSuccess, onLoginFailure, accessToken, character }) => {
                                 cursor: 'pointer'
                             }} onClick={handleLogoClick} />
                     </Typography>
-                    {!accessToken ? (
-                        <GoogleLogin
-                            onSuccess={onLoginSuccess}
-                            onError={onLoginFailure}
-                            useOneTap
-                        />
-                    ) : (
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={() => {/* ログアウト処理 */ }}
-                        >
-                            ログアウト
-                        </Button>
-                    )}
+                    <Button onClick={handleCalendarSubmit} >
+                        カレンダーから予定を取得
+                    </Button>
                 </Box>
             </Toolbar>
         </AppBar>
