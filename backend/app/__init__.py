@@ -7,20 +7,18 @@ from flask_cors import CORS
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+jwt = JWTManager()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
-
-    # コンフィグをロード
     app.config.from_object('config.Config')
 
-    # 拡張機能を初期化
+    # CORSとJWTの設定をアプリに適用
+    CORS(app)
     db.init_app(app)
     bcrypt.init_app(app)
-    jwt = JWTManager(app)
+    jwt.init_app(app)
     migrate = Migrate(app, db)
-    
 
     # ルーティングを登録
     from .routes import api
