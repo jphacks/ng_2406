@@ -30,3 +30,12 @@ class GrandMother:
         '''
         prompt = "あんた変なことしようとしてるんじゃないでしょうね。ちゃんとした生活しなきゃダメよ。"
         return prompt
+
+    def error_weather(self):
+        '''
+        天気情報の取得に失敗した時に返すメッセージ
+        input : None
+        output : str : 怒っているメッセージ
+        '''
+        prompt = "あなたの心が晴れないと、天気も晴れないわよ。"
+        return prompt

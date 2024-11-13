@@ -30,3 +30,12 @@ class Sister:
         '''
         prompt = "ねえ！変なことしようとしてない！？ちゃんとした生活して！"
         return prompt
+
+    def error_weather(self):
+        '''
+        天気情報の取得に失敗した時に返すメッセージ
+        input : None
+        output : str : 怒っているメッセージ
+        '''
+        prompt = "とりあえず折りたたみ傘はカバンに入れたよね？"
+        return prompt
