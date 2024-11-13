@@ -84,18 +84,18 @@ class GeminiAPI:
             actions = ["天気情報"] + actions
         return actions
 
-    def _get_facescore(self, action):
+    def __get_facescore(self, action):
         '''
         行動から危険度を考える（危険度が高い順に2, 1, 0で返す）
         input : action(str) : 行動
         output : int : 感情の番号
         '''
         try:
-            score = self.goolab.calculate_text_similarity(action, "危険")
+            score = self.goolab.calculate_risk_level(action)
             print(f"{action}の危険度: {score}")
-            if score >= 0.6:
+            if score >= 0.55:
                 return 2
-            elif score >= 0.5:
+            elif score >= 0.51:
                 return 1
             else:
                 return 0
@@ -103,7 +103,7 @@ class GeminiAPI:
             print(f"危険度の計算に失敗しました: {e}")
             return 0
 
-    def _get_weather_info(self, character):
+    def __get_weather_info(self, character):
         '''
         天気情報を取得する
         input : None
@@ -115,7 +115,7 @@ class GeminiAPI:
         weather_info = self.model.generate_content(prompt).text
         return weather_info
 
-    def _get_action_feedback(self, action, character):
+    def __get_action_feedback(self, action, character):
         '''
         行動からフィードバックを生成する
         input : action(str) : 行動
@@ -125,11 +125,24 @@ class GeminiAPI:
         for _ in range(3):
             try:
                 feedback = self.model.generate_content(prompt_description).text
-                return feedback
+                return False, feedback
             except Exception as e:
                 if DEBUG: print(f"ハラスメントエラーです: {e}")
         error_message = self.prompt_summary[character].error_message()
-        return error_message
+        return True, error_message
+
+    def _get_face_and_feedback(self, action, character):
+        if action == "天気情報":
+            face = 1
+            is_error, feedback = self.__get_weather_info(character)
+            if is_error:
+                face = 2
+        else:
+            face = self.__get_facescore(action)
+            (is_error, feedback) = self.__get_action_feedback(action, character)
+            if is_error:
+                face = 2
+        return face, feedback
         
     def action_feedback(self, action, character):
         '''
@@ -137,12 +150,7 @@ class GeminiAPI:
         input : action(str)
         output : response(dict)
         '''
-        if action == "天気情報":
-            face = 1
-            feedback = self._get_weather_info(character)
-        else:
-            face = self._get_facescore(action)
-            feedback = self._get_action_feedback(action, character)
+        face, feedback = self._get_face_and_feedback(action, character)
         response = {
             'face': face,
             'action': action,
@@ -152,12 +160,11 @@ class GeminiAPI:
 
     def calendar_action_feedback(self, action, character):
         '''
-        カレンダーの行動データを受け取り、行動を抽出するAPI
+        カレンダーの行動データを受け取り、フィードバックを生成するAPI
         input : action(str)
         output : response(dict)
         '''
-        face = self._get_facescore(action)
-        feedback = self._get_action_feedback(action, character)
+        face, feedback = self._get_face_and_feedback(action, character)
         response = {
             'face': face,
             'action': action,
