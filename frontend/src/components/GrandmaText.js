@@ -5,11 +5,14 @@ import oneImage from '../images/one.png';
 import otnImage from '../images/otn.png';
 import wnkImage from '../images/wnk.png';
 
-
-const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character }) => {
+const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, isLoading }) => {
     const [open, setOpen] = React.useState(false);
 
-    const handleOpen = () => setOpen(true);
+    const handleOpen = () => {
+        if (!isLoading) {
+            setOpen(true);
+        }
+    };
     const handleClose = () => setOpen(false);
 
     const imageOptions = [
@@ -51,7 +54,7 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character }
                         }),
                     },
                     '&:hover::before': {
-                        opacity: isResponseDisplayed ? 0 : 1,
+                        opacity: isResponseDisplayed || isLoading ? 0 : 1,
                     },
                     '@keyframes pulse': {
                         '0%': { opacity: 0 },
@@ -67,27 +70,28 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character }
                         width: '100%',
                         height: '100%',
                         objectFit: 'contain',
-                        cursor: 'pointer',
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
                         zIndex: 2,
+                        opacity: isLoading ? 0.5 : 1,
                     }}
                     onClick={handleOpen}
                     alt={imageOptions[character].alt}
                     src={imageOptions[character].src}
                 />
             </Box>
-        <Typography
-            variant="h5"
-            component="div"
-            sx={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                maxWidth: '100%',
-                fontFamily: '"Zen Maru Gothic"',
-            }}
-        >
-            「{text}」
-        </Typography>
+            <Typography
+                variant="h5"
+                component="div"
+                sx={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '100%',
+                    fontFamily: '"Zen Maru Gothic"',
+                }}
+            >
+                「{text}」
+            </Typography>
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -144,8 +148,10 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character }
                                 src={image.src}
                                 alt={image.alt}
                                 onClick={() => {
-                                    onCharacterChange(index);
-                                    handleClose();
+                                    if (!isLoading) {
+                                        onCharacterChange(index);
+                                        handleClose();
+                                    }
                                 }}
                             />
                         </Box>

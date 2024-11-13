@@ -21,6 +21,8 @@ function App() {
   const [diaryUrl, setDiaryUrl] = useState(null);
   const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
+  const [isDialogVisible, setIsDialogVisible] = useState(true);
+  const [lastCharacter, setLastCharacter] = useState(0);
 
   const backgroundColors = [
     '#F5F5F5', // おばあ
@@ -30,16 +32,21 @@ function App() {
   ];
 
   const handleCharacterChange = (index) => {
-    setCharacter(index);
-    console.log(`選択されたキャラクター: ${index}`);
-  };
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const diaryParam = urlParams.get('diary');
-    if (diaryParam) {
-      fetchDiary(diaryParam);
+    if (index !== character) {
+      setLastCharacter(character);
+      setCharacter(index);
+      setIsDialogVisible(false);
+      setGrandmaState('initial')
+    } else {
+      setIsDialogVisible(true);
     }
-  }, []);
+  };
+
+  useEffect(() => {
+    if (character === lastCharacter) {
+      setIsDialogVisible(true);
+    }
+  }, [character, lastCharacter]);
 
   const fetchDiary = async (diaryUrl) => {
     setIsLoading(true);
@@ -193,8 +200,12 @@ function App() {
               transition: 'all 0.3s ease-in-out',
             }}
           >
-            <GrandmaText text={dialogs.grandma[grandmaState]} onCharacterChange={handleCharacterChange}
-              character={character} />
+            <GrandmaText
+              text={dialogs[character][grandmaState]}
+              onCharacterChange={handleCharacterChange}
+              character={character}
+              isLoading={isLoading}
+            />
             <QueryInput
               query={query}
               setQuery={setQuery}
@@ -202,7 +213,7 @@ function App() {
               character={character}
             />
             {isLoading && <LoadingIndicator />}
-            {isSubmitted && !isLoading && actions.length > 0 && (
+            {isSubmitted && !isLoading && actions.length > 0 && isDialogVisible && (
               <ResponseList
                 actions={actions}
                 feedbacks={feedbacks}

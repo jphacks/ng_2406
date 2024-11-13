@@ -1,11 +1,38 @@
 {
-    "grandma": {
+    "0": {
         "initial": "今日の予定を教えておくれ",
         "loading": "おばあは考えているよ...",
         "inProgress": "もう少し考えさせておくれ...",
         "waiting": "今日も精進しておくれ",
-        "pastResponse": "人生を振り返るのも悪かないねぇ",
+        "pastResponse": "おばあからの言伝だよ",
         "sharedContent": "の内容だよ",
         "error": "耳が遠いから、もう一度頼むよ"
+    },
+    "1": {
+        "initial": "今日の予定を頼むよ",
+        "loading": "ちょっと待ってな...",
+        "inProgress": "もう少し考えさせておくれ...",
+        "waiting": "風邪ひくなよ",
+        "pastResponse": "大切な人からの伝言だぞ",
+        "sharedContent": "の内容だよ",
+        "error": "ん？ごめん聞こえなかった"
+    },
+    "2": {
+        "initial": "予定を教えてネ",
+        "loading": "いま考えている...",
+        "inProgress": "もう少し考えさせておくれ...",
+        "waiting": "頑張ってネ",
+        "pastResponse": "",
+        "sharedContent": "の内容だよ",
+        "error": "ごめん、もっかい教えて？"
+    },
+    "3": {
+        "initial": "ワン！",
+        "loading": "クゥーン...",
+        "inProgress": "もう少し考えさせておくれ...",
+        "waiting": "ワンワン！！",
+        "pastResponse": "...（明後日の方向を向いている）",
+        "sharedContent": "の内容だよ",
+        "error": "ガルルルルル..."
     }
 }
