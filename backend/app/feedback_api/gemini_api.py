@@ -95,7 +95,7 @@ class GeminiAPI:
             print(f"{action}の危険度: {score}")
             if score >= 0.6:
                 return 2
-            elif score >= 0.55:
+            elif score >= 0.5:
                 return 1
             else:
                 return 0

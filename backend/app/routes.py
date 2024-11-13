@@ -31,6 +31,9 @@ def extract_actions():
         schedule = request_data.get('schedule')
         character = request_data.get('character')
 
+        if not (0 <= character <= 3):
+            return jsonify({'message': 'キャラクターは0 ~ 3の間にしてください'}), 400
+
         actions = gemini.extract_actions(schedule)
         if actions is None:
             return jsonify({'message': '行動が見つかりませんでした'}), 400
@@ -70,6 +73,9 @@ def action_feedback():
         schedule = request_data.get('schedule')
         character = request_data.get('character')
         diary_id = request_data.get('diary_id')
+
+        if not (0 <= character <= 3):
+            return jsonify({'message': 'キャラクターは0 ~ 3の間にしてください'}), 400
 
         response = gemini.action_feedback(action, character)
         feedback = Feedback(
@@ -140,6 +146,9 @@ def calendar_event_feedback():
         request_data = request.get_json()
         action = request_data.get('action')
         character = request_data.get('character')
+
+        if not (0 <= character <= 3):
+            return jsonify({'message': 'キャラクターは0 ~ 3の間にしてください'}), 400
 
         response = gemini.calendar_action_feedback(action, character)
         return jsonify(response), 200
