@@ -9,7 +9,7 @@ import wnkImage from '../images/wnk-white.png';
 const imageOptions = [
     { src: grandmaImage, alt: 'おばあ', font: "Yuji Mai" },
     { src: otnImage, alt: 'おとん', font: "Reggae One" },
-    { src: oniImage, alt: 'おにぃ', font: "Elega" },
+    { src: oniImage, alt: 'おにぃ', font: "Hachi Maru Pop" },
     { src: wnkImage, alt: 'わんこ', font: "Zen Antique" }
 ];
 

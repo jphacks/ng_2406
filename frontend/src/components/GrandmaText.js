@@ -5,7 +5,7 @@ import oniImage from '../images/oni.png';
 import otnImage from '../images/otn.png';
 import wnkImage from '../images/wnk.png';
 
-const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, isLoading }) => {
+const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, isLoading, shouldPulse }) => {
     const [open, setOpen] = React.useState(false);
 
     const handleOpen = () => {
@@ -49,8 +49,13 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, 
                         opacity: 0,
                         transition: 'opacity 0.3s ease-in-out',
                         zIndex: 1,
-                        ...(isResponseDisplayed && {
+                        ...(shouldPulse && isResponseDisplayed && {
                             animation: 'pulse 2s infinite',
+                            '@keyframes pulse': {
+                                '0%': { opacity: 0 },
+                                '50%': { opacity: 1 },
+                                '100%': { opacity: 0 },
+                            },
                         }),
                     },
                     '&:hover::before': {
