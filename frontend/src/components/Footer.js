@@ -67,10 +67,17 @@ const Footer = () => {
                         souta0812
                     </Link>
                 </Typography>
+            </Box>
+            <Box sx={{ mt: 1 }}>
                 <Typography variant="caption" color="text.secondary">
                     Special Thanks to
                     <Link href="https://jphacks.com/" color="inherit" sx={{ mx: 1 }}>
                         JPHACKS
+                    </Link>
+                    and
+                    <Link href="https://www.mhi.com/jp" color="inherit" sx={{ mx: 1 }}>
+
+                        Mitsubishi Heavy Industries, Ltd.
                     </Link>
                 </Typography>
             </Box>
