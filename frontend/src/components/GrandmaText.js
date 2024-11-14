@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Modal } from '@mui/material';
 import titleImage from '../images/title.png';
-import oneImage from '../images/one.png';
+import oniImage from '../images/oni.png';
 import otnImage from '../images/otn.png';
 import wnkImage from '../images/wnk.png';
 
@@ -18,7 +18,7 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, 
     const imageOptions = [
         { src: titleImage, alt: 'おばあ', color: '#FFA500' },
         { src: otnImage, alt: 'おとん', color: '#E6F3FF' },
-        { src: oneImage, alt: 'おねぇ', color: '#F0FFE6' },
+        { src: oniImage, alt: 'おにぃ', color: '#F0FFE6' },
         { src: wnkImage, alt: 'わんこ', color: '#FFE6E6' },
     ];
 

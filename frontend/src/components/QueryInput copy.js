@@ -11,7 +11,7 @@ const QueryInput = ({ query, setQuery, onSubmit, isLoading, character }) => {
     const characterOptions = [
         { text: 'おばあ', color: '#FFA500' },
         { text: 'おとん', color: '#E6F3FF' },
-        { text: 'おねぇ', color: '#F0FFE6' },
+        { text: 'おにぃ', color: '#F0FFE6' },
         { text: 'わんこ', color: '#FFE6E6' },
     ];
 

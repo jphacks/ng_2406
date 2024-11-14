@@ -3,13 +3,13 @@ import { Box, Paper, Avatar, Typography, IconButton, Tooltip, Snackbar, Circular
 import shareIcon from '../images/share.png';
 import grandmaImage from '../images/oba-white.png';
 import otnImage from '../images/otn-white.png';
-import oneImage from '../images/one-white.png';
+import oniImage from '../images/oni-white.png';
 import wnkImage from '../images/wnk-white.png';
 
 const imageOptions = [
     { src: grandmaImage, alt: 'おばあ', font: "Yuji Mai" },
     { src: otnImage, alt: 'おとん', font: "Reggae One" },
-    { src: oneImage, alt: 'おねぇ', font: "Hachi Maru Pop" },
+    { src: oniImage, alt: 'おにぃ', font: "Elega" },
     { src: wnkImage, alt: 'わんこ', font: "Zen Antique" }
 ];
 

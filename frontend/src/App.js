@@ -27,7 +27,7 @@ function App() {
   const backgroundColors = [
     '#F5F5F5', // おばあ
     '#E6F3FF', // おとん
-    '#F0FFE6', // おねえ
+    '#F0FFE6', // おにぃ（おねえ）
     '#FFE6E6'  // わんこ
   ];
 
@@ -89,6 +89,7 @@ function App() {
     setActions([]);
     setFeedbacks([]);
     setIsSubmitted(true);
+    setIsDialogVisible(true);
     try {
       let extractData;
       if (actionType === 'calendar') {
@@ -108,8 +109,6 @@ function App() {
 
         extractData = await response.json();
       } else {
-        console.log(query)
-        console.log(character)
         const extractResponse = await fetch('/api/extract-actions', {
           method: 'POST',
           headers: {
