@@ -65,14 +65,10 @@ class GeminiAPI:
                 feedback = self.model.generate_content(prompt).text
                 if DEBUG: print(feedback)
 
-                # 正規表現で ```で囲まれた部分とその中の配列部分を抽出
-                code_block_pattern = r"```(.+?)```"  # ```で囲まれた部分を取得
-                array_pattern = r"\[([^\]]+)\]"     # []で囲まれた配列部分を取得
-
-                # ```で囲まれたコードブロックを検索
-                code_block_match = re.search(code_block_pattern, feedback, re.DOTALL)
-                array_match = re.search(array_pattern, code_block_match.group(1))
-                actions = [action.strip().strip('"') for action in array_match.group(1).split(",")]
+                # []で囲まれた配列部分を取得
+                array_pattern = r"\[([^\]]+)\]"
+                array_match = re.search(array_pattern, feedback)
+                actions = [str(action.strip().strip('"').strip("'")) for action in array_match.group(1).split(",")]
                 if DEBUG: print(actions)
                 break
             except Exception as e:
@@ -80,8 +76,8 @@ class GeminiAPI:
 
         if actions == []:
             return None
-        if self._is_used_weather_info(schedule):
-            actions = ["天気情報"] + actions
+        # if self._is_used_weather_info(schedule):
+        #     actions = ["天気情報"] + actions
         return actions
 
     def __get_facescore(self, action):

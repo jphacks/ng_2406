@@ -44,7 +44,6 @@ def extract_actions():
             return jsonify({'message': 'characterは0から3の整数である必要があります'}), 400
 
         actions = gemini.extract_actions(schedule)
-        actions = [action.strip("'") for action in actions]
         if actions is None:
             return jsonify({'message': '行動が見つかりませんでした'}), 400
 
