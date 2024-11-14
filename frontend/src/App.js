@@ -96,7 +96,8 @@ function App() {
       }
 
       const data = await response.json();
-      setCharacter(data.character)
+
+      setCharacter(data.character);
       setQuery(data.schedule);
       setActions(data.actions.map(action => action.action));
       setFeedbacks(data.actions);
@@ -104,6 +105,7 @@ function App() {
       setDiaryId(diaryUrl);
       setIsSubmitted(true);
       setGrandmaState('waiting');
+
     } catch (error) {
       console.error('Error fetching diary:', error);
       setGrandmaState('error');
@@ -174,7 +176,6 @@ function App() {
       const feedbackResults = await Promise.all(feedbackPromises);
       const sortedResults = feedbackResults.sort((a, b) => a.idx - b.idx);
       setFeedbacks(sortedResults);
-      setSortedFeedbacks(sortedResults);
 
     } catch (error) {
       console.error('Error:', error);
@@ -250,7 +251,7 @@ function App() {
             {isSubmitted && !isLoading && actions.length > 0 && isDialogVisible && (
               <ResponseList
                 actions={actions}
-                feedbacks={sortedFeedbacks}
+                feedbacks={feedbacks}
                 diaryUrl={diaryUrl}
                 isLoadingAdditionalInfo={isLoadingAdditionalInfo}
                 character={character}

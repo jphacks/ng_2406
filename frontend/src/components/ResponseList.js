@@ -5,6 +5,7 @@ import grandmaImage from '../images/oba-white.png';
 import otnImage from '../images/otn-white.png';
 import oniImage from '../images/oni-white.png';
 import wnkImage from '../images/wnk-white.png';
+import XIcon from '@mui/icons-material/X'; // Xのアイコンとして一時的にTwitterアイコンを使用
 
 const imageOptions = [
     { src: grandmaImage, alt: 'おばあ', font: "Yuji Mai" },
@@ -37,13 +38,28 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
         });
     };
 
+    const handleXPost = () => {
+        const urlToShare = `${window.location.origin}?diary=${diaryUrl}`;
+        const selectedImage = imageOptions[character] || imageOptions[0];
+        const text = encodeURIComponent(`安心打診${selectedImage.alt}からの伝言です...！`);
+        const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(urlToShare)}`;
+        window.open(url, '_blank');
+    };
+
     return (
         <Box sx={{ width: '100%', mt: 2 }}>
-            <Tooltip title={tooltipText} placement="right" arrow open={true} >
-                <IconButton onClick={handleShare}>
-                    <img src={shareIcon} alt="共有" style={{ width: 24, height: 24 }} />
-                </IconButton>
-            </Tooltip>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Tooltip title="Xでポスト" placement="left" arrow>
+                    <IconButton onClick={handleXPost} sx={{ mr: 1 }}>
+                        <XIcon style={{ width: 20, height: 20 }} />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title={tooltipText} placement="right" arrow open={true}>
+                    <IconButton onClick={handleShare}>
+                        <img src={shareIcon} alt="共有" style={{ width: 24, height: 24 }} />
+                    </IconButton>
+                </Tooltip>
+            </Box>
             {actions.map((action, index) => (
                 <Paper key={index} elevation={3} sx={{ p: 2, mt: 2, width: '100%', bgcolor: '#e9e9e9' }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
