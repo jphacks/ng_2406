@@ -20,3 +20,4 @@ class Feedback(db.Model):
     face = db.Column(db.Integer, nullable=False)
     action = db.Column(db.Text)
     action_feedback = db.Column(db.Text)
+    idx = db.Column(db.Integer, nullable=False)
