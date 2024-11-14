@@ -18,13 +18,13 @@
         "error": "ん？ごめん聞こえなかった"
     },
     "2": {
-        "initial": "予定を教えてネ",
-        "loading": "いま考えている...",
+        "initial": "予定を教えてネ☆",
+        "loading": "ちょっと待っててくれよ☆",
         "inProgress": "もう少し考えさせておくれ...",
-        "waiting": "頑張ってネ",
+        "waiting": "頑張ってネ☆",
         "pastResponse": "",
         "sharedContent": "の内容だよ",
-        "error": "ごめん、もっかい教えて？"
+        "error": "ごめん、もっかい教えてくれるかい？"
     },
     "3": {
         "initial": "ワン！",

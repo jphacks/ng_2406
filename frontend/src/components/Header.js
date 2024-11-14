@@ -17,15 +17,16 @@ const logoOptions = [
     { src: oniImage, alt: '安心打診おにぃ' },
     { src: wnkImage, alt: '安心打診わんこ' },
 ];
-const Header = ({ accessToken, character, handleCalendarSubmit }) => {
+const Header = ({ setCharacter, character, handleCalendarSubmit }) => {
 
     const navigate = useNavigate();
     const location = useLocation();
     const handleLogoClick = () => {
         if (location.pathname !== '/' || location.search !== '') {
             navigate('/', { replace: true });
-            window.location.reload();
         }
+        setCharacter(0);
+        window.location.reload();
     };
 
     return (

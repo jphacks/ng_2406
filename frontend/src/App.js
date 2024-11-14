@@ -15,7 +15,10 @@ function App() {
   const [actions, setActions] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [character, setCharacter] = useState(0);
+  const [character, setCharacter] = useState(() => {
+    const savedCharacter = localStorage.getItem('character');
+    return savedCharacter !== null ? parseInt(savedCharacter, 10) : 0;
+  });
   const [grandmaState, setGrandmaState] = useState('initial');
   const [diaryId, setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
@@ -48,6 +51,19 @@ function App() {
     }
   }, [character, lastCharacter]);
 
+
+  useEffect(() => {
+    localStorage.setItem('character', character);
+  }, [character]);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const diaryParam = urlParams.get('diary');
+    if (diaryParam) {
+      fetchDiary(diaryParam);
+    }
+  }, []);
+
   const fetchDiary = async (diaryUrl) => {
     setIsLoading(true);
     setActions([]);
@@ -68,6 +84,7 @@ function App() {
       }
 
       const data = await response.json();
+      setCharacter(data.character)
       setQuery(data.schedule);
       setActions(data.actions.map(action => action.action));
       setFeedbacks(data.actions);
@@ -175,8 +192,8 @@ function App() {
       transition: 'background-color 0.3s ease-in-out'
     }}>
       <Header
+        setCharacter={setCharacter}
         handleCalendarSubmit={handleCalendarSubmit}
-        accessToken={accessToken}
         character={character}
       />
       <Box
