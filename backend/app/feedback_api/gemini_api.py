@@ -7,7 +7,7 @@ from .weather_api import WeatherAPI
 from .goolab_api import GoolabAPI
 from .prompt_summary.grand_mother import GrandMother
 from .prompt_summary.father import Father
-from .prompt_summary.sister import Sister
+from .prompt_summary.brother import Brother
 from .prompt_summary.dog import Dog
 
 DEBUG = True
@@ -24,7 +24,7 @@ class GeminiAPI:
         self.model = genai.GenerativeModel("gemini-1.5-flash")
         self.weather = WeatherAPI()
         self.goolab = GoolabAPI()
-        self.prompt_summary = [GrandMother(), Father(), Sister(), Dog()]
+        self.prompt_summary = [GrandMother(), Father(), Brother(), Dog()]
 
     def _generate_prompt(self, schedule):
         '''

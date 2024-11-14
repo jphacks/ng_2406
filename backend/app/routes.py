@@ -44,6 +44,7 @@ def extract_actions():
             return jsonify({'message': 'characterは0から3の整数である必要があります'}), 400
 
         actions = gemini.extract_actions(schedule)
+        actions = [action.strip("'") for action in actions]
         if actions is None:
             return jsonify({'message': '行動が見つかりませんでした'}), 400
 
@@ -83,7 +84,10 @@ def action_feedback():
         character = request_data.get('character')
         diary_id = request_data.get('diary_id')
 
-        if not (0 <= character <= 3):
+        if action is None or character is None:
+            return jsonify({'message': '必要なパラメータが不足しています'}), 400
+
+        if not isinstance(character, int) or not (0 <= character <= 3):
             return jsonify({'message': 'キャラクターは0 ~ 3の間にしてください'}), 400
 
         response = gemini.action_feedback(action, character)
