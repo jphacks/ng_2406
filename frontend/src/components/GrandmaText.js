@@ -1,22 +1,25 @@
 import React from 'react';
 import { Box, Typography, Modal } from '@mui/material';
-import titleImage from '../images/title.png';
-import oneImage from '../images/one.png';
+import obaImage from '../images/title.png';
+import oniImage from '../images/oni.png';
 import otnImage from '../images/otn.png';
 import wnkImage from '../images/wnk.png';
 
-
-const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character }) => {
+const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, isLoading }) => {
     const [open, setOpen] = React.useState(false);
 
-    const handleOpen = () => setOpen(true);
+    const handleOpen = () => {
+        if (!isLoading) {
+            setOpen(true);
+        }
+    };
     const handleClose = () => setOpen(false);
 
     const imageOptions = [
-        { src: titleImage, alt: 'おばあ', color: '#FFA500' },
-        { src: otnImage, alt: 'おとん', color: '#E6F3FF' },
-        { src: oneImage, alt: 'おねぇ', color: '#F0FFE6' },
-        { src: wnkImage, alt: 'わんこ', color: '#FFE6E6' },
+        { src: obaImage, alt: 'おばあ', color: '#FF8C00' },
+        { src: otnImage, alt: 'おとん', color: '#4682B4' },
+        { src: oniImage, alt: 'おにぃ', color: '#228B22' },
+        { src: wnkImage, alt: 'わんこ', color: '#CD5C5C' },
     ];
 
     return (
@@ -51,7 +54,7 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character }
                         }),
                     },
                     '&:hover::before': {
-                        opacity: isResponseDisplayed ? 0 : 1,
+                        opacity: isResponseDisplayed || isLoading ? 0 : 1,
                     },
                     '@keyframes pulse': {
                         '0%': { opacity: 0 },
@@ -67,27 +70,28 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character }
                         width: '100%',
                         height: '100%',
                         objectFit: 'contain',
-                        cursor: 'pointer',
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
                         zIndex: 2,
+                        opacity: isLoading ? 0.5 : 1,
                     }}
                     onClick={handleOpen}
                     alt={imageOptions[character].alt}
                     src={imageOptions[character].src}
                 />
             </Box>
-        <Typography
-            variant="h5"
-            component="div"
-            sx={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                maxWidth: '100%',
-                fontFamily: '"Zen Maru Gothic"',
-            }}
-        >
-            「{text}」
-        </Typography>
+            <Typography
+                variant="h5"
+                component="div"
+                sx={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '100%',
+                    fontFamily: '"Zen Maru Gothic"',
+                }}
+            >
+                「{text}」
+            </Typography>
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -125,7 +129,7 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character }
                                     width: '100%',
                                     height: '100%',
                                     borderRadius: '50%',
-                                    backgroundColor: `${image.color}66`,
+                                    backgroundColor: `${image.color}55`,
                                     transition: 'opacity 0.3s ease-in-out',
                                     zIndex: 1,
                                 },
@@ -144,8 +148,10 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character }
                                 src={image.src}
                                 alt={image.alt}
                                 onClick={() => {
-                                    onCharacterChange(index);
-                                    handleClose();
+                                    if (!isLoading) {
+                                        onCharacterChange(index);
+                                        handleClose();
+                                    }
                                 }}
                             />
                         </Box>

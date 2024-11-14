@@ -15,24 +15,47 @@ function App() {
   const [actions, setActions] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [character, setCharacter] = useState(0);
+  const [character, setCharacter] = useState(() => {
+    const savedCharacter = localStorage.getItem('character');
+    return savedCharacter !== null ? parseInt(savedCharacter, 10) : 0;
+  });
   const [grandmaState, setGrandmaState] = useState('initial');
   const [diaryId, setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
   const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
+  const [isDialogVisible, setIsDialogVisible] = useState(true);
+  const [lastCharacter, setLastCharacter] = useState(0);
 
   const backgroundColors = [
     '#F5F5F5', // おばあ
     '#E6F3FF', // おとん
-    '#F0FFE6', // おねえ
+    '#F0FFE6', // おにぃ（おねえ）
     '#FFE6E6'  // わんこ
   ];
 
   const handleCharacterChange = (index) => {
-    setCharacter(index);
-    console.log(`選択されたキャラクター: ${index}`);
+    if (index !== character) {
+      setLastCharacter(character);
+      setCharacter(index);
+      setIsDialogVisible(false);
+      setGrandmaState('initial')
+    } else {
+      setIsDialogVisible(true);
+    }
   };
+
+  useEffect(() => {
+    if (character === lastCharacter) {
+      setIsDialogVisible(true);
+    }
+  }, [character, lastCharacter]);
+
+
+  useEffect(() => {
+    localStorage.setItem('character', character);
+  }, [character]);
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const diaryParam = urlParams.get('diary');
@@ -61,6 +84,7 @@ function App() {
       }
 
       const data = await response.json();
+      setCharacter(data.character)
       setQuery(data.schedule);
       setActions(data.actions.map(action => action.action));
       setFeedbacks(data.actions);
@@ -82,6 +106,7 @@ function App() {
     setActions([]);
     setFeedbacks([]);
     setIsSubmitted(true);
+    setIsDialogVisible(true);
     try {
       let extractData;
       if (actionType === 'calendar') {
@@ -101,8 +126,6 @@ function App() {
 
         extractData = await response.json();
       } else {
-        console.log(query)
-        console.log(character)
         const extractResponse = await fetch('/api/extract-actions', {
           method: 'POST',
           headers: {
@@ -169,8 +192,8 @@ function App() {
       transition: 'background-color 0.3s ease-in-out'
     }}>
       <Header
+        setCharacter={setCharacter}
         handleCalendarSubmit={handleCalendarSubmit}
-        accessToken={accessToken}
         character={character}
       />
       <Box
@@ -193,8 +216,12 @@ function App() {
               transition: 'all 0.3s ease-in-out',
             }}
           >
-            <GrandmaText text={dialogs.grandma[grandmaState]} onCharacterChange={handleCharacterChange}
-              character={character} />
+            <GrandmaText
+              text={dialogs[character][grandmaState]}
+              onCharacterChange={handleCharacterChange}
+              character={character}
+              isLoading={isLoading}
+            />
             <QueryInput
               query={query}
               setQuery={setQuery}
@@ -202,7 +229,7 @@ function App() {
               character={character}
             />
             {isLoading && <LoadingIndicator />}
-            {isSubmitted && !isLoading && actions.length > 0 && (
+            {isSubmitted && !isLoading && actions.length > 0 && isDialogVisible && (
               <ResponseList
                 actions={actions}
                 feedbacks={feedbacks}

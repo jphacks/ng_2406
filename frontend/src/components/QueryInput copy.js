@@ -9,10 +9,10 @@ const QueryInput = ({ query, setQuery, onSubmit, isLoading, character }) => {
     };
 
     const characterOptions = [
-        { text: 'おばあ', color: '#FF8C00', hoverColor: '#FFA500' }, 
-        { text: 'おとん', color: '#4682B4', hoverColor: '#5F9EA0' }, 
-        { text: 'おにぃ', color: '#228B22', hoverColor: '#32CD32' }, 
-        { text: 'わんこ', color: '#CD5C5C', hoverColor: '#F08080' }, 
+        { text: 'おばあ', color: '#FFA500' },
+        { text: 'おとん', color: '#E6F3FF' },
+        { text: 'おにぃ', color: '#F0FFE6' },
+        { text: 'わんこ', color: '#FFE6E6' },
     ];
 
     return (
@@ -40,9 +40,10 @@ const QueryInput = ({ query, setQuery, onSubmit, isLoading, character }) => {
                     fontSize: '1.1rem',
                     fontWeight: 'bold',
                     backgroundColor: characterOptions[character].color,
-                    color: 'white',
                     '&:hover': {
-                        backgroundColor: characterOptions[character].hoverColor,
+                        backgroundColor: characterOptions[character].color,
+                        opacity: 0.8,
+
                     },
                 }}
             >

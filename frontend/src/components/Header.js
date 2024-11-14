@@ -9,23 +9,24 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImage from '../images/logo.png';
 import otnImage from '../images/otn-logo.png';
-import oneImage from '../images/one-logo.png';
+import oniImage from '../images/oni-logo.png';
 import wnkImage from '../images/wnk-logo.png';
 const logoOptions = [
     { src: logoImage, alt: '安心打診おばあ' },
     { src: otnImage, alt: '安心打診おとん' },
-    { src: oneImage, alt: '安心打診おねぇ' },
+    { src: oniImage, alt: '安心打診おにぃ' },
     { src: wnkImage, alt: '安心打診わんこ' },
 ];
-const Header = ({ accessToken, character, handleCalendarSubmit }) => {
+const Header = ({ setCharacter, character, handleCalendarSubmit }) => {
 
     const navigate = useNavigate();
     const location = useLocation();
     const handleLogoClick = () => {
         if (location.pathname !== '/' || location.search !== '') {
             navigate('/', { replace: true });
-            window.location.reload();
         }
+        setCharacter(0);
+        window.location.reload();
     };
 
     return (
