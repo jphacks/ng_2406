@@ -19,6 +19,9 @@ function App() {
     const savedCharacter = localStorage.getItem('character');
     return savedCharacter !== null ? parseInt(savedCharacter, 10) : 0;
   });
+  const [hasChangedCharacter, setHasChangedCharacter] = useState(() => {
+    return localStorage.getItem('hasChangedCharacter') === 'true';
+  });
   const [grandmaState, setGrandmaState] = useState('initial');
   const [diaryId, setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
@@ -26,6 +29,10 @@ function App() {
   const [accessToken, setAccessToken] = useState(null);
   const [isDialogVisible, setIsDialogVisible] = useState(true);
   const [lastCharacter, setLastCharacter] = useState(0);
+  const [shouldPulse, setShouldPulse] = useState(!hasChangedCharacter);
+  const [isResponseDisplayed, setIsResponseDisplayed] = useState(false);
+  const [sortedFeedbacks, setSortedFeedbacks] = useState([]);
+
 
   const backgroundColors = [
     '#F5F5F5', // おばあ
@@ -35,6 +42,11 @@ function App() {
   ];
 
   const handleCharacterChange = (index) => {
+    if (!hasChangedCharacter) {
+      setIsResponseDisplayed(false);
+      setHasChangedCharacter(true);
+      localStorage.setItem('hasChangedCharacter', 'true');
+    }
     if (index !== character) {
       setLastCharacter(character);
       setCharacter(index);
@@ -105,8 +117,8 @@ function App() {
     setIsLoading(true);
     setActions([]);
     setFeedbacks([]);
+    setSortedFeedbacks([]);
     setIsSubmitted(true);
-    setIsDialogVisible(true);
     try {
       let extractData;
       if (actionType === 'calendar') {
@@ -146,25 +158,29 @@ function App() {
       setDiaryId(extractData.diary_id);
       setDiaryUrl(extractData.diary_url);
       setGrandmaState('waiting');
+      setIsDialogVisible(true)
       setIsLoading(false);
 
-      const feedbackPromises = extractData.actions.map(action =>
+      const feedbackPromises = extractData.actions.map((action, idx) =>
         fetch('/api/action-feedback', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ action, schedule: query, character, diary_id: extractData.diary_id })
+          body: JSON.stringify({ action, schedule: query, character, diary_id: extractData.diary_id, idx: idx })
         }).then(res => res.json())
       );
 
       const feedbackResults = await Promise.all(feedbackPromises);
-      setFeedbacks(prevFeedbacks => [...prevFeedbacks, ...feedbackResults]);
+      const sortedResults = feedbackResults.sort((a, b) => a.idx - b.idx);
+      setFeedbacks(sortedResults);
+      setSortedFeedbacks(sortedResults);
 
     } catch (error) {
       console.error('Error:', error);
       setGrandmaState('error');
     } finally {
+      setIsResponseDisplayed(true);
       setIsLoadingAdditionalInfo(false);
     }
   }, [query, character]);
@@ -219,8 +235,10 @@ function App() {
             <GrandmaText
               text={dialogs[character][grandmaState]}
               onCharacterChange={handleCharacterChange}
+              isResponseDisplayed={isResponseDisplayed}
               character={character}
               isLoading={isLoading}
+              shouldPulse={shouldPulse}
             />
             <QueryInput
               query={query}
@@ -232,7 +250,7 @@ function App() {
             {isSubmitted && !isLoading && actions.length > 0 && isDialogVisible && (
               <ResponseList
                 actions={actions}
-                feedbacks={feedbacks}
+                feedbacks={sortedFeedbacks}
                 diaryUrl={diaryUrl}
                 isLoadingAdditionalInfo={isLoadingAdditionalInfo}
                 character={character}
