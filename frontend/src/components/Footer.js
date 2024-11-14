@@ -43,12 +43,34 @@ const Footer = () => {
                         sx={{ width: '32px', height: 'auto' }}
                     />
                 </Link>
-            </Box>
-            <Box sx={{ mt: 1 }}>
                 <Typography variant="caption" color="text.secondary">
                     Icons by
                     <Link href="https://icons8.jp/" color="inherit" sx={{ mx: 1 }}>
                         Icons8
+                    </Link>
+                </Typography>
+            </Box>
+            <Box sx={{ mt: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                    made by JPHACKS team ng_2406
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                    <Link href="https://github.com/kabetani-yusei" color="inherit" sx={{ mx: 1 }}>
+                        kabetani-yusei
+                    </Link>
+                    |
+                    <Link href="https://github.com/waka320" color="inherit" sx={{ mx: 1 }}>
+                        waka320
+                    </Link>
+                    |
+                    <Link href="https://github.com/souta0812" color="inherit" sx={{ mx: 1 }}>
+                        souta0812
+                    </Link>
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                    Special Thanks to
+                    <Link href="https://jphacks.com/" color="inherit" sx={{ mx: 1 }}>
+                        JPHACKS
                     </Link>
                 </Typography>
             </Box>

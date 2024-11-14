@@ -41,9 +41,11 @@ const Header = ({ setCharacter, character, handleCalendarSubmit }) => {
                                 cursor: 'pointer'
                             }} onClick={handleLogoClick} />
                     </Typography>
+                    {/* カレンダーから予定を取得ボタンをコメントアウト
                     <Button onClick={handleCalendarSubmit} >
                         カレンダーから予定を取得
                     </Button>
+                    */}
                 </Box>
             </Toolbar>
         </AppBar>
