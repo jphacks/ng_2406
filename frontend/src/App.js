@@ -31,6 +31,7 @@ function App() {
   const [lastCharacter, setLastCharacter] = useState(0);
   const [shouldPulse, setShouldPulse] = useState(!hasChangedCharacter);
   const [isResponseDisplayed, setIsResponseDisplayed] = useState(false);
+  const [sortedFeedbacks, setSortedFeedbacks] = useState([]);
 
 
   const backgroundColors = [
@@ -116,6 +117,7 @@ function App() {
     setIsLoading(true);
     setActions([]);
     setFeedbacks([]);
+    setSortedFeedbacks([]);
     setIsSubmitted(true);
     try {
       let extractData;
@@ -159,18 +161,20 @@ function App() {
       setIsDialogVisible(true)
       setIsLoading(false);
 
-      const feedbackPromises = extractData.actions.map(action =>
+      const feedbackPromises = extractData.actions.map((action, idx) =>
         fetch('/api/action-feedback', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ action, schedule: query, character, diary_id: extractData.diary_id })
+          body: JSON.stringify({ action, schedule: query, character, diary_id: extractData.diary_id, idx: idx })
         }).then(res => res.json())
       );
 
       const feedbackResults = await Promise.all(feedbackPromises);
-      setFeedbacks(prevFeedbacks => [...prevFeedbacks, ...feedbackResults]);
+      const sortedResults = feedbackResults.sort((a, b) => a.idx - b.idx);
+      setFeedbacks(sortedResults);
+      setSortedFeedbacks(sortedResults);
 
     } catch (error) {
       console.error('Error:', error);
@@ -246,7 +250,7 @@ function App() {
             {isSubmitted && !isLoading && actions.length > 0 && isDialogVisible && (
               <ResponseList
                 actions={actions}
-                feedbacks={feedbacks}
+                feedbacks={sortedFeedbacks}
                 diaryUrl={diaryUrl}
                 isLoadingAdditionalInfo={isLoadingAdditionalInfo}
                 character={character}
