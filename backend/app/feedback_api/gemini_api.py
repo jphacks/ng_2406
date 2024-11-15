@@ -3,7 +3,6 @@ import os
 import re
 from dotenv import load_dotenv
 import sys
-from .weather_api import WeatherAPI
 from .goolab_api import GoolabAPI
 from .prompt_summary.grand_mother import GrandMother
 from .prompt_summary.father import Father
@@ -22,7 +21,6 @@ class GeminiAPI:
         # APIキーの設定
         genai.configure(api_key=GeminiAPI_KEY)
         self.model = genai.GenerativeModel("gemini-1.5-flash")
-        self.weather = WeatherAPI()
         self.goolab = GoolabAPI()
         self.prompt_summary = [GrandMother(), Father(), Brother(), Dog()]
 
@@ -38,22 +36,6 @@ class GeminiAPI:
                   "回答は必ずpythonの配列形式で出力してください。"
                   "もし行動が見つからなかった場合は何も返さないでください")
         return prompt
-
-    def _is_used_weather_info(self, schedule):
-        '''
-        ユーザーの予定を見て、天気情報が必要かを判定する
-        '''
-        try:
-            prompt = (schedule
-                    + "という文章で外出する可能性が高い場合は1を、それ以外の場合は0を出力してください。"
-                    "回答は必ず数値のみで「0」「1」のどちらかを返してください。")
-            response = self.model.generate_content(prompt).text
-            if DEBUG: print(response)
-            res = int(response)
-        except Exception as e:
-            print(f"天気情報の判定に失敗しました: {e}")
-            res = 0
-        return res
 
     def extract_actions(self, schedule):
         if self.goolab.has_action_content(schedule) == False:
@@ -76,8 +58,6 @@ class GeminiAPI:
 
         if actions == []:
             return None
-        # if self._is_used_weather_info(schedule):
-        #     actions = ["天気情報"] + actions
         return actions
 
     def __get_facescore(self, action):
@@ -99,23 +79,6 @@ class GeminiAPI:
             print(f"危険度の計算に失敗しました: {e}")
             return 0
 
-    def __get_weather_info(self, character):
-        '''
-        天気情報を取得する
-        input : None
-        output : str : 天気情報
-        '''
-        tokyo_city_number = 130010
-        weather_data = self.weather.get_weather(tokyo_city_number)
-        prompt = self.prompt_summary[character].weather_feedback(weather_data)
-        try:
-            weather_info = self.model.generate_content(prompt).text
-            return weather_info
-        except Exception as e:
-            if DEBUG: print(f"ハラスメントエラーです: {prompt}")
-        error_weather = self.prompt_summary[character].error_weather()
-        return error_weather
-
     def __get_action_feedback(self, action, character):
         '''
         行動からフィードバックを生成する
@@ -133,14 +96,10 @@ class GeminiAPI:
         return True, error_message
 
     def _get_face_and_feedback(self, action, character):
-        if action == "天気情報":
-            face = 0
-            feedback = self.__get_weather_info(character)
-        else:
-            face = self.__get_facescore(action)
-            (is_error, feedback) = self.__get_action_feedback(action, character)
-            if is_error:
-                face = 2
+        face = self.__get_facescore(action)
+        (is_error, feedback) = self.__get_action_feedback(action, character)
+        if is_error:
+            face = 2
         return face, feedback
         
     def action_feedback(self, action, character):
