@@ -33,7 +33,6 @@ function App() {
   const [isResponseDisplayed, setIsResponseDisplayed] = useState(false);
   const [sortedFeedbacks, setSortedFeedbacks] = useState([]);
 
-
   const backgroundColors = [
     '#F5F5F5', // おばあ
     '#E6F3FF', // おとん
@@ -51,7 +50,7 @@ function App() {
       setLastCharacter(character);
       setCharacter(index);
       setIsDialogVisible(false);
-      setGrandmaState('initial')
+      setGrandmaState('initial');
     } else {
       setIsDialogVisible(true);
     }
@@ -62,7 +61,6 @@ function App() {
       setIsDialogVisible(true);
     }
   }, [character, lastCharacter]);
-
 
   useEffect(() => {
     localStorage.setItem('character', character);
@@ -80,9 +78,9 @@ function App() {
     setIsLoading(true);
     setActions([]);
     setFeedbacks([]);
+    setSortedFeedbacks([]);
     setIsSubmitted(true);
     setGrandmaState('loading');
-
     try {
       const response = await fetch(`/api/get/diary/${diaryUrl}`, {
         method: 'GET',
@@ -90,30 +88,40 @@ function App() {
           'Content-Type': 'application/json',
         },
       });
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
-
       setCharacter(data.character);
       setQuery(data.schedule);
-      setActions(data.actions.map(action => action.action));
-      setFeedbacks(data.actions);
+
+      // アクションとフィードバックを適切に設定
+      const actionsWithFeedback = data.actions.map(action => ({
+        action: action.action,
+        feedback: action.feedback,
+        face: action.face,
+        idx: action.idx
+      }));
+
+      setActions(actionsWithFeedback.map(item => item.action));
+
+      // フィードバックをソートして設定
+      const sortedFeedbacks = actionsWithFeedback.sort((a, b) => a.idx - b.idx);
+      setFeedbacks(sortedFeedbacks);
+      setSortedFeedbacks(sortedFeedbacks);
+
       setDiaryUrl(diaryUrl);
       setDiaryId(diaryUrl);
       setIsSubmitted(true);
       setGrandmaState('waiting');
-
     } catch (error) {
       console.error('Error fetching diary:', error);
       setGrandmaState('error');
     } finally {
       setIsLoading(false);
+      setIsResponseDisplayed(true);
     }
   };
-
   const handleAction = useCallback(async (actionType, token = null) => {
     setGrandmaState('loading');
     setIsLoading(true);
@@ -124,7 +132,6 @@ function App() {
     try {
       let extractData;
       if (actionType === 'calendar') {
-
         const response = await fetch('/api/get/calendar_events', {
           method: 'GET',
           headers: {
@@ -132,12 +139,10 @@ function App() {
             'Content-Type': 'application/json',
           },
         });
-
         if (!response.ok) {
           setIsLoading(false);
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-
         extractData = await response.json();
       } else {
         const extractResponse = await fetch('/api/extract-actions', {
@@ -147,12 +152,10 @@ function App() {
           },
           body: JSON.stringify({ schedule: query, character }),
         });
-
         if (!extractResponse.ok) {
           setIsLoading(false);
           throw new Error(`HTTP error! status: ${extractResponse.status}`);
         }
-
         extractData = await extractResponse.json();
       }
 
@@ -160,7 +163,7 @@ function App() {
       setDiaryId(extractData.diary_id);
       setDiaryUrl(extractData.diary_url);
       setGrandmaState('waiting');
-      setIsDialogVisible(true)
+      setIsDialogVisible(true);
       setIsLoading(false);
 
       const feedbackPromises = extractData.actions.map((action, idx) =>
@@ -169,14 +172,20 @@ function App() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ action, schedule: query, character, diary_id: extractData.diary_id, idx: idx })
+          body: JSON.stringify({
+            action,
+            schedule: query,
+            character,
+            diary_id: extractData.diary_id,
+            idx: idx
+          })
         }).then(res => res.json())
       );
 
       const feedbackResults = await Promise.all(feedbackPromises);
       const sortedResults = feedbackResults.sort((a, b) => a.idx - b.idx);
       setFeedbacks(sortedResults);
-
+      setSortedFeedbacks(sortedResults);
     } catch (error) {
       console.error('Error:', error);
       setGrandmaState('error');
@@ -198,7 +207,6 @@ function App() {
     }
     handleAction('calendar', accessToken);
   }, [accessToken, handleAction]);
-
 
   return (
     <Box sx={{
@@ -251,11 +259,11 @@ function App() {
             {isSubmitted && !isLoading && actions.length > 0 && isDialogVisible && (
               <ResponseList
                 actions={actions}
-                feedbacks={feedbacks}
+                feedbacks={sortedFeedbacks}
                 diaryUrl={diaryUrl}
                 isLoadingAdditionalInfo={isLoadingAdditionalInfo}
                 character={character}
-              />
+              />  
             )}
           </Box>
         </Container>
