@@ -35,8 +35,8 @@ class GeminiAPI:
         prompt_action = schedule
         prompt = (prompt_action
                   + "という文章から行動を抜き出してpythonの配列として出力してください。"
-                  "回答は必ずpythonの配列形式で「['行動1', '行動2', ...]」のように"
-                  "行動が文章から見つけられない場合は「[]」と出力してください。")
+                  "回答は必ずpythonの配列形式で出力してください。"
+                  "もし行動が見つからなかった場合は何も返さないでください")
         return prompt
 
     def _is_used_weather_info(self, schedule):

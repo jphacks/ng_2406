@@ -51,5 +51,5 @@ class GoolabAPI:
         risk_check.append(self._calculate_similarity(action, "違反"))
         risk_check.append(self._calculate_similarity(action, "事件"))
         sorted_risk_check = sorted(risk_check, reverse=True)
-        weighted_risk = sorted_risk_check[0] * 0.7 + sorted_risk_check[1] * 0.3
+        weighted_risk = sorted_risk_check[0] * 0.8 + sorted_risk_check[1] * 0.2
         return weighted_risk
