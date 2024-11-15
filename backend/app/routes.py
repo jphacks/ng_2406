@@ -12,7 +12,6 @@ from hashids import Hashids
 
 api = Blueprint('api', __name__)
 gemini = GeminiAPI()
-calendar = CalendarAPI()
 
 
 # diary idをURLに使用する10桁のハッシュ値に変換する
