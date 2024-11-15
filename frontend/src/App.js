@@ -118,6 +118,7 @@ function App() {
       console.error('Error fetching diary:', error);
       setGrandmaState('error');
     } finally {
+      setGrandmaState("pastResponse");
       setIsLoading(false);
       setIsResponseDisplayed(true);
     }
@@ -263,7 +264,7 @@ function App() {
                 diaryUrl={diaryUrl}
                 isLoadingAdditionalInfo={isLoadingAdditionalInfo}
                 character={character}
-              />  
+              />
             )}
           </Box>
         </Container>
