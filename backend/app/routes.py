@@ -82,6 +82,7 @@ def action_feedback():
         schedule = request_data.get('schedule')
         character = request_data.get('character')
         diary_id = request_data.get('diary_id')
+        idx = request_data.get('idx')
 
         if action is None or character is None:
             return jsonify({'message': '必要なパラメータが不足しています'}), 400
@@ -94,7 +95,8 @@ def action_feedback():
             diary_id=diary_id,
             face=response['face'],
             action=response['action'],
-            action_feedback=response['feedback']
+            action_feedback=response['feedback'],
+            idx=idx
         )
         db.session.add(feedback)
         db.session.commit()
@@ -122,7 +124,7 @@ def get_feedbacks(diary_url):
         }
 
         feedbacks = Feedback.query.filter_by(
-            diary_id=diary_id).order_by(Feedback.id).all()
+            diary_id=diary_id).order_by(Feedback.idx).all()
         response['actions'] = [
             {
                 'face': feedback.face,
