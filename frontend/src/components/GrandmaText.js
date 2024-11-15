@@ -92,7 +92,7 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, 
                     textAlign: 'center',
                     wordBreak: 'break-word',
                     whiteSpace: 'pre-wrap',
-                    fontSize: '1.3rem', // スマートフォン向けに少し大きくしたフォントサイズ
+                    fontSize: '1.3rem',
                     fontFamily: '"Zen Maru Gothic"',
                 }}>
                     「{text}」
