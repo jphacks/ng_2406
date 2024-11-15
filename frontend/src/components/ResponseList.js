@@ -39,7 +39,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
 
     const handleXPost = () => {
         const urlToShare = `${window.location.origin}?diary=${diaryUrl}`;
-        const text = encodeURIComponent(`安心打診${selectedImage.alt}からの伝言です...！`);
+        const text = encodeURIComponent(`安心打診${selectedImage.alt}からの伝言です...！ #JPHACKS2024 #安心打診おばあ`);
         const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(urlToShare)}`;
         window.open(url, '_blank');
     };
