@@ -5,7 +5,7 @@ import grandmaImage from '../images/oba-white.png';
 import otnImage from '../images/otn-white.png';
 import oniImage from '../images/oni-white.png';
 import wnkImage from '../images/wnk-white.png';
-import XIcon from '@mui/icons-material/X'; // Xのアイコンとして一時的にTwitterアイコンを使用
+import XIcon from '@mui/icons-material/X';
 
 const imageOptions = [
     { src: grandmaImage, alt: 'おばあ', font: "Yuji Mai" },
@@ -26,7 +26,6 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
 
     const handleShare = () => {
         const urlToCopy = `${window.location.origin}?diary=${diaryUrl}`;
-
         navigator.clipboard.writeText(urlToCopy).then(() => {
             setTooltipText("コピー完了！");
             console.log('URLがクリップボードにコピーされました');
@@ -40,7 +39,6 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
 
     const handleXPost = () => {
         const urlToShare = `${window.location.origin}?diary=${diaryUrl}`;
-        const selectedImage = imageOptions[character] || imageOptions[0];
         const text = encodeURIComponent(`安心打診${selectedImage.alt}からの伝言です...！`);
         const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(urlToShare)}`;
         window.open(url, '_blank');
@@ -61,7 +59,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
                 </Tooltip>
             </Box>
             {actions.map((action, index) => (
-                <Paper key={index} elevation={3} sx={{ p: 2, mt: 2, width: '100%', bgcolor: '#e9e9e9' }}>
+                <Paper key={index} elevation={3} sx={{ p: 2, mb: 2, width: '100%', bgcolor: '#f5f5f5' }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                         <Avatar
                             sx={{
@@ -76,7 +74,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
                             src={selectedImage.src}
                             alt={selectedImage.alt}
                         />
-                        <Box>
+                        <Box sx={{ flexGrow: 1 }}>
                             <Typography
                                 variant="h6"
                                 sx={{
