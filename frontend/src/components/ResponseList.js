@@ -59,7 +59,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
                 </Tooltip>
             </Box>
             {actions.map((action, index) => (
-                <Paper key={index} elevation={3} sx={{ p: 2, mb: 2, width: '100%', bgcolor: '#f5f5f5' }}>
+                <Paper key={index} elevation={3} sx={{ p: 2, mt: 2, width: '100%', bgcolor: '#f5f5f5' }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                         <Avatar
                             sx={{
