@@ -169,7 +169,7 @@ function App() {
       setIsLoading(false);
 
       const feedbackPromises = extractData.actions.map((action, idx) =>
-        fetch('/api/action-feedback', {
+        fetch(`${apiBaseUrl}/api/action-feedback`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
