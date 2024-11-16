@@ -33,7 +33,6 @@ function App() {
   const [isResponseDisplayed, setIsResponseDisplayed] = useState(false);
   const [sortedFeedbacks, setSortedFeedbacks] = useState([]);
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || '';
-  console.log('API Base URL:', process.env.REACT_APP_API_BASE_URL);
 
   const backgroundColors = [
     '#F5F5F5', // おばあ
