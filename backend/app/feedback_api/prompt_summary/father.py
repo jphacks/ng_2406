@@ -18,7 +18,7 @@ class Father:
         output(str) : feedback
         '''
         prompt = (
-            f"{action}の危険につながりそうなポイントを親父口調で60字以内で警告してください。"
+            f"{action}の危険につながりそうなポイントを親父口調で60字以内で教えてください。"
         )
         return prompt
     
@@ -37,5 +37,5 @@ class Father:
         input : None
         output : str : 怒っているメッセージ
         '''
-        prompt = "天気情報なんか信じるな。窓の外見てこい。"
+        prompt = "天気情報なんか当てにすんな。窓の外見てこい。"
         return prompt

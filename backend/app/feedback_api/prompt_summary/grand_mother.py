@@ -37,5 +37,5 @@ class GrandMother:
         input : None
         output : str : 怒っているメッセージ
         '''
-        prompt = "あなたの心が晴れないと、天気も晴れないわよ。"
+        prompt = "お天気は読めないわねえ。あなたの心は晴れててね。"
         return prompt
