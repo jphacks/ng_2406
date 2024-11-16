@@ -24,13 +24,15 @@ const logoOptions = [
 ];
 
 const Header = ({ setCharacter, character, handleCalendarSubmit }) => {
+    const [openHandout, setOpenHandout] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const [openHandout, setOpenHandout] = useState(false);
-
+    const basePath = '/ng_2406';
     const handleLogoClick = () => {
-        if (location.pathname !== '/' || location.search !== '') {
-            navigate('/', { replace: true });
+
+
+        if (location.pathname !== `${basePath}/` || location.search !== '') {
+            navigate(`${basePath}/`, { replace: true });
         }
         setCharacter(0);
         window.location.reload();
