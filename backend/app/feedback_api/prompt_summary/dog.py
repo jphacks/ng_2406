@@ -18,7 +18,7 @@ class Dog:
         output(str) : feedback
         '''
         prompt = (
-            f"{action}の危険さに応じて忠告するように「ワン」と「!」のみで40字以内の文字列を返してください。"
+            f"{action}の危険さに応じて忠告するように「ワン」と「!」のみで30字以内の文字列を返してください。"
         )
         return prompt
     
