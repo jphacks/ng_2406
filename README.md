@@ -1,5 +1,4 @@
-# 安心打診おばあ: [url](https://www.youtube.com/watch?v=wMtzEgBEyec)
-
+# 安心打診おばあ: [実際に試してみる](https://jphacks.github.io/ng_2406/)
 ![2024-10-27 11 04の画像 (1)](https://github.com/user-attachments/assets/b41391e4-8875-4d36-981e-96848e568c97)
 
 ## 製品概要
@@ -26,16 +25,16 @@ YouTube URL : [安心打診おばあ](https://www.youtube.com/watch?v=wMtzEgBEye
 ## 開発技術
 ### 活用した技術
 #### API・データ
-* GeminiAPI 
-* [天気予報 API](https://github.com/tsukumijima/weather-api)
+* GeminiAPI
+* gooラボAPI
 
 #### フレームワーク・ライブラリ・モジュール
 * Flask
 * React
-* MySQL
+* PostgreSQL
 
 #### デバイス
-* WindowsまたはMacのPC上で動作
+* webが開ける端末であれば動作する
 
 ### 独自技術
 #### ハッカソンで開発した独自機能・技術
@@ -44,7 +43,10 @@ YouTube URL : [安心打診おばあ](https://www.youtube.com/watch?v=wMtzEgBEye
   * チームメンバーのうち１人は開発経験ゼロ
   * 残業もゼロ（"ホワイト"！）
 * 力を入れた部分  
-  * [routes.py](https://github.com/jphacks/ng_2406/blob/main/backend/app/gemini_api.py)
-  について、プロンプトを工夫してほしいデータを取得できるようにすることに力をいれた。
+  * [プロンプトの部分](https://github.com/jphacks/ng_2406/tree/main/backend/app/feedback_api/prompt_summary)  
+    エラーが起きた時に表示する文章を含めて、どうしたらキャラクターの個性を出せるかを考えた部分
+  * [gooラボAPI](https://github.com/jphacks/ng_2406/blob/main/backend/app/feedback_api/goolab_api.py)  
+    HackDayと比較してより完成度を高くしようとしたときに、自然言語処理が高速にできるgooラボAPIに目を付けた。
+    なんども試行錯誤を繰り返して、gooラボAPIをどのように活かせるかを模索し続けた。
   * UIはシンプルでいて、ユーモアのあるものを目指した。
     * 個性を残しつつ良いUXを 
