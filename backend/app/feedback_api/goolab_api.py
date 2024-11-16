@@ -46,6 +46,10 @@ class GoolabAPI:
         return similarity
     
     def calculate_risk_level(self, action):
+        #　起きるは必ず0.5にする
+        keywords = ["起きる", "起きた", "おきる", "おきた"]
+        if any(keyword in action for keyword in keywords):
+            return 0.5
         risk_check = []
         risk_check.append(self._calculate_similarity(action, "犯罪"))
         risk_check.append(self._calculate_similarity(action, "違反"))
