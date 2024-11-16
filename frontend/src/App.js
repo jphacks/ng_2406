@@ -32,6 +32,8 @@ function App() {
   const [shouldPulse, setShouldPulse] = useState(!hasChangedCharacter);
   const [isResponseDisplayed, setIsResponseDisplayed] = useState(false);
   const [sortedFeedbacks, setSortedFeedbacks] = useState([]);
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || '';
+  console.log('API Base URL:', process.env.REACT_APP_API_BASE_URL);
 
   const backgroundColors = [
     '#F5F5F5', // おばあ
@@ -82,7 +84,7 @@ function App() {
     setIsSubmitted(true);
     setGrandmaState('loading');
     try {
-      const response = await fetch(`/api/get/diary/${diaryUrl}`, {
+      const response = await fetch(`${apiBaseUrl}/api/get/diary/${diaryUrl}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +135,7 @@ function App() {
     try {
       let extractData;
       if (actionType === 'calendar') {
-        const response = await fetch('/api/get/calendar_events', {
+        const response = await fetch(`${apiBaseUrl}/api/get/calendar_events`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -146,7 +148,7 @@ function App() {
         }
         extractData = await response.json();
       } else {
-        const extractResponse = await fetch('/api/extract-actions', {
+        const extractResponse = await fetch(`${apiBaseUrl}/api/extract-actions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
