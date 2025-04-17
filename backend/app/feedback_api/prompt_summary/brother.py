@@ -8,7 +8,7 @@ class Brother:
         input(str) : weather_data
         output(str) : feedback
         '''
-        prompt = (weather_data + "ここから本日の天気情報を取り出し、キザなナルシスト口調で30字以内のアドバイスをください"
+        prompt = (weather_data + "ここから本日の天気情報を取り出し、キザなナルシスト口調(一人称は俺)で30字以内のアドバイスをください"
                 "必ず文章の最後には句読点や?ではなく☆をつけてください。"
         )
         return prompt
@@ -32,7 +32,7 @@ class Brother:
         input : None
         output : str : 怒っているメッセージ
         '''
-        prompt = "なんでそんなちっぽけなことを聞くんだい☆"
+        prompt = "変な気を起こしちゃダメだぜ☆俺様だけ見てれば良いのさ☆"
         return prompt
 
     def error_weather(self):
@@ -41,5 +41,5 @@ class Brother:
         input : None
         output : str : 怒っているメッセージ
         '''
-        prompt = "俺は傘を持たない。雨が降って濡れたとしても水も滴るいい男ってな☆"
+        prompt = "天気は読めないな☆ん？あぁ俺様は大丈夫だぜ☆水も滴るいい男だからな☆"
         return prompt

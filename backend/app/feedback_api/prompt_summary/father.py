@@ -37,5 +37,5 @@ class Father:
         input : None
         output : str : 怒っているメッセージ
         '''
-        prompt = "天気情報なんか信じるな。窓の外見てこい。"
+        prompt = "天気情報なんか当てにすんな。窓の外見てこい。"
         return prompt

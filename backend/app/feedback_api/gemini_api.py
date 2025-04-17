@@ -3,7 +3,6 @@ import os
 import re
 from dotenv import load_dotenv
 import sys
-from .goolab_api import GoolabAPI
 from .prompt_summary.grand_mother import GrandMother
 from .prompt_summary.father import Father
 from .prompt_summary.brother import Brother
@@ -21,7 +20,6 @@ class GeminiAPI:
         # APIキーの設定
         genai.configure(api_key=GeminiAPI_KEY)
         self.model = genai.GenerativeModel("gemini-1.5-flash-8b")
-        self.goolab = GoolabAPI()
         self.prompt_summary = [GrandMother(), Father(), Brother(), Dog()]
 
     def _generate_prompt(self, schedule):
@@ -37,25 +35,7 @@ class GeminiAPI:
                   "もし行動が見つからなかった場合は何も返さないでください")
         return prompt
 
-    def _is_used_weather_info(self, schedule):
-        '''
-        ユーザーの予定を見て、天気情報が必要かを判定する
-        '''
-        try:
-            prompt = (schedule
-                    + "という文章で外出する可能性が高い場合は1を、それ以外の場合は0を出力してください。"
-                    "回答は必ず数値のみで「0」「1」のどちらかを返してください。")
-            response = self.model.generate_content(prompt).text
-            if DEBUG: print(response)
-            res = int(response)
-        except Exception as e:
-            print(f"天気情報の判定に失敗しました: {e}")
-            res = 0
-        return res
-
     def extract_actions(self, schedule):
-        if self.goolab.has_action_content(schedule) == False:
-            return None
         actions = []
         prompt = self._generate_prompt(schedule)
         for _ in range(5):
@@ -82,15 +62,21 @@ class GeminiAPI:
         input : action(str) : 行動
         output : int : 感情の番号
         '''
+        prompt_description = f"""次の行動「{action}」の危険度を0〜2のいずれかの数字1文字で評価してください。
+        説明は不要です。出力は「0」「1」「2」のいずれかの半角数字1文字だけにしてください。"""
+
         try:
-            score = self.goolab.calculate_risk_level(action)
-            print(f"{action}の危険度: {score}")
-            if score >= 0.55:
-                return 2
-            elif score >= 0.51:
-                return 1
-            else:
-                return 0
+            response = self.model.generate_content(prompt_description).text.strip()
+            print(f"{action}の危険度（生返答）: {response}")
+            
+            if response.isdigit():
+                score = int(response)
+                if 0 <= score <= 2:
+                    print(f"{action}の危険度: {score}")
+                    return score
+
+            # 無効な数値だった場合
+            return 0
         except Exception as e:
             print(f"危険度の計算に失敗しました: {e}")
             return 0
@@ -112,6 +98,10 @@ class GeminiAPI:
         return True, error_message
 
     def _get_face_and_feedback(self, action, character):
+        face = self.__get_facescore(action)
+        (is_error, feedback) = self.__get_action_feedback(action, character)
+        if is_error:
+            face = 2
         face = self.__get_facescore(action)
         (is_error, feedback) = self.__get_action_feedback(action, character)
         if is_error:
