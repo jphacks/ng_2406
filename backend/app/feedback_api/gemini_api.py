@@ -102,6 +102,10 @@ class GeminiAPI:
         (is_error, feedback) = self.__get_action_feedback(action, character)
         if is_error:
             face = 2
+        face = self.__get_facescore(action)
+        (is_error, feedback) = self.__get_action_feedback(action, character)
+        if is_error:
+            face = 2
         return face, feedback
         
     def action_feedback(self, action, character):

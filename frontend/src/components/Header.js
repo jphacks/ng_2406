@@ -23,7 +23,7 @@ const logoOptions = [
     { src: wnkImage, alt: '安心打診わんこ' },
 ];
 
-const Header = ({ setCharacter, character, handleCalendarSubmit }) => {
+const Header = ({ setCharacter, character, handleCalendarSubmit, handleAddToCalendar, isCalendarDataFetched }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [openHandout, setOpenHandout] = useState(false);
@@ -57,9 +57,15 @@ const Header = ({ setCharacter, character, handleCalendarSubmit }) => {
                                     cursor: 'pointer'
                                 }} onClick={handleLogoClick} />
                         </Typography>
-                        <Button onClick={handleHandout}>
-                            つかいかた
-                        </Button>
+                        {isCalendarDataFetched ? (
+                            <Button onClick={handleAddToCalendar} color="primary" variant="contained">
+                                カレンダーに追加
+                            </Button>
+                        ) : (
+                            <Button onClick={handleCalendarSubmit} color="primary" variant="contained">
+                                カレンダー取得
+                            </Button>
+                        )}
                     </Box>
                 </Toolbar>
             </AppBar>
