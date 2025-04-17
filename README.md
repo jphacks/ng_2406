@@ -1,3 +1,6 @@
+# JPHACKS2024 AwardDay時点のコードです  
+2025年3月にgooラボAPIがサービス終了してしまいました.  
+なので自分たちがNTTドコモさんからgooラボAPIが条件のスポンサー賞を受賞した最後のチームです.
 # 安心打診おばあ: [実際に試してみる](https://jphacks.github.io/ng_2406/)
 ![2024-10-27 11 04の画像 (1)](https://github.com/user-attachments/assets/b41391e4-8875-4d36-981e-96848e568c97)
 
