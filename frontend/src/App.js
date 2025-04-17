@@ -114,6 +114,11 @@ function App() {
   }, [character, lastCharacter]);
 
   useEffect(() => {
+    // character値が正しい範囲内かをチェック
+    if (character < 0 || character > 3) {
+      console.error('キャラクター値が範囲外です:', character);
+      return;
+    }
     localStorage.setItem('character', character);
   }, [character]);
 
@@ -155,10 +160,15 @@ function App() {
           },
           body: JSON.stringify({ schedule: query, character }),
         });
+
+        // 以下を追加してエラーの詳細を確認
         if (!extractResponse.ok) {
+          const errorText = await extractResponse.text();
+          console.error(`Error response: ${errorText}`);
           setIsLoading(false);
-          throw new Error(`HTTP error! status: ${extractResponse.status}`);
+          throw new Error(`HTTP error! status: ${extractResponse.status}, details: ${errorText}`);
         }
+
         extractData = await extractResponse.json();
       }
 
