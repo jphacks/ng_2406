@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Container, Box, Button, Typography } from '@mui/material';
+import { Container, Box, } from '@mui/material';
 import './App.css';
 import Header from './components/Header';
 import QueryInput from './components/QueryInput';
@@ -32,8 +32,7 @@ function App() {
   const [shouldPulse, setShouldPulse] = useState(!hasChangedCharacter);
   const [isResponseDisplayed, setIsResponseDisplayed] = useState(false);
   const [sortedFeedbacks, setSortedFeedbacks] = useState([]);
-  const [isCalendarDataFetched, setIsCalendarDataFetched] = useState(false);
-
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || '';
 
   const backgroundColors = [
     '#F5F5F5', // おばあ
@@ -84,7 +83,7 @@ function App() {
     setIsSubmitted(true);
     setGrandmaState('loading');
     try {
-      const response = await fetch(`/api/get/diary/${diaryUrl}`, {
+      const response = await fetch(`${apiBaseUrl}/api/get/diary/${diaryUrl}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +134,7 @@ function App() {
     try {
       let extractData;
       if (actionType === 'calendar') {
-        const response = await fetch('/api/get/calendar_events', {
+        const response = await fetch(`${apiBaseUrl}/api/get/calendar_events`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -148,7 +147,7 @@ function App() {
         }
         extractData = await response.json();
       } else {
-        const extractResponse = await fetch('/api/extract-actions', {
+        const extractResponse = await fetch(`${apiBaseUrl}/api/extract-actions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -170,7 +169,7 @@ function App() {
       setIsLoading(false);
 
       const feedbackPromises = extractData.actions.map((action, idx) =>
-        fetch('/api/action-feedback', {
+        fetch(`${apiBaseUrl}/api/action-feedback`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -263,7 +262,6 @@ function App() {
 
       setActions(data.events.map(event => event.action));
       setDiaryId(data.events[0].event_id);
-      setIsCalendarDataFetched(true);
 
       const feedbackPromises = data.events.map(event => getCalendarEventFeedback(event.action));
       const feedbackResults = await Promise.all(feedbackPromises);
@@ -322,7 +320,6 @@ function App() {
         character={character}
         handleCalendarSubmit={handleCalendarSubmit}
         handleAddToCalendar={handleAddToCalendar}
-        isCalendarDataFetched={isCalendarDataFetched}
       />
       <Box
         sx={{

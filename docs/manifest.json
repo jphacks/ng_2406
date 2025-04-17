@@ -1,0 +1,15 @@
+{
+  "short_name": "安心打診おばあ",
+  "name": "安心打診おばあ",
+  "icons": [
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x100"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

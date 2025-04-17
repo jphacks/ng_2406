@@ -37,22 +37,6 @@ class GeminiAPI:
                   "もし行動が見つからなかった場合は何も返さないでください")
         return prompt
 
-    def _is_used_weather_info(self, schedule):
-        '''
-        ユーザーの予定を見て、天気情報が必要かを判定する
-        '''
-        try:
-            prompt = (schedule
-                    + "という文章で外出する可能性が高い場合は1を、それ以外の場合は0を出力してください。"
-                    "回答は必ず数値のみで「0」「1」のどちらかを返してください。")
-            response = self.model.generate_content(prompt).text
-            if DEBUG: print(response)
-            res = int(response)
-        except Exception as e:
-            print(f"天気情報の判定に失敗しました: {e}")
-            res = 0
-        return res
-
     def extract_actions(self, schedule):
         if self.goolab.has_action_content(schedule) == False:
             return None
