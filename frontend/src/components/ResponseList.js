@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Paper, Avatar, Typography, IconButton, Tooltip, Snackbar, CircularProgress } from '@mui/material';
+import { Box, Paper, Avatar, Typography, IconButton, Tooltip, CircularProgress } from '@mui/material';
 import shareIcon from '../images/share.png';
 import grandmaImage from '../images/oba-white.png';
 import otnImage from '../images/otn-white.png';
