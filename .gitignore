@@ -1,0 +1,6 @@
+__pycache__
+venv
+migrations
+.env
+.DS_Store
+.DS_Store

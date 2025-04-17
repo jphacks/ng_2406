@@ -20,7 +20,7 @@ class GeminiAPI:
 
         # APIキーの設定
         genai.configure(api_key=GeminiAPI_KEY)
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+        self.model = genai.GenerativeModel("gemini-1.5-flash-8b")
         self.goolab = GoolabAPI()
         self.prompt_summary = [GrandMother(), Father(), Brother(), Dog()]
 

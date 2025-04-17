@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Container, Box, Button, Typography } from '@mui/material';
+import { Container, Box, } from '@mui/material';
 import './App.css';
 import Header from './components/Header';
 import QueryInput from './components/QueryInput';
@@ -202,14 +202,111 @@ function App() {
     handleAction('query');
   }, [handleAction]);
 
-  const handleCalendarSubmit = useCallback(() => {
-    if (!accessToken) {
-      console.error('Google認証が必要です');
-      return;
-    }
-    handleAction('calendar', accessToken);
-  }, [accessToken, handleAction]);
 
+  const fetchCalendarEvents = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/get/calendar_events', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setActions(data.events.map(event => event.action));
+      setDiaryId(data.events[0].event_id); // 最初のイベントIDを使用
+    } catch (error) {
+      console.error('カレンダーイベントの取得に失敗しました:', error);
+      setGrandmaState('error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getCalendarEventFeedback = async (action) => {
+    try {
+      const response = await fetch('/api/calendar-event-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action, character }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('フィードバックの取得に失敗しました:', error);
+      return null;
+    }
+  };
+
+  const handleCalendarSubmit = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/get/calendar_events', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('取得したカレンダーデータ:', data); // デバッグ用
+
+      setActions(data.events.map(event => event.action));
+      setDiaryId(data.events[0].event_id);
+
+      const feedbackPromises = data.events.map(event => getCalendarEventFeedback(event.action));
+      const feedbackResults = await Promise.all(feedbackPromises);
+      console.log('取得したフィードバック:', feedbackResults); // デバッグ用
+
+      setFeedbacks(feedbackResults);
+      setSortedFeedbacks(feedbackResults);
+    } catch (error) {
+      console.error('カレンダーイベントの取得に失敗しました:', error);
+      setGrandmaState('error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleAddToCalendar = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const eventsWithFeedback = sortedFeedbacks.map((feedback, index) => ({
+        event_id: actions[index].event_id,
+        feedback: feedback.feedback
+      }));
+
+      const response = await fetch('/api/add-feedback-to-calendar', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ events: eventsWithFeedback }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log(result.message);
+      // ここで成功メッセージを表示するなどの処理を追加できます
+    } catch (error) {
+      console.error('カレンダーへのフィードバック追加に失敗しました:', error);
+      // ここでエラーメッセージを表示するなどの処理を追加できます
+    } finally {
+      setIsLoading(false);
+    }
+  }, [actions, sortedFeedbacks]);
   return (
     <Box sx={{
       display: 'flex',
@@ -220,8 +317,9 @@ function App() {
     }}>
       <Header
         setCharacter={setCharacter}
-        handleCalendarSubmit={handleCalendarSubmit}
         character={character}
+        handleCalendarSubmit={handleCalendarSubmit}
+        handleAddToCalendar={handleAddToCalendar}
       />
       <Box
         sx={{
