@@ -29,8 +29,8 @@ const Footer = () => {
                     <Box
                         component="img"
                         src={gooImage}
-                        alt="supported by goo"
-                        title="supported by goo"
+                        alt="was greatly supported by goo"
+                        title="was greatly supported by goo"
                         sx={{ width: '100px', height: 'auto' }}
                     />
                 </Link>
@@ -60,6 +60,10 @@ const Footer = () => {
                     <Link href="https://www.mhi.com/jp" color="inherit" sx={{ mx: 1 }}>
 
                         Mitsubishi Heavy Industries, Ltd.
+                    </Link>
+                    <Link href="https://www.docomo.ne.jp/" color="inherit" sx={{ mx: 1 }}>
+
+                        NTT DOCOMO, INC.
                     </Link>
                 </Typography>
             </Box>
