@@ -19,7 +19,7 @@ class GeminiAPI:
 
         # APIキーの設定
         genai.configure(api_key=GeminiAPI_KEY)
-        self.model = genai.GenerativeModel("gemini-1.5-flash-8b")
+        self.model = genai.GenerativeModel("gemini-2.0-flash")
         self.prompt_summary = [GrandMother(), Father(), Brother(), Dog()]
 
     def _generate_prompt(self, schedule):
