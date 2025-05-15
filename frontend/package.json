@@ -51,6 +51,7 @@
   },
   "proxy": "https://ng2406-backend.fly.dev",
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/plugin-transform-private-property-in-object": "^7.27.1",
     "autoprefixer": "^10.4.20",
     "gh-pages": "^6.2.0",
