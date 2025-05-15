@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Modal, useMediaQuery, useTheme } from '@mui/material';
-import obaImage from '../images/title.png';
-import oniImage from '../images/oni.png';
-import otnImage from '../images/otn.png';
-import wnkImage from '../images/wnk.png';
+import { CHARACTER_OPTIONS } from '../constants/theme';
 
-const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, isLoading, shouldPulse }) => {
-    const [open, setOpen] = React.useState(false);
+const GrandmaText = ({ 
+    text, 
+    isResponseDisplayed, 
+    onCharacterChange, 
+    character, 
+    isLoading, 
+    shouldPulse 
+}) => {
+    const [open, setOpen] = useState(false);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -15,15 +19,76 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, 
             setOpen(true);
         }
     };
+    
     const handleClose = () => setOpen(false);
+    
+    const handleCharacterSelect = (index) => {
+        if (!isLoading) {
+            onCharacterChange(index);
+            handleClose();
+        }
+    };
 
-    const imageOptions = [
-        { src: obaImage, alt: 'おばあ', color: '#FF8C00' },
-        { src: otnImage, alt: 'おとん', color: '#4682B4' },
-        { src: oniImage, alt: 'おにぃ', color: '#228B22' },
-        { src: wnkImage, alt: 'わんこ', color: '#CD5C5C' },
-    ];
+    const renderCharacterSelector = () => (
+        <Box sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 280,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            py: 2,
+            px: 2,
+            display: 'flex',
+            justifyContent: 'space-evenly',
+            alignItems: 'center',
+            gap: 2,
+            borderRadius: 5,
+        }}>
+            {CHARACTER_OPTIONS.map((charOption, index) => (
+                <Box
+                    key={index}
+                    sx={{
+                        position: 'relative',
+                        width: 50,
+                        height: 50,
+                        '&:hover::before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: '50%',
+                            backgroundColor: `${charOption.color}55`,
+                            transition: 'opacity 0.3s ease-in-out',
+                            zIndex: 1,
+                        },
+                    }}
+                >
+                    <Box
+                        component="img"
+                        sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            zIndex: 2,
+                        }}
+                        src={charOption.src}
+                        alt={charOption.alt}
+                        onClick={() => handleCharacterSelect(index)}
+                    />
+                </Box>
+            ))}
+        </Box>
+    );
 
+    const selectedCharacter = CHARACTER_OPTIONS[character] || CHARACTER_OPTIONS[0];
+
+    // モバイル表示用
     if (isMobile) {
         return (
             <Box sx={{
@@ -65,11 +130,6 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, 
                         '&:hover::before': {
                             opacity: isResponseDisplayed || isLoading ? 0 : 1,
                         },
-                        '@keyframes pulse': {
-                            '0%': { opacity: 0 },
-                            '50%': { opacity: 1 },
-                            '100%': { opacity: 0 },
-                        },
                     }}
                 >
                     <Box
@@ -84,8 +144,8 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, 
                             opacity: isLoading ? 0.5 : 1,
                         }}
                         onClick={handleOpen}
-                        alt={imageOptions[character].alt}
-                        src={imageOptions[character].src}
+                        alt={selectedCharacter.alt}
+                        src={selectedCharacter.src}
                     />
                 </Box>
                 <Typography variant="body1" sx={{
@@ -97,77 +157,20 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, 
                 }}>
                     「{text}」
                 </Typography>
+                
                 <Modal
                     open={open}
                     onClose={handleClose}
                     aria-labelledby="modal-modal-title"
                     aria-describedby="modal-modal-description"
                 >
-                    <Box sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: 280,
-                        bgcolor: 'background.paper',
-                        boxShadow: 24,
-                        py: 2,
-                        px: 2,
-                        display: 'flex',
-                        justifyContent: 'space-evenly',
-                        alignItems: 'center',
-                        gap: 2,
-                        borderRadius: 5,
-                    }}>
-                        {imageOptions.map((image, index) => (
-                            <Box
-                                key={index}
-                                sx={{
-                                    position: 'relative',
-                                    width: 50,
-                                    height: 50,
-                                    '&:hover::before': {
-                                        content: '""',
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        width: '100%',
-                                        height: '100%',
-                                        borderRadius: '50%',
-                                        backgroundColor: `${image.color}55`,
-                                        transition: 'opacity 0.3s ease-in-out',
-                                        zIndex: 1,
-                                    },
-                                }}
-                            >
-                                <Box
-                                    component="img"
-                                    sx={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'contain',
-                                        cursor: 'pointer',
-                                        position: 'relative',
-                                        zIndex: 2,
-                                    }}
-                                    src={image.src}
-                                    alt={image.alt}
-                                    onClick={() => {
-                                        if (!isLoading) {
-                                            onCharacterChange(index);
-                                            handleClose();
-                                        }
-                                    }}
-                                />
-                            </Box>
-                        ))}
-                    </Box>
+                    {renderCharacterSelector()}
                 </Modal>
             </Box>
         );
     }
 
-
+    // デスクトップ表示用
     return (
         <Box sx={{
             display: 'flex',
@@ -207,11 +210,6 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, 
                     '&:hover::before': {
                         opacity: isResponseDisplayed || isLoading ? 0 : 1,
                     },
-                    '@keyframes pulse': {
-                        '0%': { opacity: 0 },
-                        '50%': { opacity: 1 },
-                        '100%': { opacity: 0 },
-                    },
                 }}
             >
                 <Box
@@ -226,8 +224,8 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, 
                         opacity: isLoading ? 0.5 : 1,
                     }}
                     onClick={handleOpen}
-                    alt={imageOptions[character].alt}
-                    src={imageOptions[character].src}
+                    alt={selectedCharacter.alt}
+                    src={selectedCharacter.src}
                 />
             </Box>
             <Typography
@@ -243,71 +241,13 @@ const GrandmaText = ({ text, isResponseDisplayed, onCharacterChange, character, 
             >
                 「{text}」
             </Typography>
+            
             <Modal
                 open={open}
                 onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
+                aria-labelledby="character-selector"
             >
-                <Box sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 280,
-                    bgcolor: 'background.paper',
-                    boxShadow: 24,
-                    py: 2,
-                    px: 2,
-                    display: 'flex',
-                    justifyContent: 'space-evenly',
-                    alignItems: 'center',
-                    gap: 2,
-                    borderRadius: 5,
-                }}>
-                    {imageOptions.map((image, index) => (
-                        <Box
-                            key={index}
-                            sx={{
-                                position: 'relative',
-                                width: 50,
-                                height: 50,
-                                '&:hover::before': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    width: '100%',
-                                    height: '100%',
-                                    borderRadius: '50%',
-                                    backgroundColor: `${image.color}55`,
-                                    transition: 'opacity 0.3s ease-in-out',
-                                    zIndex: 1,
-                                },
-                            }}
-                        >
-                            <Box
-                                component="img"
-                                sx={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'contain',
-                                    cursor: 'pointer',
-                                    position: 'relative',
-                                    zIndex: 2,
-                                }}
-                                src={image.src}
-                                alt={image.alt}
-                                onClick={() => {
-                                    if (!isLoading) {
-                                        onCharacterChange(index);
-                                        handleClose();
-                                    }
-                                }}
-                            />
-                        </Box>
-                    ))}
-                </Box>
+                {renderCharacterSelector()}
             </Modal>
         </Box>
     );

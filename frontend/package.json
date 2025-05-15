@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22.10.0",
-    "npm": ">=10.9.0"
+    "node": ">=20.19.0",
+    "npm": ">=10.8.2"
   },
   "homepage": "https://jphacks.github.io/ng_2406/",
   "dependencies": {
@@ -51,6 +51,7 @@
   },
   "proxy": "https://ng2406-backend.fly.dev",
   "devDependencies": {
+    "@babel/plugin-transform-private-property-in-object": "^7.27.1",
     "autoprefixer": "^10.4.20",
     "gh-pages": "^6.2.0",
     "postcss": "^8.4.47",

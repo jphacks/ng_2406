@@ -1,47 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Paper, Avatar, Typography, IconButton, Tooltip, CircularProgress } from '@mui/material';
 import shareIcon from '../images/share.png';
-import grandmaImage from '../images/oba-white.png';
-import otnImage from '../images/otn-white.png';
-import oniImage from '../images/oni-white.png';
-import wnkImage from '../images/wnk-white.png';
 import XIcon from '@mui/icons-material/X';
 
-const imageOptions = [
-    { src: grandmaImage, alt: 'おばあ', font: "Yuji Mai" },
-    { src: otnImage, alt: 'おとん', font: "Reggae One" },
-    { src: oniImage, alt: 'おにぃ', font: "Hachi Maru Pop" },
-    { src: wnkImage, alt: 'わんこ', font: "Zen Antique" }
-];
+// theme.jsからインポート
+import { CHARACTER_OPTIONS, FACE_COLORS } from '../constants/theme';
 
-const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, character }) => {
+const ResponseList = ({ actions, feedbacks, diaryUrl, character }) => {
     const [tooltipText, setTooltipText] = useState("大切な人に共有");
-
-    const selectedImage = imageOptions[character] || imageOptions[0];
-    const selectedFont = selectedImage.font;
+    const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+    
+    const selectedCharacter = CHARACTER_OPTIONS[character] || CHARACTER_OPTIONS[0];
+    const selectedFont = selectedCharacter.font;
+    
+    const basePath = '/ng_2406';
+    const shareUrl = `${window.location.origin + basePath}?diary=${diaryUrl}`;
+    
+    useEffect(() => {
+        let timeoutId;
+        if (tooltipText === "コピー完了！") {
+            setIsTooltipOpen(true);
+            timeoutId = setTimeout(() => {
+                setTooltipText("大切な人に共有");
+                setIsTooltipOpen(false);
+            }, 3000);
+        }
+        
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }, [tooltipText]);
 
     if (!actions || actions.length === 0) {
         return null;
     }
-    const basePath = '/ng_2406';
 
     const handleShare = () => {
-        const urlToCopy = `${window.location.origin + basePath}?diary=${diaryUrl}`;
-        navigator.clipboard.writeText(urlToCopy).then(() => {
+        navigator.clipboard.writeText(shareUrl).then(() => {
             setTooltipText("コピー完了！");
-            console.log('URLがクリップボードにコピーされました');
-            setTimeout(() => {
-                setTooltipText("大切な人に共有！");
-            }, 3000);
         }, (err) => {
             console.error('クリップボードへのコピーに失敗しました', err);
         });
     };
 
     const handleXPost = () => {
-        const urlToShare = `${window.location.origin + basePath}?diary=${diaryUrl}`;
-        const text = encodeURIComponent(`安心打診${selectedImage.alt}からの伝言です...！ #JPHACKS2024 #安心打診おばあ`);
-        const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(urlToShare)}`;
+        const text = encodeURIComponent(`安心打診${selectedCharacter.alt}からの伝言です...！ #JPHACKS2024 #安心打診おばあ`);
+        const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`;
         window.open(url, '_blank');
     };
 
@@ -53,7 +57,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
                         <XIcon style={{ width: 20, height: 20 }} />
                     </IconButton>
                 </Tooltip>
-                <Tooltip title={tooltipText} placement="right" arrow open={true}>
+                <Tooltip title={tooltipText} placement="right" arrow open={isTooltipOpen}>
                     <IconButton onClick={handleShare}>
                         <img src={shareIcon} alt="共有" style={{ width: 24, height: 24 }} />
                     </IconButton>
@@ -64,16 +68,13 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
                     <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                         <Avatar
                             sx={{
-                                bgcolor: feedbacks[index]?.face === 0 ? 'blue' :
-                                    feedbacks[index]?.face === 1 ? 'orange' :
-                                        feedbacks[index]?.face === 2 ? 'red' :
-                                            feedbacks[index]?.face === 3 ? "black" : 'black',
+                                bgcolor: FACE_COLORS[feedbacks[index]?.face] || FACE_COLORS[3],
                                 mr: 2,
                                 width: 56,
                                 height: 56
                             }}
-                            src={selectedImage.src}
-                            alt={selectedImage.alt}
+                            src={selectedCharacter.altSrc}
+                            alt={selectedCharacter.alt}
                         />
                         <Box sx={{ flexGrow: 1 }}>
                             <Typography
@@ -105,11 +106,6 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
                     </Box>
                 </Paper>
             ))}
-            {isLoadingAdditionalInfo && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                    <CircularProgress />
-                </Box>
-            )}
         </Box>
     );
 };

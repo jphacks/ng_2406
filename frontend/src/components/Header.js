@@ -10,31 +10,20 @@ import {
     DialogActions
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import logoImage from '../images/logo.png';
-import otnImage from '../images/otn-logo.png';
-import oniImage from '../images/oni-logo.png';
-import wnkImage from '../images/wnk-logo.png';
 import handoutImage from '../images/handout.png';
+import { CHARACTER_OPTIONS } from '../constants/theme';
 
-const logoOptions = [
-    { src: logoImage, alt: '安心打診おばあ' },
-    { src: otnImage, alt: '安心打診おとん' },
-    { src: oniImage, alt: '安心打診おにぃ' },
-    { src: wnkImage, alt: '安心打診わんこ' },
-];
-
-const Header = ({ setCharacter, character, handleCalendarSubmit }) => {
+const Header = ({ character, onCharacterChange }) => {
     const [openHandout, setOpenHandout] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const basePath = '/ng_2406';
+
     const handleLogoClick = () => {
-
-
         if (location.pathname !== `${basePath}/` || location.search !== '') {
             navigate(`${basePath}/`, { replace: true });
         }
-        setCharacter(0);
+        onCharacterChange(0);
         window.location.reload();
     };
 
@@ -46,18 +35,24 @@ const Header = ({ setCharacter, character, handleCalendarSubmit }) => {
         setOpenHandout(false);
     };
 
+    const selectedCharacter = CHARACTER_OPTIONS[character] || CHARACTER_OPTIONS[0];
+
     return (
         <>
             <AppBar position="fixed" color="default" elevation={2} sx={{ width: '100%' }}>
                 <Toolbar>
                     <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
                         <Typography variant="h6" component="div">
-                            <img alt={logoOptions[character].alt}
-                                src={logoOptions[character].src} style={{
+                            <img
+                                alt={selectedCharacter.alt}
+                                src={selectedCharacter.logoSrc}
+                                style={{
                                     height: '40px',
                                     marginRight: '10px',
                                     cursor: 'pointer'
-                                }} onClick={handleLogoClick} />
+                                }}
+                                onClick={handleLogoClick}
+                            />
                         </Typography>
                         <Button onClick={handleHandout}>
                             つかいかた
