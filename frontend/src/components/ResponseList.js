@@ -1,25 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Paper, Avatar, Typography, IconButton, Tooltip, CircularProgress } from '@mui/material';
 import shareIcon from '../images/share.png';
-import grandmaImage from '../images/oba-white.png';
-import otnImage from '../images/otn-white.png';
-import oniImage from '../images/oni-white.png';
-import wnkImage from '../images/wnk-white.png';
 import XIcon from '@mui/icons-material/X';
 
-const imageOptions = [
-    { src: grandmaImage, alt: 'おばあ', font: "Yuji Mai" },
-    { src: otnImage, alt: 'おとん', font: "Reggae One" },
-    { src: oniImage, alt: 'おにぃ', font: "Hachi Maru Pop" },
-    { src: wnkImage, alt: 'わんこ', font: "Zen Antique" }
-];
+// theme.jsからインポート
+import { CHARACTER_OPTIONS, FACE_COLORS } from '../constants/theme';
 
 const ResponseList = ({ actions, feedbacks, diaryUrl, character }) => {
     const [tooltipText, setTooltipText] = useState("大切な人に共有");
     const [isTooltipOpen, setIsTooltipOpen] = useState(false);
     
-    const selectedImage = imageOptions[character] || imageOptions[0];
-    const selectedFont = selectedImage.font;
+    const selectedCharacter = CHARACTER_OPTIONS[character] || CHARACTER_OPTIONS[0];
+    const selectedFont = selectedCharacter.font;
     
     const basePath = '/ng_2406';
     const shareUrl = `${window.location.origin + basePath}?diary=${diaryUrl}`;
@@ -52,7 +44,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, character }) => {
     };
 
     const handleXPost = () => {
-        const text = encodeURIComponent(`安心打診${selectedImage.alt}からの伝言です...！ #JPHACKS2024 #安心打診おばあ`);
+        const text = encodeURIComponent(`安心打診${selectedCharacter.alt}からの伝言です...！ #JPHACKS2024 #安心打診おばあ`);
         const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`;
         window.open(url, '_blank');
     };
@@ -76,16 +68,13 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, character }) => {
                     <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                         <Avatar
                             sx={{
-                                bgcolor: feedbacks[index]?.face === 0 ? 'blue' :
-                                    feedbacks[index]?.face === 1 ? 'orange' :
-                                        feedbacks[index]?.face === 2 ? 'red' :
-                                            feedbacks[index]?.face === 3 ? "black" : 'black',
+                                bgcolor: FACE_COLORS[feedbacks[index]?.face] || FACE_COLORS[3],
                                 mr: 2,
                                 width: 56,
                                 height: 56
                             }}
-                            src={selectedImage.src}
-                            alt={selectedImage.alt}
+                            src={selectedCharacter.altSrc}
+                            alt={selectedCharacter.alt}
                         />
                         <Box sx={{ flexGrow: 1 }}>
                             <Typography

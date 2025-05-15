@@ -1,12 +1,6 @@
 import React from 'react';
 import { TextField, Button, Box } from '@mui/material';
-
-const characterOptions = [
-    { text: 'おばあ', color: '#FF8C00', hoverColor: '#FFA500' },
-    { text: 'おとん', color: '#4682B4', hoverColor: '#5F9EA0' },
-    { text: 'おにぃ', color: '#228B22', hoverColor: '#32CD32' },
-    { text: 'わんこ', color: '#CD5C5C', hoverColor: '#F08080' },
-];
+import { CHARACTER_OPTIONS } from '../constants/theme';
 
 const QueryInput = ({ query, setQuery, onSubmit, isLoading, character }) => {
     const handleKeyDown = (event) => {
@@ -15,7 +9,7 @@ const QueryInput = ({ query, setQuery, onSubmit, isLoading, character }) => {
         }
     };
 
-    const selectedCharacter = characterOptions[character] || characterOptions[0];
+    const selectedCharacter = CHARACTER_OPTIONS[character] || CHARACTER_OPTIONS[0];
 
     return (
         <Box sx={{ width: '100%', mt: 3, mb: 1 }}>

@@ -11,24 +11,14 @@ import {
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import handoutImage from '../images/handout.png';
-import logoImage from '../images/logo.png';
-import otnImage from '../images/otn-logo.png';
-import oniImage from '../images/oni-logo.png';
-import wnkImage from '../images/wnk-logo.png';
-
-const logoOptions = [
-    { src: logoImage, alt: '安心打診おばあ' },
-    { src: otnImage, alt: '安心打診おとん' },
-    { src: oniImage, alt: '安心打診おにぃ' },
-    { src: wnkImage, alt: '安心打診わんこ' },
-];
+import { CHARACTER_OPTIONS } from '../constants/theme';
 
 const Header = ({ character, onCharacterChange }) => {
     const [openHandout, setOpenHandout] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const basePath = '/ng_2406';
-    
+
     const handleLogoClick = () => {
         if (location.pathname !== `${basePath}/` || location.search !== '') {
             navigate(`${basePath}/`, { replace: true });
@@ -45,21 +35,23 @@ const Header = ({ character, onCharacterChange }) => {
         setOpenHandout(false);
     };
 
+    const selectedCharacter = CHARACTER_OPTIONS[character] || CHARACTER_OPTIONS[0];
+
     return (
         <>
             <AppBar position="fixed" color="default" elevation={2} sx={{ width: '100%' }}>
                 <Toolbar>
                     <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
                         <Typography variant="h6" component="div">
-                            <img 
-                                alt={logoOptions[character].alt}
-                                src={logoOptions[character].src} 
+                            <img
+                                alt={selectedCharacter.alt}
+                                src={selectedCharacter.logoSrc}
                                 style={{
                                     height: '40px',
                                     marginRight: '10px',
                                     cursor: 'pointer'
-                                }} 
-                                onClick={handleLogoClick} 
+                                }}
+                                onClick={handleLogoClick}
                             />
                         </Typography>
                         <Button onClick={handleHandout}>

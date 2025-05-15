@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Modal, useMediaQuery, useTheme } from '@mui/material';
-import obaImage from '../images/title.png';
-import oniImage from '../images/oni.png';
-import otnImage from '../images/otn.png';
-import wnkImage from '../images/wnk.png';
-
-const imageOptions = [
-    { src: obaImage, alt: 'おばあ', color: '#FF8C00' },
-    { src: otnImage, alt: 'おとん', color: '#4682B4' },
-    { src: oniImage, alt: 'おにぃ', color: '#228B22' },
-    { src: wnkImage, alt: 'わんこ', color: '#CD5C5C' },
-];
+import { CHARACTER_OPTIONS } from '../constants/theme';
 
 const GrandmaText = ({ 
     text, 
@@ -56,7 +46,7 @@ const GrandmaText = ({
             gap: 2,
             borderRadius: 5,
         }}>
-            {imageOptions.map((image, index) => (
+            {CHARACTER_OPTIONS.map((charOption, index) => (
                 <Box
                     key={index}
                     sx={{
@@ -71,7 +61,7 @@ const GrandmaText = ({
                             width: '100%',
                             height: '100%',
                             borderRadius: '50%',
-                            backgroundColor: `${image.color}55`,
+                            backgroundColor: `${charOption.color}55`,
                             transition: 'opacity 0.3s ease-in-out',
                             zIndex: 1,
                         },
@@ -87,14 +77,16 @@ const GrandmaText = ({
                             position: 'relative',
                             zIndex: 2,
                         }}
-                        src={image.src}
-                        alt={image.alt}
+                        src={charOption.src}
+                        alt={charOption.alt}
                         onClick={() => handleCharacterSelect(index)}
                     />
                 </Box>
             ))}
         </Box>
     );
+
+    const selectedCharacter = CHARACTER_OPTIONS[character] || CHARACTER_OPTIONS[0];
 
     // モバイル表示用
     if (isMobile) {
@@ -152,8 +144,8 @@ const GrandmaText = ({
                             opacity: isLoading ? 0.5 : 1,
                         }}
                         onClick={handleOpen}
-                        alt={imageOptions[character].alt}
-                        src={imageOptions[character].src}
+                        alt={selectedCharacter.alt}
+                        src={selectedCharacter.src}
                     />
                 </Box>
                 <Typography variant="body1" sx={{
@@ -232,8 +224,8 @@ const GrandmaText = ({
                         opacity: isLoading ? 0.5 : 1,
                     }}
                     onClick={handleOpen}
-                    alt={imageOptions[character].alt}
-                    src={imageOptions[character].src}
+                    alt={selectedCharacter.alt}
+                    src={selectedCharacter.src}
                 />
             </Box>
             <Typography
