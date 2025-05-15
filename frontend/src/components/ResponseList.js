@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Paper, Avatar, Typography, IconButton, Tooltip, CircularProgress } from '@mui/material';
 import shareIcon from '../images/share.png';
 import grandmaImage from '../images/oba-white.png';
@@ -14,34 +14,46 @@ const imageOptions = [
     { src: wnkImage, alt: 'わんこ', font: "Zen Antique" }
 ];
 
-const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, character }) => {
+const ResponseList = ({ actions, feedbacks, diaryUrl, character }) => {
     const [tooltipText, setTooltipText] = useState("大切な人に共有");
-
+    const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+    
     const selectedImage = imageOptions[character] || imageOptions[0];
     const selectedFont = selectedImage.font;
+    
+    const basePath = '/ng_2406';
+    const shareUrl = `${window.location.origin + basePath}?diary=${diaryUrl}`;
+    
+    useEffect(() => {
+        let timeoutId;
+        if (tooltipText === "コピー完了！") {
+            setIsTooltipOpen(true);
+            timeoutId = setTimeout(() => {
+                setTooltipText("大切な人に共有");
+                setIsTooltipOpen(false);
+            }, 3000);
+        }
+        
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }, [tooltipText]);
 
     if (!actions || actions.length === 0) {
         return null;
     }
-    const basePath = '/ng_2406';
 
     const handleShare = () => {
-        const urlToCopy = `${window.location.origin + basePath}?diary=${diaryUrl}`;
-        navigator.clipboard.writeText(urlToCopy).then(() => {
+        navigator.clipboard.writeText(shareUrl).then(() => {
             setTooltipText("コピー完了！");
-            console.log('URLがクリップボードにコピーされました');
-            setTimeout(() => {
-                setTooltipText("大切な人に共有！");
-            }, 3000);
         }, (err) => {
             console.error('クリップボードへのコピーに失敗しました', err);
         });
     };
 
     const handleXPost = () => {
-        const urlToShare = `${window.location.origin + basePath}?diary=${diaryUrl}`;
         const text = encodeURIComponent(`安心打診${selectedImage.alt}からの伝言です...！ #JPHACKS2024 #安心打診おばあ`);
-        const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(urlToShare)}`;
+        const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`;
         window.open(url, '_blank');
     };
 
@@ -53,7 +65,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
                         <XIcon style={{ width: 20, height: 20 }} />
                     </IconButton>
                 </Tooltip>
-                <Tooltip title={tooltipText} placement="right" arrow open={true}>
+                <Tooltip title={tooltipText} placement="right" arrow open={isTooltipOpen}>
                     <IconButton onClick={handleShare}>
                         <img src={shareIcon} alt="共有" style={{ width: 24, height: 24 }} />
                     </IconButton>
@@ -105,11 +117,6 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
                     </Box>
                 </Paper>
             ))}
-            {isLoadingAdditionalInfo && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                    <CircularProgress />
-                </Box>
-            )}
         </Box>
     );
 };

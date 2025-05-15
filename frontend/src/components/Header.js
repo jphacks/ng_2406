@@ -10,11 +10,11 @@ import {
     DialogActions
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import handoutImage from '../images/handout.png';
 import logoImage from '../images/logo.png';
 import otnImage from '../images/otn-logo.png';
 import oniImage from '../images/oni-logo.png';
 import wnkImage from '../images/wnk-logo.png';
-import handoutImage from '../images/handout.png';
 
 const logoOptions = [
     { src: logoImage, alt: '安心打診おばあ' },
@@ -23,18 +23,17 @@ const logoOptions = [
     { src: wnkImage, alt: '安心打診わんこ' },
 ];
 
-const Header = ({ setCharacter, character, handleCalendarSubmit }) => {
+const Header = ({ character, onCharacterChange }) => {
     const [openHandout, setOpenHandout] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const basePath = '/ng_2406';
+    
     const handleLogoClick = () => {
-
-
         if (location.pathname !== `${basePath}/` || location.search !== '') {
             navigate(`${basePath}/`, { replace: true });
         }
-        setCharacter(0);
+        onCharacterChange(0);
         window.location.reload();
     };
 
@@ -52,12 +51,16 @@ const Header = ({ setCharacter, character, handleCalendarSubmit }) => {
                 <Toolbar>
                     <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
                         <Typography variant="h6" component="div">
-                            <img alt={logoOptions[character].alt}
-                                src={logoOptions[character].src} style={{
+                            <img 
+                                alt={logoOptions[character].alt}
+                                src={logoOptions[character].src} 
+                                style={{
                                     height: '40px',
                                     marginRight: '10px',
                                     cursor: 'pointer'
-                                }} onClick={handleLogoClick} />
+                                }} 
+                                onClick={handleLogoClick} 
+                            />
                         </Typography>
                         <Button onClick={handleHandout}>
                             つかいかた
