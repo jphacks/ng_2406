@@ -1,4 +1,3 @@
-import React from 'react';
 import { TextField, Button, Box } from '@mui/material';
 
 const QueryInput = ({ query, setQuery, onSubmit, isLoading, character }) => {

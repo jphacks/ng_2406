@@ -13,8 +13,6 @@ function App() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [actions, setActions] = useState([]);
-  // 変数名の前に _ をつけると未使用変数の警告を抑制できます
-  const [_feedbacks, setFeedbacks] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [character, setCharacter] = useState(() => {
     const savedCharacter = localStorage.getItem('character');
@@ -24,8 +22,6 @@ function App() {
     return localStorage.getItem('hasChangedCharacter') === 'true';
   });
   const [grandmaState, setGrandmaState] = useState('initial');
-  // 未使用変数は _ をつけて警告を抑制
-  const [_diaryId, _setDiaryId] = useState(null);
   const [diaryUrl, setDiaryUrl] = useState(null);
   const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
   const [isDialogVisible, setIsDialogVisible] = useState(true);
@@ -61,7 +57,6 @@ function App() {
   const fetchDiary = useCallback(async (diaryUrl) => {
     setIsLoading(true);
     setActions([]);
-    setFeedbacks([]);
     setSortedFeedbacks([]);
     setIsSubmitted(true);
     setGrandmaState('loading');
@@ -91,19 +86,22 @@ function App() {
 
       // フィードバックをソートして設定
       const sortedFeedbacks = actionsWithFeedback.sort((a, b) => a.idx - b.idx);
-      setFeedbacks(sortedFeedbacks);
       setSortedFeedbacks(sortedFeedbacks);
 
       setDiaryUrl(diaryUrl);
       setIsSubmitted(true);
       setGrandmaState('waiting');
+
+      // 処理完了時に明示的に状態を更新
+      setIsDialogVisible(true);
+      setIsResponseDisplayed(true);
     } catch (error) {
       console.error('Error fetching diary:', error);
       setGrandmaState('error');
+      setIsLoading(false); // エラー時にもロード状態を解除
     } finally {
       setGrandmaState("pastResponse");
       setIsLoading(false);
-      setIsResponseDisplayed(true);
     }
   }, [apiBaseUrl]);
 
@@ -134,9 +132,10 @@ function App() {
     setGrandmaState('loading');
     setIsLoading(true);
     setActions([]);
-    setFeedbacks([]);
     setSortedFeedbacks([]);
     setIsSubmitted(true);
+    setIsResponseDisplayed(false); // 初期化時に明示的にfalseにする
+
     try {
       let extractData;
       if (actionType === 'calendar') {
@@ -161,7 +160,6 @@ function App() {
           body: JSON.stringify({ schedule: query, character }),
         });
 
-        // 以下を追加してエラーの詳細を確認
         if (!extractResponse.ok) {
           const errorText = await extractResponse.text();
           console.error(`Error response: ${errorText}`);
@@ -172,7 +170,6 @@ function App() {
         extractData = await extractResponse.json();
       }
 
-      setActions(extractData.actions);
       setActions(extractData.actions);
       setDiaryUrl(extractData.diary_url);
       setGrandmaState('waiting');
@@ -196,13 +193,19 @@ function App() {
 
       const feedbackResults = await Promise.all(feedbackPromises);
       const sortedResults = feedbackResults.sort((a, b) => a.idx - b.idx);
-      setFeedbacks(sortedResults);
       setSortedFeedbacks(sortedResults);
+
+      // すべての処理が完了したら表示状態を更新
+      setIsDialogVisible(true); // 明示的に表示を有効にする
+      setIsResponseDisplayed(true);
+
     } catch (error) {
       console.error('Error:', error);
       setGrandmaState('error');
+      setIsLoading(false); // エラー時にもロード状態を解除
+      // エラー時は表示しない
+      setIsResponseDisplayed(false);
     } finally {
-      setIsResponseDisplayed(true);
       setIsLoadingAdditionalInfo(false);
     }
   }, [query, character, apiBaseUrl]);
@@ -222,7 +225,7 @@ function App() {
     }}>
       <Header
         setCharacter={setCharacter}
-        character={character} 
+        character={character}
       />
       <Box
         sx={{
@@ -259,7 +262,7 @@ function App() {
               character={character}
             />
             {isLoading && <LoadingIndicator />}
-            {isSubmitted && !isLoading && actions.length > 0 && isDialogVisible && (
+            {isSubmitted && !isLoading && actions.length > 0 && isDialogVisible && isResponseDisplayed && (
               <ResponseList
                 actions={actions}
                 feedbacks={sortedFeedbacks}
