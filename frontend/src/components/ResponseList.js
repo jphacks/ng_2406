@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Paper, Avatar, Typography, IconButton, Tooltip, Snackbar, CircularProgress } from '@mui/material';
+import { Box, Paper, Avatar, Typography, IconButton, Tooltip, CircularProgress } from '@mui/material';
 import shareIcon from '../images/share.png';
 import grandmaImage from '../images/oba-white.png';
 import otnImage from '../images/otn-white.png';
@@ -23,9 +23,10 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
     if (!actions || actions.length === 0) {
         return null;
     }
+    const basePath = '/ng_2406';
 
     const handleShare = () => {
-        const urlToCopy = `${window.location.origin}?diary=${diaryUrl}`;
+        const urlToCopy = `${window.location.origin + basePath}?diary=${diaryUrl}`;
         navigator.clipboard.writeText(urlToCopy).then(() => {
             setTooltipText("コピー完了！");
             console.log('URLがクリップボードにコピーされました');
@@ -38,7 +39,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, isLoadingAdditionalInfo, c
     };
 
     const handleXPost = () => {
-        const urlToShare = `${window.location.origin}?diary=${diaryUrl}`;
+        const urlToShare = `${window.location.origin + basePath}?diary=${diaryUrl}`;
         const text = encodeURIComponent(`安心打診${selectedImage.alt}からの伝言です...！ #JPHACKS2024 #安心打診おばあ`);
         const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(urlToShare)}`;
         window.open(url, '_blank');
