@@ -1,0 +1,25 @@
+# ビルドスクリプトの制御（セキュリティ対策 2-1）
+allowBuilds:
+  sharp: true
+  esbuild: true
+  unrs-resolver: true
+
+strictDepBuilds: true
+
+# 新規リリースパッケージの制限（セキュリティ対策 2-2）
+# 公開から3日（4320分）未満のバージョンはインストール拒否
+minimumReleaseAge: 4320
+
+# 信頼性レベルの低下検知（セキュリティ対策 2-3）
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - "undici-types"
+  - "eslint-import-resolver-typescript"
+  - "semver"
+
+# 変則的な依存取得元のブロック（セキュリティ対策 2-4）
+blockExoticSubdeps: true
+
+# バージョン固定（minimumReleaseAge 回避用、3日経過後に解除可）
+overrides:
+  "@emnapi/runtime": "1.9.2"
