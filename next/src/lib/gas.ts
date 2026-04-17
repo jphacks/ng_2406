@@ -1,21 +1,17 @@
 const GAS_ENDPOINT = process.env.GAS_ENDPOINT!;
 
-type DiaryRow = {
-  diary_url: string;
-  created_at: string;
-  schedule: string;
-  character: number;
-};
-
-type FeedbackRow = {
-  diary_id: number;
+type FeedbackItem = {
   face: number;
   action: string;
   action_feedback: string;
   idx: number;
 };
 
-type DiaryWithFeedbacks = DiaryRow & {
+type DiaryWithFeedbacks = {
+  diary_url: string;
+  created_at: string;
+  schedule: string;
+  character: number;
   actions: { face: number; action: string; feedback: string; idx: number }[];
 };
 
@@ -36,20 +32,27 @@ async function callGAS<T>(action: string, payload: Record<string, unknown> = {})
 
 export async function createDiary(
   schedule: string,
-  character: number,
-  diaryUrl: string
+  character: number
 ): Promise<number> {
   const result = await callGAS<{ diary_id: number }>("createDiary", {
     schedule,
     character,
-    diary_url: diaryUrl,
+    diary_url: "",
     created_at: new Date().toISOString(),
   });
   return result.diary_id;
 }
 
-export async function addFeedback(feedback: FeedbackRow): Promise<void> {
-  await callGAS("addFeedback", feedback);
+export async function saveDiaryResult(
+  diaryId: number,
+  diaryUrl: string,
+  feedbacks: FeedbackItem[]
+): Promise<void> {
+  await callGAS("saveDiaryResult", {
+    diary_id: diaryId,
+    diary_url: diaryUrl,
+    feedbacks,
+  });
 }
 
 export async function getDiaryByUrl(diaryUrl: string): Promise<DiaryWithFeedbacks | null> {

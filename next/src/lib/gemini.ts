@@ -1,8 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { characters } from "./characters";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+const MODEL = "gemini-3.1-flash-lite-preview";
 
 export type ActionFeedback = {
   action: string;
@@ -41,8 +41,11 @@ ${schedule}
 
   for (let i = 0; i < 3; i++) {
     try {
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
+      const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: prompt,
+      });
+      const text = response.text ?? "";
 
       const jsonMatch = text.match(/\[[\s\S]*\]/);
       if (!jsonMatch) continue;
@@ -52,9 +55,10 @@ ${schedule}
       if (Array.isArray(parsed) && parsed.length > 0) {
         return parsed.map((item) => ({
           action: String(item.action),
-          face: typeof item.face === "number" && item.face >= 0 && item.face <= 2
-            ? item.face
-            : 0,
+          face:
+            typeof item.face === "number" && item.face >= 0 && item.face <= 2
+              ? item.face
+              : 0,
           feedback: String(item.feedback),
         }));
       }

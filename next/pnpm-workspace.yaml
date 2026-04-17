@@ -3,6 +3,7 @@ allowBuilds:
   sharp: true
   esbuild: true
   unrs-resolver: true
+  protobufjs: true
 
 strictDepBuilds: true
 

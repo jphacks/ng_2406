@@ -17,6 +17,9 @@ import useAppState from "@/hooks/useAppState";
 import dialogs from "@/data/dialogs.json";
 
 import { BACKGROUND_COLORS } from "@/constants/theme";
+import Hashids from "hashids";
+
+const hashids = new Hashids("f84fSgda", 10);
 
 type DialogMap = Record<string, Record<string, string>>;
 const dialogData = dialogs as DialogMap;
@@ -72,6 +75,14 @@ function AppContent() {
 
   const handleFetchDiary = useCallback(
     async (url: string) => {
+      // URLからキャラクター番号をデコードしてローディング前にセット
+      const decoded = hashids.decode(url);
+      if (decoded.length >= 2) {
+        const charFromUrl = Number(decoded[1]);
+        if (charFromUrl >= 0 && charFromUrl <= 3) {
+          setCharacter(charFromUrl);
+        }
+      }
       startLoading();
       await fetchDiary(url, {
         onSuccess: (data) => {

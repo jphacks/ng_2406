@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { analyzeSchedule } from "@/lib/gemini";
-import { createDiary, addFeedback } from "@/lib/gas";
+import { createDiary, saveDiaryResult } from "@/lib/gas";
 import Hashids from "hashids";
 
 const hashids = new Hashids("f84fSgda", 10);
@@ -23,25 +23,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const results = await analyzeSchedule(schedule, character);
+    // Gemini呼び出しとdiary作成を並列実行
+    const [results, diaryId] = await Promise.all([
+      analyzeSchedule(schedule, character),
+      createDiary(schedule, character),
+    ]);
+
     if (!results) {
       return Response.json({ message: "行動が見つかりませんでした" }, { status: 400 });
     }
 
-    const diaryId = await createDiary(schedule, character, "");
-    const diaryUrl = hashids.encode(diaryId);
+    const diaryUrl = hashids.encode(diaryId, character);
 
-    await Promise.all(
-      results.map((r, idx) =>
-        addFeedback({
-          diary_id: diaryId,
-          face: r.face,
-          action: r.action,
-          action_feedback: r.feedback,
-          idx,
-        })
-      )
-    );
+    // GASへの保存（URL更新 + 全フィードバック）を1回のリクエストで非同期実行
+    saveDiaryResult(
+      diaryId,
+      diaryUrl,
+      results.map((r, idx) => ({
+        face: r.face,
+        action: r.action,
+        action_feedback: r.feedback,
+        idx,
+      }))
+    ).catch((e) => console.error("GAS保存エラー:", e));
 
     return Response.json({
       diary_url: diaryUrl,
