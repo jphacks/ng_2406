@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  font-family: var(--font-zen-maru-gothic), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.zen-maru-gothic-regular {
+  font-family: var(--font-zen-maru-gothic), sans-serif !important;
+}
+
+.reggae-one-regular {
+  font-family: var(--font-reggae-one), sans-serif !important;
+}
+
+.zen-antique-regular {
+  font-family: var(--font-zen-antique), sans-serif !important;
+}
+
+.hachi-maru-pop-regular {
+  font-family: var(--font-hachi-maru-pop), sans-serif !important;
+}
+
+.yuji-mai-regular {
+  font-family: var(--font-yuji-mai), serif !important;
+}
