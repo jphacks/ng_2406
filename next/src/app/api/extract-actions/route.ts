@@ -1,9 +1,5 @@
 import { NextRequest } from "next/server";
 import { analyzeSchedule } from "@/lib/gemini";
-import { createDiary, saveDiaryResult } from "@/lib/gas";
-import Hashids from "hashids";
-
-const hashids = new Hashids("f84fSgda", 10);
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,29 +19,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Gemini呼び出しとdiary作成を並列実行
-    const [results, diaryId] = await Promise.all([
-      analyzeSchedule(schedule, character),
-      createDiary(schedule, character),
-    ]);
+    const results = await analyzeSchedule(schedule, character);
 
     if (!results) {
       return Response.json({ message: "行動が見つかりませんでした" }, { status: 400 });
     }
 
-    const diaryUrl = hashids.encode(diaryId, character);
-
-    // GASへの保存（URL更新 + 全フィードバック）を1回のリクエストで非同期実行
-    saveDiaryResult(
-      diaryId,
-      diaryUrl,
-      results.map((r, idx) => ({
-        face: r.face,
-        action: r.action,
-        action_feedback: r.feedback,
-        idx,
-      }))
-    ).catch((e) => console.error("GAS保存エラー:", e));
+    const uuid = crypto.randomUUID().replaceAll("-", "");
+    const diaryUrl = `${uuid}${character}`;
 
     return Response.json({
       diary_url: diaryUrl,

@@ -22,35 +22,34 @@ async function callGAS<T>(action: string, payload: Record<string, unknown> = {})
     body: JSON.stringify({ action, payload }),
     redirect: "follow",
   });
+  if (!res.ok) {
+    throw new Error(`GAS returned HTTP ${res.status}: ${res.statusText}`);
+  }
+
   const text = await res.text();
 
   if (!text.startsWith("{") && !text.startsWith("[")) {
     throw new Error(`GAS returned non-JSON: ${text.substring(0, 200)}`);
   }
-  return JSON.parse(text) as T;
-}
 
-export async function createDiary(
-  schedule: string,
-  character: number
-): Promise<number> {
-  const result = await callGAS<{ diary_id: number }>("createDiary", {
-    schedule,
-    character,
-    diary_url: "",
-    created_at: new Date().toISOString(),
-  });
-  return result.diary_id;
+  const parsed = JSON.parse(text);
+  if (parsed && typeof parsed === "object" && "error" in parsed) {
+    throw new Error(`GAS error: ${(parsed as { error: string }).error}`);
+  }
+  return parsed as T;
 }
 
 export async function saveDiaryResult(
-  diaryId: number,
   diaryUrl: string,
+  schedule: string,
+  character: number,
   feedbacks: FeedbackItem[]
 ): Promise<void> {
   await callGAS("saveDiaryResult", {
-    diary_id: diaryId,
     diary_url: diaryUrl,
+    schedule,
+    character,
+    created_at: new Date().toISOString(),
     feedbacks,
   });
 }

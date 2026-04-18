@@ -105,10 +105,42 @@ const useApi = () => {
     []
   );
 
+  const saveDiary = useCallback(
+    async (
+      diaryUrl: string,
+      schedule: string,
+      character: number,
+      feedbacks: FeedbackItem[]
+    ): Promise<boolean> => {
+      try {
+        const response = await fetch("/api/save-diary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            diary_url: diaryUrl,
+            schedule,
+            character,
+            feedbacks,
+          }),
+        });
+        if (!response.ok) {
+          console.error(`保存失敗: HTTP ${response.status}`);
+          return false;
+        }
+        return true;
+      } catch (error) {
+        console.error("保存エラー:", error);
+        return false;
+      }
+    },
+    []
+  );
+
   return {
     isLoading,
     fetchDiary,
     analyzeSchedule,
+    saveDiary,
   };
 };
 

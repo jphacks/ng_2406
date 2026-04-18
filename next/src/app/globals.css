@@ -2,29 +2,29 @@
 
 body {
   margin: 0;
-  font-family: "Zen Maru Gothic", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-    "Helvetica Neue", sans-serif;
+  font-family: var(--font-zen-maru-gothic), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .zen-maru-gothic-regular {
-  font-family: "Zen Maru Gothic", sans-serif !important;
+  font-family: var(--font-zen-maru-gothic), sans-serif !important;
 }
 
 .reggae-one-regular {
-  font-family: "Reggae One", sans-serif !important;
+  font-family: var(--font-reggae-one), sans-serif !important;
 }
 
 .zen-antique-regular {
-  font-family: "Zen Antique", sans-serif !important;
+  font-family: var(--font-zen-antique), sans-serif !important;
 }
 
 .hachi-maru-pop-regular {
-  font-family: "Hachi Maru Pop", sans-serif !important;
+  font-family: var(--font-hachi-maru-pop), sans-serif !important;
 }
 
 .yuji-mai-regular {
-  font-family: "Yuji Mai", serif !important;
+  font-family: var(--font-yuji-mai), serif !important;
 }

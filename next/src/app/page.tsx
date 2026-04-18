@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, Suspense } from "react";
+import { useCallback, useEffect, useState, Suspense } from "react";
 import { Container, Box } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 
@@ -17,17 +17,17 @@ import useAppState from "@/hooks/useAppState";
 import dialogs from "@/data/dialogs.json";
 
 import { BACKGROUND_COLORS } from "@/constants/theme";
-import Hashids from "hashids";
-
-const hashids = new Hashids("f84fSgda", 10);
 
 type DialogMap = Record<string, Record<string, string>>;
 const dialogData = dialogs as DialogMap;
 
+type SaveState = "saving" | "saved" | "failed";
+
 function AppContent() {
-  const { isLoading, fetchDiary, analyzeSchedule } = useApi();
+  const { isLoading, fetchDiary, analyzeSchedule, saveDiary } = useApi();
   const { character, setCharacter, handleCharacterChange, hasChangedCharacter } =
     useCharacter();
+  const [saveState, setSaveState] = useState<SaveState>("saved");
   const {
     query,
     setQuery,
@@ -75,13 +75,9 @@ function AppContent() {
 
   const handleFetchDiary = useCallback(
     async (url: string) => {
-      // URLからキャラクター番号をデコードしてローディング前にセット
-      const decoded = hashids.decode(url);
-      if (decoded.length >= 2) {
-        const charFromUrl = Number(decoded[1]);
-        if (charFromUrl >= 0 && charFromUrl <= 3) {
-          setCharacter(charFromUrl);
-        }
+      const charFromUrl = Number(url.slice(-1));
+      if (charFromUrl >= 0 && charFromUrl <= 3) {
+        setCharacter(charFromUrl);
       }
       startLoading();
       await fetchDiary(url, {
@@ -138,6 +134,13 @@ function AppContent() {
         setDiaryUrl(data.diary_url);
         setSortedFeedbacks(data.feedbacks);
         finishLoading(true);
+
+        setSaveState("saving");
+        saveDiary(data.diary_url, query, character, data.feedbacks).then(
+          (ok) => {
+            setSaveState(ok ? "saved" : "failed");
+          }
+        );
       } else {
         finishLoading(false);
       }
@@ -146,6 +149,7 @@ function AppContent() {
       query,
       character,
       analyzeSchedule,
+      saveDiary,
       setActions,
       setDiaryUrl,
       setGrandmaState,
@@ -223,6 +227,7 @@ function AppContent() {
                   feedbacks={sortedFeedbacks}
                   diaryUrl={diaryUrl}
                   character={character}
+                  saveState={saveState}
                 />
               )}
           </Box>

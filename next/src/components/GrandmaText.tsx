@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Box, Typography, Modal, useMediaQuery, useTheme } from "@mui/material";
-import { CHARACTER_OPTIONS } from "@/constants/theme";
+import { CHARACTER_OPTIONS, FONT_FAMILIES } from "@/constants/theme";
 
 type GrandmaTextProps = {
   text: string;
@@ -172,7 +172,7 @@ const GrandmaText = ({
             wordBreak: "break-word",
             whiteSpace: "pre-wrap",
             fontSize: "1.1rem",
-            fontFamily: '"Zen Maru Gothic"',
+            fontFamily: FONT_FAMILIES.DEFAULT,
           }}
         >
           {`「${text}」`}
@@ -204,7 +204,7 @@ const GrandmaText = ({
           overflow: "hidden",
           textOverflow: "ellipsis",
           maxWidth: "100%",
-          fontFamily: '"Zen Maru Gothic"',
+          fontFamily: FONT_FAMILIES.DEFAULT,
         }}
       >
         {`「${text}」`}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import {
   Box,
   Paper,
@@ -20,14 +20,17 @@ type FeedbackItem = {
   idx?: number;
 };
 
+type SaveState = "saving" | "saved" | "failed";
+
 type ResponseListProps = {
   actions: string[];
   feedbacks: FeedbackItem[];
   diaryUrl: string | null;
   character: number;
+  saveState?: SaveState;
 };
 
-const ResponseList = ({ actions, feedbacks, diaryUrl, character }: ResponseListProps) => {
+const ResponseList = ({ actions, feedbacks, diaryUrl, character, saveState = "saved" }: ResponseListProps) => {
   const [tooltipText, setTooltipText] = useState("大切な人に共有");
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
@@ -39,25 +42,21 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, character }: ResponseListP
       ? `${window.location.origin}?diary=${diaryUrl}`
       : "";
 
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    if (tooltipText === "コピー完了！") {
-      setIsTooltipOpen(true);
-      timeoutId = setTimeout(() => {
-        setTooltipText("大切な人に共有");
-        setIsTooltipOpen(false);
-      }, 3000);
-    }
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [tooltipText]);
+  const tooltipTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   if (!actions || actions.length === 0) return null;
 
   const handleShare = () => {
     navigator.clipboard.writeText(shareUrl).then(
-      () => setTooltipText("コピー完了！"),
+      () => {
+        setTooltipText("コピー完了！");
+        setIsTooltipOpen(true);
+        if (tooltipTimerRef.current) clearTimeout(tooltipTimerRef.current);
+        tooltipTimerRef.current = setTimeout(() => {
+          setTooltipText("大切な人に共有");
+          setIsTooltipOpen(false);
+        }, 3000);
+      },
       (err) => console.error("クリップボードへのコピーに失敗しました", err)
     );
   };
@@ -72,18 +71,46 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, character }: ResponseListP
 
   return (
     <Box sx={{ width: "100%", mt: 2 }}>
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <Tooltip title="Xでポスト" placement="left" arrow>
-          <IconButton onClick={handleXPost} sx={{ mr: 1 }}>
-            <XIcon style={{ width: 20, height: 20 }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={tooltipText} placement="right" arrow open={isTooltipOpen}>
-          <IconButton onClick={handleShare}>
-            <img src="/share.png" alt="共有" style={{ width: 24, height: 24 }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
+      {(() => {
+        const disabled = saveState !== "saved";
+        const stateLabel =
+          saveState === "saving"
+            ? "保存中..."
+            : saveState === "failed"
+            ? "保存に失敗しました"
+            : null;
+        return (
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Tooltip title={stateLabel ?? "Xでポスト"} placement="left" arrow>
+              <span>
+                <IconButton
+                  onClick={handleXPost}
+                  disabled={disabled}
+                  sx={{ mr: 1, opacity: disabled ? 0.4 : 1 }}
+                >
+                  <XIcon style={{ width: 20, height: 20 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip
+              title={stateLabel ?? tooltipText}
+              placement="right"
+              arrow
+              open={disabled ? false : isTooltipOpen}
+            >
+              <span>
+                <IconButton
+                  onClick={handleShare}
+                  disabled={disabled}
+                  sx={{ opacity: disabled ? 0.4 : 1 }}
+                >
+                  <img src="/share.png" alt="共有" style={{ width: 24, height: 24 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
+        );
+      })()}
       {actions.map((action, index) => (
         <Paper key={index} elevation={3} sx={{ p: 2, mt: 2, width: "100%", bgcolor: "#f5f5f5" }}>
           <Box sx={{ display: "flex", alignItems: "flex-start" }}>

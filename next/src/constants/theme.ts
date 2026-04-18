@@ -14,7 +14,7 @@ export const CHARACTER_OPTIONS = [
     altSrc: "/oba-white.png",
     logoSrc: "/logo.png",
     alt: "おばあ",
-    font: "Yuji Mai",
+    font: "var(--font-yuji-mai), serif",
   },
   {
     text: "おとん",
@@ -24,7 +24,7 @@ export const CHARACTER_OPTIONS = [
     altSrc: "/otn-white.png",
     logoSrc: "/otn-logo.png",
     alt: "おとん",
-    font: "Reggae One",
+    font: "var(--font-reggae-one), sans-serif",
   },
   {
     text: "おにぃ",
@@ -34,7 +34,7 @@ export const CHARACTER_OPTIONS = [
     altSrc: "/oni-white.png",
     logoSrc: "/oni-logo.png",
     alt: "おにぃ",
-    font: "Hachi Maru Pop",
+    font: "var(--font-hachi-maru-pop), sans-serif",
   },
   {
     text: "わんこ",
@@ -44,16 +44,16 @@ export const CHARACTER_OPTIONS = [
     altSrc: "/wnk-white.png",
     logoSrc: "/wnk-logo.png",
     alt: "わんこ",
-    font: "Zen Antique",
+    font: "var(--font-zen-antique), sans-serif",
   },
 ];
 
 export const FONT_FAMILIES = {
-  DEFAULT: "Zen Maru Gothic",
-  OBA: "Yuji Mai",
-  OTN: "Reggae One",
-  ONI: "Hachi Maru Pop",
-  WNK: "Zen Antique",
+  DEFAULT: "var(--font-zen-maru-gothic), sans-serif",
+  OBA: "var(--font-yuji-mai), serif",
+  OTN: "var(--font-reggae-one), sans-serif",
+  ONI: "var(--font-hachi-maru-pop), sans-serif",
+  WNK: "var(--font-zen-antique), sans-serif",
 };
 
 export const FACE_COLORS: Record<number, string> = {

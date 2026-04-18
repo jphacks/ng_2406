@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { characters } from "./characters";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-const MODEL = "gemini-3.1-flash-lite-preview";
+const MODEL = "gemini-2.5-flash-lite";
 
 export type ActionFeedback = {
   action: string;
@@ -28,29 +28,37 @@ ${schedule}
 - 各行動に対して以下を判定してください:
   - face: 危険度（0=安全, 1=注意, 2=危険）
   - feedback: ${char.feedbackInstruction}
-- 行動が見つからない場合は空配列 [] を返してください
-- **必ず以下のJSON形式のみを出力してください。説明文や装飾は不要です。**
+- 行動が見つからない場合は空配列 [] を返してください`;
 
-## 出力形式
-\`\`\`json
-[
-  { "action": "行動名", "face": 0, "feedback": "フィードバック文" },
-  { "action": "行動名", "face": 1, "feedback": "フィードバック文" }
-]
-\`\`\``;
+  const responseSchema = {
+    type: "array",
+    items: {
+      type: "object",
+      properties: {
+        action: { type: "string" },
+        face: { type: "integer", minimum: 0, maximum: 2 },
+        feedback: { type: "string" },
+      },
+      required: ["action", "face", "feedback"],
+    },
+  };
 
-  for (let i = 0; i < 3; i++) {
+  const MAX_ATTEMPTS = 3;
+
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
     try {
       const response = await ai.models.generateContent({
         model: MODEL,
         contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseJsonSchema: responseSchema,
+        },
       });
       const text = response.text ?? "";
+      if (!text) continue;
 
-      const jsonMatch = text.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) continue;
-
-      const parsed: ActionFeedback[] = JSON.parse(jsonMatch[0]);
+      const parsed: ActionFeedback[] = JSON.parse(text);
 
       if (Array.isArray(parsed) && parsed.length > 0) {
         return parsed.map((item) => ({
@@ -63,7 +71,14 @@ ${schedule}
         }));
       }
     } catch (e) {
-      console.error(`Gemini解析に失敗しました (試行 ${i + 1}): ${e}`);
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error(`Gemini解析失敗 (試行 ${i + 1}/${MAX_ATTEMPTS}): ${msg}`);
+      if (i < MAX_ATTEMPTS - 1) {
+        // 503 は指数バックオフで長めに待つ、その他も軽く待つ
+        const is503 = /\b503\b|UNAVAILABLE/i.test(msg);
+        const delay = is503 ? 1000 * Math.pow(2, i) : 300 * (i + 1);
+        await new Promise((r) => setTimeout(r, delay));
+      }
     }
   }
 

@@ -1,41 +1,35 @@
 import type { Metadata } from "next";
-import {
-  Zen_Maru_Gothic,
-  Yuji_Mai,
-  Reggae_One,
-  Hachi_Maru_Pop,
-  Zen_Antique,
-} from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const zenMaruGothic = Zen_Maru_Gothic({
-  weight: "400",
-  subsets: ["latin"],
+const zenMaruGothic = localFont({
+  src: "./fonts/ZenMaruGothic-Regular.ttf",
   variable: "--font-zen-maru-gothic",
+  display: "swap",
 });
 
-const yujiMai = Yuji_Mai({
-  weight: "400",
-  subsets: ["latin"],
+const yujiMai = localFont({
+  src: "./fonts/YujiMai-Regular.ttf",
   variable: "--font-yuji-mai",
+  display: "swap",
 });
 
-const reggaeOne = Reggae_One({
-  weight: "400",
-  subsets: ["latin"],
+const reggaeOne = localFont({
+  src: "./fonts/ReggaeOne-Regular.ttf",
   variable: "--font-reggae-one",
+  display: "swap",
 });
 
-const hachiMaruPop = Hachi_Maru_Pop({
-  weight: "400",
-  subsets: ["latin"],
+const hachiMaruPop = localFont({
+  src: "./fonts/HachiMaruPop-Regular.ttf",
   variable: "--font-hachi-maru-pop",
+  display: "swap",
 });
 
-const zenAntique = Zen_Antique({
-  weight: "400",
-  subsets: ["latin"],
+const zenAntique = localFont({
+  src: "./fonts/ZenAntique-Regular.ttf",
   variable: "--font-zen-antique",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -53,7 +47,7 @@ export default function RootLayout({
       lang="ja"
       className={`${zenMaruGothic.variable} ${yujiMai.variable} ${reggaeOne.variable} ${hachiMaruPop.variable} ${zenAntique.variable}`}
     >
-      <body style={{ margin: 0, fontFamily: "'Zen Maru Gothic', sans-serif" }}>
+      <body>
         {children}
       </body>
     </html>

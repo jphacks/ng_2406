@@ -1,31 +1,48 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useSyncExternalStore } from "react";
+
+function getLocalStorageValue(key: string): string | null {
+  return typeof window === "undefined" ? null : localStorage.getItem(key);
+}
+
+function subscribeToStorage(callback: () => void) {
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+}
 
 const useCharacter = (initialState = 0) => {
-  const [character, setCharacter] = useState(initialState);
+  const savedCharacter = useSyncExternalStore(
+    subscribeToStorage,
+    () => getLocalStorageValue("character"),
+    () => null
+  );
+  const savedHasChanged = useSyncExternalStore(
+    subscribeToStorage,
+    () => getLocalStorageValue("hasChangedCharacter"),
+    () => null
+  );
+
+  const initialCharacter =
+    savedCharacter !== null ? parseInt(savedCharacter, 10) : initialState;
+
+  const [character, setCharacter] = useState(
+    initialCharacter >= 0 && initialCharacter <= 3 ? initialCharacter : initialState
+  );
   const [lastCharacter, setLastCharacter] = useState(initialState);
-  const [hasChangedCharacter, setHasChangedCharacter] = useState(false);
+  const [hasChangedCharacter, setHasChangedCharacter] = useState(
+    savedHasChanged === "true"
+  );
 
-  // マウント後にlocalStorageから復元（SSRとの不一致を防ぐ）
-  useEffect(() => {
-    const saved = localStorage.getItem("character");
-    if (saved !== null) {
-      const parsed = parseInt(saved, 10);
-      if (parsed >= 0 && parsed <= 3) setCharacter(parsed);
-    }
-    if (localStorage.getItem("hasChangedCharacter") === "true") {
-      setHasChangedCharacter(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (character < 0 || character > 3) {
-      console.error("キャラクター値が範囲外です:", character);
-      return;
-    }
-    localStorage.setItem("character", String(character));
-  }, [character]);
+  const updateCharacter = useCallback(
+    (value: number) => {
+      if (value >= 0 && value <= 3) {
+        setCharacter(value);
+        localStorage.setItem("character", String(value));
+      }
+    },
+    []
+  );
 
   const handleCharacterChange = useCallback(
     (index: number) => {
@@ -36,17 +53,17 @@ const useCharacter = (initialState = 0) => {
 
       if (index !== character) {
         setLastCharacter(character);
-        setCharacter(index);
+        updateCharacter(index);
         return true;
       }
       return false;
     },
-    [character, hasChangedCharacter]
+    [character, hasChangedCharacter, updateCharacter]
   );
 
   return {
     character,
-    setCharacter,
+    setCharacter: updateCharacter,
     lastCharacter,
     hasChangedCharacter,
     handleCharacterChange,
