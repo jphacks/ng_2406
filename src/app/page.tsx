@@ -29,6 +29,7 @@ function AppContent() {
     useCharacter();
   const [saveState, setSaveState] = useState<SaveState>("saved");
   const saveSessionRef = useRef(0);
+  const [loadingCharacter, setLoadingCharacter] = useState<number | null>(null);
   const {
     query,
     setQuery,
@@ -51,6 +52,7 @@ function AppContent() {
 
   const searchParams = useSearchParams();
   const shouldPulse = !hasChangedCharacter;
+  const displayCharacter = loadingCharacter !== null ? loadingCharacter : character;
 
   const onCharacterChange = useCallback(
     (index: number) => {
@@ -76,6 +78,10 @@ function AppContent() {
 
   const handleFetchDiary = useCallback(
     async (url: string) => {
+      const charFromUrl = Number(url.slice(-1));
+      if (Number.isInteger(charFromUrl) && charFromUrl >= 0 && charFromUrl <= 3) {
+        setLoadingCharacter(charFromUrl);
+      }
       startLoading();
       await fetchDiary(url, {
         onSuccess: (data) => {
@@ -89,9 +95,11 @@ function AppContent() {
           setDiaryUrl(url);
           setGrandmaState("pastResponse");
           setIsResponseDisplayed(true);
+          setLoadingCharacter(null);
         },
         onError: () => {
           setGrandmaState("error");
+          setLoadingCharacter(null);
         },
       });
     },
@@ -165,11 +173,11 @@ function AppContent() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        backgroundColor: BACKGROUND_COLORS[character],
+        backgroundColor: BACKGROUND_COLORS[displayCharacter],
         transition: "background-color 0.3s ease-in-out",
       }}
     >
-      <Header character={character} onCharacterChange={onCharacterChange} />
+      <Header character={displayCharacter} onCharacterChange={onCharacterChange} />
 
       <Box
         sx={{
@@ -192,10 +200,10 @@ function AppContent() {
             }}
           >
             <GrandmaText
-              text={dialogData[character]?.[grandmaState] ?? ""}
+              text={dialogData[displayCharacter]?.[grandmaState] ?? ""}
               onCharacterChange={onCharacterChange}
               isResponseDisplayed={isResponseDisplayed}
-              character={character}
+              character={displayCharacter}
               isLoading={isLoading}
               shouldPulse={shouldPulse}
             />
@@ -205,7 +213,7 @@ function AppContent() {
               setQuery={setQuery}
               onSubmit={handleSubmit}
               isLoading={isLoading}
-              character={character}
+              character={displayCharacter}
             />
 
             {isLoading && <LoadingIndicator />}
@@ -219,7 +227,7 @@ function AppContent() {
                   actions={actions}
                   feedbacks={sortedFeedbacks}
                   diaryUrl={diaryUrl}
-                  character={character}
+                  character={displayCharacter}
                   saveState={saveState}
                 />
               )}
