@@ -1,6 +1,8 @@
 # [安心打診おばあ](https://ng-2406.vercel.app/)
 <p align="center">
-  <img src="anshin-dashin-obaa-screen.jpg" alt="安心打診おばあのアプリ画面" width="960" />
+  <a href="https://www.youtube.com/watch?v=wMtzEgBEyec">
+    <img src="anshin-dashin-obaa-screen.jpg" alt="安心打診おばあのアプリ画面" width="960" />
+  </a>
 </p>
 
 ## 製品概要
