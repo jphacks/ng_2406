@@ -24,3 +24,4 @@ blockExoticSubdeps: true
 # バージョン固定（minimumReleaseAge 回避用、3日経過後に解除可）
 overrides:
   "@emnapi/runtime": "1.9.2"
+  protobufjs: "7.5.5"
