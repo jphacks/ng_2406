@@ -14,6 +14,7 @@ type QueryInputProps = {
 const QueryInput = ({ query, setQuery, onSubmit, isLoading, character }: QueryInputProps) => {
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      if (!query.trim()) return;
       onSubmit(event);
     }
   };

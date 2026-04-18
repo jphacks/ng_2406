@@ -66,7 +66,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, character, saveState = "sa
       `安心打診${selectedCharacter.alt}からの伝言です...！ #JPHACKS2024 #安心打診おばあ`
     );
     const url = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`;
-    window.open(url, "_blank");
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -104,6 +104,7 @@ const ResponseList = ({ actions, feedbacks, diaryUrl, character, saveState = "sa
                   disabled={disabled}
                   sx={{ opacity: disabled ? 0.4 : 1 }}
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/share.png" alt="共有" style={{ width: 24, height: 24 }} />
                 </IconButton>
               </span>

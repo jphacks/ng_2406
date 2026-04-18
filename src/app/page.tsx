@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, Suspense } from "react";
+import { useCallback, useEffect, useRef, useState, Suspense } from "react";
 import { Container, Box } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 
@@ -28,6 +28,7 @@ function AppContent() {
   const { character, setCharacter, handleCharacterChange, hasChangedCharacter } =
     useCharacter();
   const [saveState, setSaveState] = useState<SaveState>("saved");
+  const saveSessionRef = useRef(0);
   const {
     query,
     setQuery,
@@ -75,25 +76,14 @@ function AppContent() {
 
   const handleFetchDiary = useCallback(
     async (url: string) => {
-      const charFromUrl = Number(url.slice(-1));
-      if (charFromUrl >= 0 && charFromUrl <= 3) {
-        setCharacter(charFromUrl);
-      }
       startLoading();
       await fetchDiary(url, {
         onSuccess: (data) => {
           setCharacter(data.character);
           setQuery(data.schedule);
 
-          const actionsWithFeedback = data.actions.map((action) => ({
-            action: action.action,
-            feedback: action.feedback,
-            face: action.face,
-            idx: action.idx,
-          }));
-
-          setActions(actionsWithFeedback.map((item) => item.action));
-          const sorted = [...actionsWithFeedback].sort((a, b) => a.idx - b.idx);
+          const sorted = [...data.actions].sort((a, b) => a.idx - b.idx);
+          setActions(sorted.map((item) => item.action));
           setSortedFeedbacks(sorted);
 
           setDiaryUrl(url);
@@ -121,6 +111,7 @@ function AppContent() {
   const handleSubmit = useCallback(
     async (event: React.FormEvent | React.KeyboardEvent) => {
       event.preventDefault();
+      if (!query.trim()) return;
       startLoading();
 
       const data = await analyzeSchedule(query, character, {
@@ -135,9 +126,11 @@ function AppContent() {
         setSortedFeedbacks(data.feedbacks);
         finishLoading(true);
 
+        const sessionId = ++saveSessionRef.current;
         setSaveState("saving");
         saveDiary(data.diary_url, query, character, data.feedbacks).then(
           (ok) => {
+            if (saveSessionRef.current !== sessionId) return;
             setSaveState(ok ? "saved" : "failed");
           }
         );

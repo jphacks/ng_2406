@@ -60,7 +60,7 @@ ${schedule}
 
       const parsed: ActionFeedback[] = JSON.parse(text);
 
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return parsed.map((item) => ({
           action: String(item.action),
           face:

@@ -11,7 +11,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { CHARACTER_OPTIONS } from "@/constants/theme";
 
 type HeaderProps = {
@@ -21,16 +21,10 @@ type HeaderProps = {
 
 const Header = ({ character, onCharacterChange }: HeaderProps) => {
   const [openHandout, setOpenHandout] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const handleLogoClick = () => {
-    if (pathname !== "/" || searchParams.toString() !== "") {
-      router.replace("/");
-    }
     onCharacterChange(0);
-    window.location.reload();
+    window.location.href = "/";
   };
 
   const selectedCharacter = CHARACTER_OPTIONS[character] || CHARACTER_OPTIONS[0];
@@ -41,6 +35,7 @@ const Header = ({ character, onCharacterChange }: HeaderProps) => {
         <Toolbar>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <Typography variant="h6" component="div">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt={selectedCharacter.alt}
                 src={selectedCharacter.logoSrc}
@@ -59,7 +54,14 @@ const Header = ({ character, onCharacterChange }: HeaderProps) => {
 
       <Dialog open={openHandout} onClose={() => setOpenHandout(false)} maxWidth="md" fullWidth>
         <DialogContent>
-          <img src="/handout.png" alt="使い方" style={{ width: "100%", height: "auto" }} />
+          <Image
+            src="/handout.png"
+            alt="使い方"
+            width={2179}
+            height={3147}
+            sizes="(max-width: 900px) 100vw, 900px"
+            style={{ width: "100%", height: "auto" }}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenHandout(false)}>閉じる</Button>

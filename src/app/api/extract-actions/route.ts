@@ -6,13 +6,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { schedule, character } = body;
 
-    if (schedule == null) {
+    if (typeof schedule !== "string" || schedule.trim() === "") {
       return Response.json({ message: "scheduleが指定されていません" }, { status: 400 });
     }
     if (character == null) {
       return Response.json({ message: "characterが指定されていません" }, { status: 400 });
     }
-    if (typeof character !== "number" || character < 0 || character > 3) {
+    if (
+      typeof character !== "number" ||
+      !Number.isInteger(character) ||
+      character < 0 ||
+      character > 3
+    ) {
       return Response.json(
         { message: "characterは0から3の整数である必要があります" },
         { status: 400 }
@@ -21,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const results = await analyzeSchedule(schedule, character);
 
-    if (!results) {
+    if (!results || results.length === 0) {
       return Response.json({ message: "行動が見つかりませんでした" }, { status: 400 });
     }
 
@@ -39,6 +44,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return Response.json({ message: "処理が失敗しました" }, { status: 400 });
+    return Response.json({ message: "処理が失敗しました" }, { status: 500 });
   }
 }

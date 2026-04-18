@@ -9,7 +9,7 @@ export async function GET(
     const diary = await getDiaryByUrl(diaryUrl);
 
     if (!diary) {
-      return Response.json({ message: "日記が見つかりませんでした" }, { status: 400 });
+      return Response.json({ message: "日記が見つかりませんでした" }, { status: 404 });
     }
 
     return Response.json({
@@ -20,6 +20,6 @@ export async function GET(
     });
   } catch (e) {
     console.error(e);
-    return Response.json({ message: "リクエストが不正です" }, { status: 400 });
+    return Response.json({ message: "取得に失敗しました" }, { status: 500 });
   }
 }
