@@ -15,6 +15,7 @@ import useApi from "@/hooks/useApi";
 import useCharacter from "@/hooks/useCharacter";
 import useAppState from "@/hooks/useAppState";
 import dialogs from "@/data/dialogs.json";
+import { isValidDiaryUrl } from "@/lib/diary";
 
 import { BACKGROUND_COLORS } from "@/constants/theme";
 
@@ -24,12 +25,19 @@ const dialogData = dialogs as DialogMap;
 type SaveState = "saving" | "saved" | "failed";
 
 function AppContent() {
+  const searchParams = useSearchParams();
+  const diaryParam = searchParams.get("diary");
+  const sharedDiaryUrl = isValidDiaryUrl(diaryParam) ? diaryParam : null;
+
   const { isLoading, fetchDiary, analyzeSchedule, saveDiary } = useApi();
   const { character, setCharacter, handleCharacterChange, hasChangedCharacter } =
     useCharacter();
   const [saveState, setSaveState] = useState<SaveState>("saved");
   const saveSessionRef = useRef(0);
-  const [loadingCharacter, setLoadingCharacter] = useState<number | null>(null);
+  // 共有リンクの日記を読み込み中は、URL末尾のキャラ番号で表示する
+  const [loadingCharacter, setLoadingCharacter] = useState<number | null>(() =>
+    sharedDiaryUrl ? Number(sharedDiaryUrl.slice(-1)) : null
+  );
   const {
     query,
     setQuery,
@@ -48,9 +56,8 @@ function AppContent() {
     setIsResponseDisplayed,
     startLoading,
     finishLoading,
-  } = useAppState();
+  } = useAppState(sharedDiaryUrl ? "loading" : diaryParam ? "error" : "initial");
 
-  const searchParams = useSearchParams();
   const shouldPulse = !hasChangedCharacter;
   const displayCharacter = loadingCharacter !== null ? loadingCharacter : character;
 
@@ -78,11 +85,6 @@ function AppContent() {
 
   const handleFetchDiary = useCallback(
     async (url: string) => {
-      const charFromUrl = Number(url.slice(-1));
-      if (Number.isInteger(charFromUrl) && charFromUrl >= 0 && charFromUrl <= 3) {
-        setLoadingCharacter(charFromUrl);
-      }
-      startLoading();
       await fetchDiary(url, {
         onSuccess: (data) => {
           setCharacter(data.character);
@@ -111,7 +113,6 @@ function AppContent() {
       setSortedFeedbacks,
       setDiaryUrl,
       setGrandmaState,
-      startLoading,
       setIsResponseDisplayed,
     ]
   );
@@ -136,7 +137,7 @@ function AppContent() {
 
         const sessionId = ++saveSessionRef.current;
         setSaveState("saving");
-        saveDiary(data.diary_url, query, character, data.feedbacks).then(
+        saveDiary(data.diary_url, query, character, data.feedbacks, data.signature).then(
           (ok) => {
             if (saveSessionRef.current !== sessionId) return;
             setSaveState(ok ? "saved" : "failed");
@@ -161,11 +162,10 @@ function AppContent() {
   );
 
   useEffect(() => {
-    const diaryParam = searchParams.get("diary");
-    if (diaryParam) {
-      handleFetchDiary(diaryParam);
+    if (sharedDiaryUrl) {
+      handleFetchDiary(sharedDiaryUrl);
     }
-  }, [searchParams, handleFetchDiary]);
+  }, [sharedDiaryUrl, handleFetchDiary]);
 
   return (
     <Box

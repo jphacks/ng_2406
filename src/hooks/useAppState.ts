@@ -1,30 +1,17 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import type { FeedbackItem } from "@/lib/diary";
 
-type FeedbackItem = {
-  face: number;
-  action: string;
-  feedback: string;
-  idx: number;
-};
-
-const useAppState = () => {
+const useAppState = (initialGrandmaState = "initial") => {
   const [query, setQuery] = useState("");
   const [actions, setActions] = useState<string[]>([]);
   const [sortedFeedbacks, setSortedFeedbacks] = useState<FeedbackItem[]>([]);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(initialGrandmaState === "loading");
   const [diaryUrl, setDiaryUrl] = useState<string | null>(null);
-  const [grandmaState, setGrandmaState] = useState("initial");
+  const [grandmaState, setGrandmaState] = useState(initialGrandmaState);
   const [isDialogVisible, setIsDialogVisible] = useState(true);
   const [isResponseDisplayed, setIsResponseDisplayed] = useState(false);
-  const [isLoadingAdditionalInfo, setIsLoadingAdditionalInfo] = useState(false);
-
-  const resetState = useCallback(() => {
-    setActions([]);
-    setSortedFeedbacks([]);
-    setIsResponseDisplayed(false);
-  }, []);
 
   const startLoading = useCallback(() => {
     setActions([]);
@@ -50,7 +37,6 @@ const useAppState = () => {
     sortedFeedbacks,
     setSortedFeedbacks,
     isSubmitted,
-    setIsSubmitted,
     diaryUrl,
     setDiaryUrl,
     grandmaState,
@@ -59,9 +45,6 @@ const useAppState = () => {
     setIsDialogVisible,
     isResponseDisplayed,
     setIsResponseDisplayed,
-    isLoadingAdditionalInfo,
-    setIsLoadingAdditionalInfo,
-    resetState,
     startLoading,
     finishLoading,
   };

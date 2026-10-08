@@ -50,10 +50,6 @@ export const CHARACTER_OPTIONS = [
 
 export const FONT_FAMILIES = {
   DEFAULT: "var(--font-zen-maru-gothic), sans-serif",
-  OBA: "var(--font-yuji-mai), serif",
-  OTN: "var(--font-reggae-one), sans-serif",
-  ONI: "var(--font-hachi-maru-pop), sans-serif",
-  WNK: "var(--font-zen-antique), sans-serif",
 };
 
 export const FACE_COLORS: Record<number, string> = {

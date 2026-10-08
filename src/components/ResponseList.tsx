@@ -12,13 +12,7 @@ import {
 } from "@mui/material";
 import XIcon from "@mui/icons-material/X";
 import { CHARACTER_OPTIONS, FACE_COLORS } from "@/constants/theme";
-
-type FeedbackItem = {
-  face: number;
-  action: string;
-  feedback: string;
-  idx?: number;
-};
+import type { FeedbackItem } from "@/lib/diary";
 
 type SaveState = "saving" | "saved" | "failed";
 

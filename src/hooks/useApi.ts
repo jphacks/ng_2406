@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import type { FeedbackItem } from "@/lib/diary";
 
 type FetchDiaryCallbacks = {
   onLoadStart?: () => void;
@@ -13,7 +14,7 @@ type DiaryResponse = {
   created_at: string;
   schedule: string;
   character: number;
-  actions: { action: string; feedback: string; face: number; idx: number }[];
+  actions: FeedbackItem[];
 };
 
 type AnalyzeCallbacks = {
@@ -21,16 +22,10 @@ type AnalyzeCallbacks = {
   onError?: (error: Error) => void;
 };
 
-type FeedbackItem = {
-  action: string;
-  face: number;
-  feedback: string;
-  idx: number;
-};
-
 type AnalyzeResponse = {
   diary_url: string;
   feedbacks: FeedbackItem[];
+  signature: string;
 };
 
 const useApi = () => {
@@ -44,10 +39,7 @@ const useApi = () => {
       onLoadStart?.();
 
       try {
-        const response = await fetch(`/api/get/diary/${diaryUrl}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
+        const response = await fetch(`/api/get/diary/${encodeURIComponent(diaryUrl)}`);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -110,7 +102,8 @@ const useApi = () => {
       diaryUrl: string,
       schedule: string,
       character: number,
-      feedbacks: FeedbackItem[]
+      feedbacks: FeedbackItem[],
+      signature: string
     ): Promise<boolean> => {
       try {
         const response = await fetch("/api/save-diary", {
@@ -121,6 +114,7 @@ const useApi = () => {
             schedule,
             character,
             feedbacks,
+            signature,
           }),
         });
         if (!response.ok) {

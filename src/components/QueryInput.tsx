@@ -2,6 +2,7 @@
 
 import { TextField, Button, Box } from "@mui/material";
 import { CHARACTER_OPTIONS } from "@/constants/theme";
+import { MAX_SCHEDULE_LENGTH } from "@/lib/diary";
 
 type QueryInputProps = {
   query: string;
@@ -35,6 +36,8 @@ const QueryInput = ({ query, setQuery, onSubmit, isLoading, character }: QueryIn
         sx={{ mb: 2 }}
         variant="outlined"
         disabled={isLoading}
+        slotProps={{ htmlInput: { maxLength: MAX_SCHEDULE_LENGTH } }}
+        helperText={`${query.length} / ${MAX_SCHEDULE_LENGTH}`}
       />
       <Button
         fullWidth
