@@ -22,11 +22,6 @@ type HeaderProps = {
 const Header = ({ character, onCharacterChange }: HeaderProps) => {
   const [openHandout, setOpenHandout] = useState(false);
 
-  const handleLogoClick = () => {
-    onCharacterChange(0);
-    window.location.href = "/";
-  };
-
   const selectedCharacter = CHARACTER_OPTIONS[character] || CHARACTER_OPTIONS[0];
 
   return (
@@ -35,17 +30,16 @@ const Header = ({ character, onCharacterChange }: HeaderProps) => {
         <Toolbar>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <Typography variant="h6" component="div">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt={selectedCharacter.alt}
-                src={selectedCharacter.logoSrc}
-                style={{
-                  height: "40px",
-                  marginRight: "10px",
-                  cursor: "pointer",
-                }}
-                onClick={handleLogoClick}
-              />
+              {/* 状態をリセットするため、クライアント遷移ではなく通常のページ遷移にする */}
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+              <a href="/" onClick={() => onCharacterChange(0)} style={{ display: "inline-flex" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt={selectedCharacter.alt}
+                  src={selectedCharacter.logoSrc}
+                  style={{ height: "40px", marginRight: "10px" }}
+                />
+              </a>
             </Typography>
             <Button onClick={() => setOpenHandout(true)}>つかいかた</Button>
           </Box>

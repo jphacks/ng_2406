@@ -1,18 +1,17 @@
-const GAS_ENDPOINT = process.env.GAS_ENDPOINT!;
+import "server-only";
+import type { FeedbackItem } from "./diary";
 
-type FeedbackItem = {
-  face: number;
-  action: string;
-  action_feedback: string;
-  idx: number;
-};
+const GAS_ENDPOINT = process.env.GAS_ENDPOINT!;
+const TIMEOUT_MS = 10_000;
+
+type GasFeedbackItem = Omit<FeedbackItem, "feedback"> & { action_feedback: string };
 
 type DiaryWithFeedbacks = {
   diary_url: string;
   created_at: string;
   schedule: string;
   character: number;
-  actions: { face: number; action: string; feedback: string; idx: number }[];
+  actions: FeedbackItem[];
 };
 
 async function callGAS<T>(action: string, payload: Record<string, unknown> = {}): Promise<T> {
@@ -21,6 +20,7 @@ async function callGAS<T>(action: string, payload: Record<string, unknown> = {})
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action, payload }),
     redirect: "follow",
+    signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   if (!res.ok) {
     throw new Error(`GAS returned HTTP ${res.status}: ${res.statusText}`);
@@ -45,12 +45,18 @@ export async function saveDiaryResult(
   character: number,
   feedbacks: FeedbackItem[]
 ): Promise<void> {
+  const mapped: GasFeedbackItem[] = feedbacks.map((f) => ({
+    face: f.face,
+    action: f.action,
+    action_feedback: f.feedback,
+    idx: f.idx,
+  }));
   await callGAS("saveDiaryResult", {
     diary_url: diaryUrl,
     schedule,
     character,
     created_at: new Date().toISOString(),
-    feedbacks,
+    feedbacks: mapped,
   });
 }
 

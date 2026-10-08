@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
+import { isValidCharacter } from "@/lib/diary";
 
 const LOCAL_STORAGE_EVENT = "character-storage-change";
 
@@ -37,12 +38,12 @@ const useCharacter = (initialState = 0) => {
   let character = initialState;
   if (savedCharacter !== null) {
     const n = parseInt(savedCharacter, 10);
-    if (n >= 0 && n <= 3) character = n;
+    if (isValidCharacter(n)) character = n;
   }
   const hasChangedCharacter = savedHasChanged === "true";
 
   const setCharacter = useCallback((value: number) => {
-    if (value >= 0 && value <= 3) {
+    if (isValidCharacter(value)) {
       setLocalStorage("character", String(value));
     }
   }, []);
@@ -52,7 +53,7 @@ const useCharacter = (initialState = 0) => {
       if (!hasChangedCharacter) {
         setLocalStorage("hasChangedCharacter", "true");
       }
-      if (index !== character && index >= 0 && index <= 3) {
+      if (index !== character && isValidCharacter(index)) {
         setLocalStorage("character", String(index));
         return true;
       }

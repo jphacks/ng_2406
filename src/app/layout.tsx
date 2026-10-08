@@ -32,9 +32,27 @@ const zenAntique = localFont({
   display: "swap",
 });
 
+const title = "安心打診おばあ";
+const description = "今日の予定を教えて、家族がフィードバックしてくれるアプリ";
+
 export const metadata: Metadata = {
-  title: "安心打診おばあ",
-  description: "今日の予定を教えて、家族がフィードバックしてくれるアプリ",
+  metadataBase: new URL("https://ng-2406.vercel.app"),
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    siteName: title,
+    locale: "ja_JP",
+    type: "website",
+    images: [{ url: "/ogp.png", width: 1200, height: 630, alt: title }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/ogp.png"],
+  },
 };
 
 export default function RootLayout({
